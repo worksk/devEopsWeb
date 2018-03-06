@@ -1,4 +1,4 @@
-# deveopsweb
+# devEopsWeb
 
 > A Vue.js project
 

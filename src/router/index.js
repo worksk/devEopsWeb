@@ -1,15 +1,25 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
+const _import = require('./_import_route')
 
 Vue.use(Router)
 
-export default new Router({
-  routes: [
+export const defaultsRouterMap = [
     {
-      path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
+        path: '/404',
+        name: '404',
+        component: _import('error/404'),
+        hidden: true
+    },{
+        path: '/login',
+        name: 'login',
+        component: _import('login/index'),
+        hidden: true
     }
-  ]
+]
+
+export default new Router({
+    mode: 'history',
+    linkActiveClass: 'active',
+    routes: defaultsRouterMap
 })
