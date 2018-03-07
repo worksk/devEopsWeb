@@ -10,23 +10,19 @@ const service = axios.create({
 
 service.interceptors.request.use(config => {
   if(store.getters.token){
-      config.headers['authorization'] = getToken() // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
+      config.headers['authorization'] = getToken()
   }
-  config.headers['Access-Control-Allow-Origin'] = '*'
-  console.log(config)
   return config
 }, error => {
-  console.log(error)
   Promise.reject(error)
 })
 
-// respone interceptor
+
 service.interceptors.response.use(
   response => response,
   error => {
-    console.log('err' + error)// for debug
     Message({
-      message: error.message,
+      message: error.response.data,
       type: 'error',
       duration: 5 * 1000
     })

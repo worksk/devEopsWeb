@@ -6,7 +6,7 @@ import App from './App'
 import router from './router'
 import store from './store'
 import '@/styles/index.scss'
-
+import './permission'
 
 /*外部引用模块*/
 import ElementUI from 'element-ui'

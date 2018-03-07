@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-import service from "../utils/request";
 
 const host = '10.100.100.246:9999'
 export function loginByUsername(username, password) {
@@ -7,23 +6,18 @@ export function loginByUsername(username, password) {
     username,
     password
   }
-  return service.post('/api-login/',data)
   return request({
-    url: '/api-login/',
+    url: '/api-auth/login/',
     method: 'POST',
     data
   })
+}
 
-  // axios.post("10.100.100.246:9999/api-login/", {
-  //   username: 'username',
-  //   password: 'password'
-  // })
-  //   .then(function (response) {
-  //     console.log(response);
-  //   })
-  //   .catch(function (response) {
-  //     console.log(response);
-  //   })
+export function isAdmin(){
+  return request({
+    url: '/api-auth/isadmin/',
+    method: 'POST',
+  })
 }
 //
 // export function logout() {

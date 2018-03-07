@@ -2,7 +2,9 @@ const getters = {
   token: state => state.user.token,
   name: state => state.user.name,
   status: state => state.user.status,
-  roles: state => state.user.roles
+  isadmin: state => state.user.isadmin,
+  routers: state => state.permission.routers,
+  topsidebar: state => state.app.topsidebar
 }
 
 export default getters

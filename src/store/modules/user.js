@@ -1,5 +1,5 @@
 // import { loginByUsername, logout, getUserInfo } from '@/api/login'
-import { loginByUsername } from "@/api/login";
+import { loginByUsername,isAdmin } from "@/api/login";
 import { getToken, setToken, removeToken } from '@/utils/auth';
 
 const user = {
@@ -9,7 +9,7 @@ const user = {
     code: '',
     token: getToken(),
     name: '',
-    roles: [],
+    isadmin: false,
   },
 
   mutations: {
@@ -25,12 +25,23 @@ const user = {
     SET_NAME: (state, name) => {
       state.name = name
     },
-    SET_ROLES: (state, roles) => {
-      state.roles = roles
+    SET_ADMIN: (state, isadmin) =>{
+      state.isadmin = isadmin
     }
   },
 
   actions: {
+    // 判断用户是否是管理级别
+    IsAdmin({commit}){
+      return new Promise((resolve,reject)=>{
+        isAdmin().then(response =>{
+          commit('SET_ADMIN',response.data.isadmin)
+        }).catch(error =>{
+          reject(error)
+        })
+      })
+    },
+
     // 用户名登录
     LoginByUsername({ commit }, userForm) {
       const username = userForm.username.trim()
@@ -46,30 +57,12 @@ const user = {
       })
     },
 
-    // 获取用户信息
-    GetUserInfo({ commit, state }) {
-      return new Promise((resolve, reject) => {
-        getUserInfo(state.token).then(response => {
-          if (!response.data) { // 由于mockjs 不支持自定义状态码只能这样hack
-            reject('error')
-          }
-          const data = response.data
-          commit('SET_ROLES', data.roles)
-          commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
-          commit('SET_INTRODUCTION', data.introduction)
-          resolve(response)
-        }).catch(error => {
-          reject(error)
-        })
-      })
-    },
     // 登出
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {
         logout(state.token).then(() => {
           commit('SET_TOKEN', '')
-          commit('SET_ROLES', [])
+          commit('SET_ADMIN', false)
           removeToken()
           resolve()
         }).catch(error => {
@@ -84,22 +77,6 @@ const user = {
         commit('SET_TOKEN', '')
         removeToken()
         resolve()
-      })
-    },
-
-    // 动态修改权限
-    ChangeRoles({ commit }, role) {
-      return new Promise(resolve => {
-        commit('SET_TOKEN', role)
-        setToken(role)
-        getUserInfo(role).then(response => {
-          const data = response.data
-          commit('SET_ROLES', data.roles)
-          commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
-          commit('SET_INTRODUCTION', data.introduction)
-          resolve()
-        })
       })
     }
   }
