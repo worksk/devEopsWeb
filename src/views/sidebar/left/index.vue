@@ -1,6 +1,5 @@
 <template>
     <el-menu mode="vertical" :default-active="$route.path" background-color="#304156" text-color="#bfcbd9" active-text-color="#409EFF">
-      <h1>123</h1>
       <sidebar-item :routes="routers"></sidebar-item>
     </el-menu>
 </template>
