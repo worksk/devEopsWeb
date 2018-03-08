@@ -16,7 +16,7 @@ export function loginByUsername(username, password) {
 export function isAdmin(){
   return request({
     url: '/api-auth/isadmin/',
-    method: 'POST',
+    method: 'GET',
   })
 }
 //

@@ -1,13 +1,7 @@
 import { defaultsRouterMap, devEopsRouterMap } from '@/router'
 import { isAdmin } from "@/api/login";
 import store from '@/store'
-function reflushRouter(devEopsRouterMap, isadmin){
-  if(isadmin === true){
-    return devEopsRouterMap
-  }else{
-    return []
-  }
-}
+import getters from "../getters";
 
 const permission = {
   state: {
@@ -15,18 +9,20 @@ const permission = {
   },
   mutations: {
     SET_ROUTERS: (state,routers)=>{
-      state.routers = defaultsRouterMap.concat(routers)
+      state.routers = routers
     }
   },
   actions: {
     generateRouter({commit}){
-      if(state.isadmin){
-        commit('SET_ROUTERS',devEopsRouterMap)
-        resolve()
-      }else{
-        commit('SET_ROUTERS',[])
-        resolve()
-      }
+      return new Promise((resolve) => {
+        if(store.getters.isadmin){
+          commit('SET_ROUTERS',devEopsRouterMap)
+          resolve()
+        }else{
+          commit('SET_ROUTERS',[])
+          resolve()
+        }
+      })
     }
   }
 }

@@ -10,7 +10,7 @@ const service = axios.create({
 
 service.interceptors.request.use(config => {
   if(store.getters.token){
-      config.headers['authorization'] = getToken()
+      config.headers['authorization'] = 'JWT '+getToken()
   }
   return config
 }, error => {

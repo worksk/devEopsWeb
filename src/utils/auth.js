@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 
-const TokenKey = 'None'
+const TokenKey = 'devEops-Token'
 
 export function getToken() {
   return Cookies.get(TokenKey)

@@ -10,6 +10,7 @@ const user = {
     token: getToken(),
     name: '',
     isadmin: false,
+    islogin: false
   },
 
   mutations: {
@@ -25,8 +26,12 @@ const user = {
     SET_NAME: (state, name) => {
       state.name = name
     },
-    SET_ADMIN: (state, isadmin) =>{
+    SET_ADMIN: (state, isadmin) => {
+      state.islogin = true
       state.isadmin = isadmin
+    },
+    SET_LOGIN: (state, islogin) =>{
+      state.islogin = islogin
     }
   },
 
@@ -36,6 +41,7 @@ const user = {
       return new Promise((resolve,reject)=>{
         isAdmin().then(response =>{
           commit('SET_ADMIN',response.data.isadmin)
+          resolve()
         }).catch(error =>{
           reject(error)
         })

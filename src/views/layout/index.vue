@@ -1,25 +1,26 @@
 <template>
   <div class="app-wrapper">
        <!--:class="{hideSidebar:!sidebar.opened}">-->
-    <!--<sidebar class="sidebar-container"></sidebar>-->
+    <left-sidebar class="sidebar-container"></left-sidebar>
     <div class="main-container">
       <!--<navbar></navbar>-->
       <!--<tags-view></tags-view>-->
       <!--<tags></tags>-->
-      <app></app>
+      <!--<app></app>-->
+      <h1>123</h1>
     </div>
   </div>
 </template>
 
 <script>
   // import Tags from '@/views/tags/index'
-  // import Sidebar from '@/views/sidebar/index'
+  import LeftSidebar from '@/views/sidebar/left/index'
   // import Navbar from '@/views/navbar/index'
   import App from '@/views/app/index'
   export default {
     name: "layout",
     components: {//Sidebar,Navbar,,Tags
-      App
+      LeftSidebar, App
     },
     computed: {
       // sidebar() {
