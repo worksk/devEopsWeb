@@ -56,6 +56,26 @@ export const devEopsRouterMap = [
       meta: { title: '计划',icon:'hourglass-half',hidden:false}
     }]
   },{
+    path: '/authority',
+    component: layout,
+    meta:{title: '人员管理',icon:'address-card-o'},
+    children: [{
+      path: 'dashboard',
+      component: _import('dashboard/index'),
+      name: 'dashboard',
+      meta: { title: '概况',icon:'dashboard',hidden:false}
+    },{
+      path: 'user',
+      component: _import('dashboard/index'),
+      name: 'user',
+      meta: { title: '人员',icon:'street-view',hidden:false}
+    },{
+      path: 'auth',
+      component: _import('dashboard/index'),
+      name: 'auth',
+      meta: { title: '权限组',icon:'eye-slash',hidden:false}
+    }]
+  },{
     path: '/manager',
     component: layout,
     meta:{title: '资产管理',icon:'truck'},
@@ -84,6 +104,21 @@ export const devEopsRouterMap = [
       component: _import('dashboard/index'),
       name: 'search',
       meta: { title: '搜索',icon:'search',hidden:false}
+    }]
+  },{
+    path: '/application',
+    component: layout,
+    meta:{title: '应用管理',icon:'joomla'},
+    children: [{
+      path: 'dashboard',
+      component: _import('dashboard/index'),
+      name: 'dashboard',
+      meta: { title: '概况',icon:'dashboard',hidden:false}
+    },{
+      path: 'redis',
+      component: _import('dashboard/index'),
+      name: 'redis',
+      meta: { title: 'Redis缓存',icon:'puzzle-piece',hidden:false}
     }]
   }
 ]
