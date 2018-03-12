@@ -13,10 +13,10 @@ export function loginByUsername(username, password) {
   })
 }
 
-export function isAdmin(){
+export function userInfo(){
   return request({
-    url: '/api-auth/isadmin/',
-    method: 'GET',
+    url: '/api-auth/userinfo',
+    method: 'GET'
   })
 }
 //

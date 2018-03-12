@@ -11,10 +11,9 @@ router.beforeEach((to,from,next)=>{
     if(to.path === '/login'){
       next('/dashboard')
     }else{
-      console.log(store.getters.islogin)
       if(!store.getters.islogin){
-        store.dispatch('IsAdmin').then(()=>{ //判断用戶权限
-          store.dispatch('generateRouter').then(()=>{
+        store.dispatch('UserInfo').then(()=>{ //判断用戶权限
+          store.dispatch('GenerateRouter').then(()=>{
             router.addRoutes(store.getters.routers)
             next({...to})
           })

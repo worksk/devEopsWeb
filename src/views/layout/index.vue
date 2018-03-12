@@ -3,10 +3,8 @@
         <left-sidebar class="sidebar-container"></left-sidebar>
       <div class="main-container">
         <top-sidebar></top-sidebar>
-        <!--<navbar></navbar>-->
-        <!--<tags-view></tags-view>-->
-        <!--<tags></tags>-->
-          <app></app>
+        <tags></tags>
+        <app></app>
       </div>
   </div>
 </template>
@@ -15,11 +13,12 @@
   // import Tags from '@/views/tags/index'
   import LeftSidebar from '@/views/sidebar/left/index'
   import TopSidebar from '@/views/sidebar/top/index'
+  import Tags from '@/views/tags/index'
   import App from '@/views/app/index'
   export default {
     name: "layout",
     components: {
-      TopSidebar,LeftSidebar, App
+      TopSidebar,LeftSidebar, Tags, App
     },
     computed: {
       topsidebar() {

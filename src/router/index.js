@@ -33,7 +33,7 @@ export const devEopsRouterMap = [
       path: 'dashboard',
       component: _import('dashboard/index'),
       name: 'dashboard',
-      meta: { title: '仪表盘',icon:'dashboard',hidden:false}
+      meta: { title: '仪表盘',icon:'dashboard',hidden:false,cache:true}
     }]
   },{
     path: '/timeline',
@@ -42,18 +42,18 @@ export const devEopsRouterMap = [
     children: [{
       path: 'dashboard',
       component: _import('dashboard/index'),
-      name: 'dashboard',
-      meta: { title: '概况',icon:'dashboard',hidden:false}
+      name: 'dashboard1',
+      meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
     },{
       path: 'record',
       component: _import('dashboard/index'),
       name: 'record',
-      meta: { title: '记录',icon:'thumb-tack',hidden:false}
+      meta: { title: '记录',icon:'thumb-tack',hidden:false,cache:true}
     },{
       path: 'plan',
       component: _import('dashboard/index'),
       name: 'plan',
-      meta: { title: '计划',icon:'hourglass-half',hidden:false}
+      meta: { title: '计划',icon:'hourglass-half',hidden:false,cache:true}
     }]
   },{
     path: '/authority',
@@ -62,18 +62,18 @@ export const devEopsRouterMap = [
     children: [{
       path: 'dashboard',
       component: _import('dashboard/index'),
-      name: 'dashboard',
-      meta: { title: '概况',icon:'dashboard',hidden:false}
+      name: 'dashboard2',
+      meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
     },{
       path: 'user',
       component: _import('dashboard/index'),
       name: 'user',
-      meta: { title: '人员',icon:'street-view',hidden:false}
+      meta: { title: '人员',icon:'street-view',hidden:false,cache:true}
     },{
       path: 'auth',
       component: _import('dashboard/index'),
       name: 'auth',
-      meta: { title: '权限组',icon:'eye-slash',hidden:false}
+      meta: { title: '权限组',icon:'eye-slash',hidden:false,cache:true}
     }]
   },{
     path: '/manager',
@@ -82,28 +82,28 @@ export const devEopsRouterMap = [
     children: [{
       path: 'dashboard',
       component: _import('dashboard/index'),
-      name: 'dashboard',
-      meta: { title: '概况',icon:'dashboard',hidden:false}
+      name: 'dashboard3',
+      meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
     },{
       path: 'group',
       component: _import('dashboard/index'),
       name: 'group',
-      meta: { title: '应用组',icon:'server',hidden:false}
+      meta: { title: '应用组',icon:'server',hidden:false,cache:true}
     },{
       path: 'host',
       component: _import('dashboard/index'),
       name: 'host',
-      meta: { title: '主机',icon:'laptop',hidden:false}
+      meta: { title: '主机',icon:'laptop',hidden:false,cache:true}
     },{
       path: 'storage',
       component: _import('dashboard/index'),
       name: 'storage',
-      meta: { title: '存储',icon:'hdd-o',hidden:false}
+      meta: { title: '存储',icon:'hdd-o',hidden:false,cache:true}
     },{
       path: 'search',
       component: _import('dashboard/index'),
       name: 'search',
-      meta: { title: '搜索',icon:'search',hidden:false}
+      meta: { title: '搜索',icon:'search',hidden:false,cache:true}
     }]
   },{
     path: '/application',
@@ -112,13 +112,13 @@ export const devEopsRouterMap = [
     children: [{
       path: 'dashboard',
       component: _import('dashboard/index'),
-      name: 'dashboard',
-      meta: { title: '概况',icon:'dashboard',hidden:false}
+      name: 'dashboard4',
+      meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
     },{
       path: 'redis',
       component: _import('dashboard/index'),
       name: 'redis',
-      meta: { title: 'Redis缓存',icon:'puzzle-piece',hidden:false}
+      meta: { title: 'Redis缓存',icon:'puzzle-piece',hidden:false,cache:true}
     }]
   }
 ]
