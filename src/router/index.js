@@ -83,10 +83,10 @@ export const devEopsRouterMap = [
       path: 'dashboard',
       component: _import('dashboard/index'),
       name: 'dashboard3',
-      meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
+      meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
     },{
       path: 'group',
-      component: _import('dashboard/index'),
+      component: _import('manager/group'),
       name: 'group',
       meta: { title: '应用组',icon:'server',hidden:false,cache:true}
     },{
