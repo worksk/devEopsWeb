@@ -17,7 +17,7 @@
           <router-link :to="route.path+'/'+child.path" :key="child.name">
             <el-menu-item :index="route.path+'/'+child.path">
               <awesome :awesclass="child.meta.icon"></awesome>
-              <span>{{ child.meta.title }}</span>
+              <span>{{ child.meta.title}}</span>
             </el-menu-item>
           </router-link>
         </template>

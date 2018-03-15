@@ -3,7 +3,7 @@ import Cookies from 'js-cookie'
 const app ={
   state: {
     topsidebar:{
-      opened: 1
+      opened: !+Cookies.get('topSidebarStatus')
     }
   },
   mutations: {
@@ -17,7 +17,7 @@ const app ={
     }
   },
   actions: {
-    toggle_sidebar({commit}){
+    ToggleSidebar({commit}){
       commit('TOGGLE_SIDEBAR')
     }
   }

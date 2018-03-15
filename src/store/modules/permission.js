@@ -13,7 +13,7 @@ const permission = {
     }
   },
   actions: {
-    generateRouter({commit}){
+    GenerateRouter({commit}){
       return new Promise((resolve) => {
         if(store.getters.isadmin){
           commit('SET_ROUTERS',devEopsRouterMap)

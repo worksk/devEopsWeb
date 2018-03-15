@@ -1,5 +1,4 @@
-// import { loginByUsername, logout, getUserInfo } from '@/api/login'
-import { loginByUsername,isAdmin } from "@/api/login";
+import { loginByUsername,userInfo } from "@/api/login";
 import { getToken, setToken, removeToken } from '@/utils/auth';
 
 const user = {
@@ -26,21 +25,28 @@ const user = {
     SET_NAME: (state, name) => {
       state.name = name
     },
-    SET_ADMIN: (state, isadmin) => {
+    SET_ISADMIN: (state, isadmin) => {
       state.islogin = true
       state.isadmin = isadmin
     },
     SET_LOGIN: (state, islogin) =>{
       state.islogin = islogin
+    },
+    SET_USERNAME: (state, username) =>{
+      state.username = username
+    },
+    SET_NAME: (state, name) =>{
+      state.name = name
     }
   },
 
   actions: {
-    // 判断用户是否是管理级别
-    IsAdmin({commit}){
+    UserInfo({commit}){
       return new Promise((resolve,reject)=>{
-        isAdmin().then(response =>{
-          commit('SET_ADMIN',response.data.isadmin)
+        userInfo().then(response =>{
+          commit('SET_ISADMIN',response.data.isadmin)
+          commit('SET_USERNAME',response.data.username)
+          commit('SET_NAME',response.data.name)
           resolve()
         }).catch(error =>{
           reject(error)
@@ -65,15 +71,20 @@ const user = {
 
     // 登出
     LogOut({ commit, state }) {
-      return new Promise((resolve, reject) => {
-        logout(state.token).then(() => {
+      return new Promise((resolve) => {
+
+        // logout(state.token).then(() => {
+        //   commit('SET_TOKEN', '')
+        //   commit('SET_ISADMIN', false)
+        //   removeToken()
+        //   resolve()
+        // }).catch(error => {
+        //   reject(error)
+        // })
           commit('SET_TOKEN', '')
-          commit('SET_ADMIN', false)
+          commit('SET_ISADMIN', false)
           removeToken()
           resolve()
-        }).catch(error => {
-          reject(error)
-        })
       })
     },
 

@@ -1,6 +1,7 @@
 <template>
-    <el-menu mode="vertical" :default-active="$route.path" background-color="#304156" text-color="#bfcbd9" active-text-color="#409EFF">
+    <el-menu mode="vertical" :default-active="$route.path"  background-color="#304156" text-color="#bfcbd9" active-text-color="#409EFF">
       <sidebar-item :routes="routers"></sidebar-item>
+      <!--:collapse="isCollapse"-->
     </el-menu>
 </template>
 
@@ -9,12 +10,16 @@
   import SidebarItem from '@/components/SidebarItem/index'
   export default {
     name:'Sidebar',
-    components: { SidebarItem },
+    components: {
+      SidebarItem },
     computed:{
       ...mapGetters([
         'routers',
         'topsidebar'
-      ])
+      ]),
+      isCollapse(){
+        return !this.topsidebar.opened
+      }
     }
   }
 </script>

@@ -1,31 +1,29 @@
 <template>
-  <div class="app-wrapper">
-       <!--:class="{hideSidebar:!sidebar.opened}">-->
-    <left-sidebar class="sidebar-container"></left-sidebar>
-    <div class="main-container">
-      <!--<navbar></navbar>-->
-      <!--<tags-view></tags-view>-->
-      <!--<tags></tags>-->
-      <!--<app></app>-->
-      <h1>123</h1>
-    </div>
+    <div class="app-wrapper" :class="{hideSidebar:!topsidebar.opened}">
+        <left-sidebar class="sidebar-container"></left-sidebar>
+      <div class="main-container">
+        <top-sidebar></top-sidebar>
+        <tags></tags>
+        <app></app>
+      </div>
   </div>
 </template>
 
 <script>
   // import Tags from '@/views/tags/index'
   import LeftSidebar from '@/views/sidebar/left/index'
-  // import Navbar from '@/views/navbar/index'
+  import TopSidebar from '@/views/sidebar/top/index'
+  import Tags from '@/views/tags/index'
   import App from '@/views/app/index'
   export default {
     name: "layout",
-    components: {//Sidebar,Navbar,,Tags
-      LeftSidebar, App
+    components: {
+      TopSidebar,LeftSidebar, Tags, App
     },
     computed: {
-      // sidebar() {
-      //   return this.$store.state.app.sidebar
-      // }
+      topsidebar() {
+        return this.$store.state.app.topsidebar
+      }
     }
   }
 </script>
