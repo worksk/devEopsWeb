@@ -91,7 +91,7 @@ export const devEopsRouterMap = [
       meta: { title: '应用组',icon:'server',hidden:false,cache:true}
     },{
       path: 'host',
-      component: _import('dashboard/index'),
+      component: _import('manager/host'),
       name: 'host',
       meta: { title: '主机',icon:'laptop',hidden:false,cache:true}
     },{
