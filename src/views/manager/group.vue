@@ -56,14 +56,18 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="60%" top="2vh">
       <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
-        <el-form-item label="应用组ID" prop="id">
-          <el-input v-model="temp.id" disabled></el-input>
+        <el-form-item label="应用组UUID" prop="id">
+          <el-input v-model="temp.uuid" disabled></el-input>
         </el-form-item>
         <el-form-item label="应用组名称" prop="name">
-          <el-input v-model="temp.name"></el-input>
+          <el-tooltip content="请输入您的业务系统名称，如:[预发布]新媒体云服务平台" placement="top" effect="light">
+            <el-input v-model="temp.name"></el-input>
+          </el-tooltip>
         </el-form-item>
         <el-form-item label="应用组信息" prop="info">
-          <el-input type="textarea" v-model="temp.info"></el-input>
+          <el-tooltip content="请简要描述您业务系统的作用和所属" placement="top" effect="light">
+            <el-input type="textarea" v-model="temp.info"></el-input>
+          </el-tooltip>
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="temp.status" placeholder="请选择应用组状态">
@@ -71,8 +75,8 @@
           </el-select>
         </el-form-item>
         <el-form-item label="管理用户" prop="users">
-          <el-transfer v-model="temp.users" :data="users" placeholder="请选择管理用户" filterable>
-          </el-transfer>
+            <el-transfer v-model="temp.users" :data="users" placeholder="请选择管理用户" filterable>
+            </el-transfer>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -90,7 +94,8 @@
 </template>
 
 <script>
-  import { fetch_GroupList,update_Group,delete_Group,create_Group,fetch_UserList,fetch_HostList } from '@/api/manager'
+  import { fetch_GroupList,update_Group,delete_Group,create_Group,fetch_HostList } from '@/api/manager'
+  import { fetch_UserList } from '@/api/login'
   export default {
     data(){
       return {
@@ -103,15 +108,16 @@
         users:[],
         // header:{'authorization':'JWT '+this.$store.getters.token},
         textMap: {
-          update: '编辑',
-          create: '新建',
-          img: '图片'
+          update: '编辑应用组',
+          create: '新建应用组',
+          img: '应用组架构图'
         },
         temp: {
           name: '',
           status: 0,
           info: '',
-          users: []
+          users: [],
+          framework: ''
         },
         rules: {
           name: [{ required: true, message: '应用组名称是必填的', trigger: 'change' }],
