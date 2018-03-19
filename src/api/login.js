@@ -19,3 +19,10 @@ export function userInfo(){
     method: 'GET'
   })
 }
+
+export function fetch_UserList(){
+  return request({
+    url: '/api-auth/v1/user/',
+    method: 'GET'
+  })
+}
