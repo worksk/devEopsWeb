@@ -225,7 +225,6 @@
             create_Group(this.temp).then(() => {
               this.list.unshift(this.temp)
               this.dialogFormVisible = false
-              this.getList()
               this.$message({
                 showClose: true,
                 message: '创建成功',
