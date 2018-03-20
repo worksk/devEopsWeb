@@ -73,32 +73,32 @@
     </el-dialog>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="60%" top="2vh">
-      <el-form ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
         <el-form-item label="主机UUID" prop="uuid">
           <el-input v-model="temp.uuid" disabled></el-input>
         </el-form-item>
 
-        <el-form-item label="主机信息" prop="info">
-          <el-tooltip content="请输入该主机设计的服务内容" placement="bottom" effect="light">
-            <el-input v-model="temp.info"></el-input>
+        <el-form-item label="主机信息" prop="detail.info">
+          <el-tooltip content="请输入该主机涉及的服务内容" placement="bottom" effect="light">
+            <el-input type="textarea" v-model="temp.detail.info"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="连接IP" prop="connect_ip">
           <el-tooltip content="请输入管理该机器的IP地址" placement="bottom" effect="light">
-            <el-input type="textarea" v-model="temp.connect_ip"></el-input>
+            <el-input v-model="temp.connect_ip"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="连接端口" prop="sshport">
           <el-tooltip content="请输入管理该机器通过的SSH端口" placement="bottom" effect="light">
-            <el-input type="textarea" v-model="temp.sshport"></el-input>
+            <el-input v-model="temp.sshport"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="服务IP" prop="service_ip">
           <el-tooltip content="请输入该机器对外提供服务的IP地址" placement="bottom" effect="light">
-            <el-input type="textarea" v-model="temp.service_ip"></el-input>
+            <el-input v-model="temp.service_ip"></el-input>
           </el-tooltip>
         </el-form-item>
 
@@ -110,12 +110,19 @@
           </el-tooltip>
         </el-form-item>
 
+        <el-form-item label="主机名" prop="hostname">
+          <el-tooltip content="请输入该机器主机名" placement="top" effect="light">
+            <el-input v-model="temp.hostname"></el-input>
+          </el-tooltip>
+        </el-form-item>
+
         <el-form-item label="位置" prop="detail.position">
           <el-tooltip content="请输入该主机目前在什么位置" placement="top" effect="light">
             <el-select v-model="temp.detail.position" placeholder="请选择主机位置">
               <el-option v-for="option in position" :key="option.id" :label="option.name" :value="option.id"></el-option>
             </el-select>
           </el-tooltip>
+          <el-button @click="handleposition" :disabled="btnStatus">新增位置类型</el-button>
         </el-form-item>
 
         <el-form-item label="系统类型" prop="detail.systemtype">
@@ -124,19 +131,50 @@
               <el-option v-for="option in systemtype" :key="option.id" :label="option.name" :value="option.id"></el-option>
             </el-select>
           </el-tooltip>
+          <el-button @click="handlesystype" :disabled="btnStatus">新增系统类型</el-button>
         </el-form-item>
 
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button v-if="dialogStatus=='create'" type="primary" @click="createData" :disabled="btnStatus">提交</el-button>
+        <el-button v-else type="primary" @click="updateData" :disabled="btnStatus">提交</el-button>
       </div>
+
+      <el-dialog
+        width="30%"
+        title="新增系统类型"
+        :visible.sync="dialogSystypeVisible"
+        append-to-body>
+        <el-form>
+
+          <el-autocomplete
+            class="inline-input"
+            v-model="systype_item"
+            :fetch-suggestions="querySearch"
+            placeholder="请输入内容"
+            :trigger-on-focus="false"
+            @select="handleSelect"
+          ></el-autocomplete>
+
+        </el-form>
+      </el-dialog>
+
+      <el-dialog
+        width="30%"
+        title="新增位置类型"
+        :visible.sync="dialogPositionVisible"
+        append-to-body>
+
+      </el-dialog>
+
     </el-dialog>
 
   </div>
 </template>
 
 <script>
-  import { fetch_HostList,fetch_PositionList,fetch_SystypeList,delete_Host } from '@/api/manager'
+  import { fetch_HostList,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host } from '@/api/manager'
     export default {
       data(){
         return{
@@ -145,7 +183,11 @@
           btnStatus:false,
           dialogDetailVisible:false,
           dialogFormVisible:false,
+          dialogSystypeVisible:false,
+          dialogPositionVisible:false,
           systemtype:[],
+          systype_item: '',
+          position_item: '',
           position:[],
           systype:[],
           postype:[],
@@ -157,8 +199,6 @@
           dialogStatus:'',
           temp: {
             detail:{
-              position: 0,
-              systemtype: 0
             }
           },
           optionState:[
@@ -171,7 +211,19 @@
             }, {
               value: 2,
               label: '不可达'
-            }]
+            }],
+          rules: {
+            'detail.info':[{ required: true, message: '主机信息是必须的', trigger: 'change' }],
+            connect_ip: [
+              { required: true, message: '连接IP是您管理主机的重要信息', trigger: 'change' },
+              { pattern: /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/, message: '您输入的IP地址有误',trigger:'blur'}
+              ],
+            service_ip:[{ pattern: /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/, message: '您输入的IP地址有误',trigger:'blur'}],
+            sshport: [{ required: true, message: '连接端口是您管理主机的重要信息', trigger: 'change' }],
+            status: [{ required: true, message:'您未填写该主机目前的状态', trigger: 'blur'}],
+            'detail.position': [{ required: true, message:'请填写该主机目前所在的位置', trigger: 'blur'}],
+            'detail.systemtype': [{ required: true, message:'请填写该主机的操作系统类型', trigger: 'blur'}]
+          }
         }
       },
       created(){
@@ -207,14 +259,25 @@
               this.systype[sys.id] = sys.name
             }
             this.systemtype = response.data
+            console.log(this.systype)
+            console.log(this.systemtype)
           })
         },
         getList(){
+          this.list = null
           this.listLoading = true
           fetch_HostList(0).then(response =>{
             this.list=response.data
             this.listLoading = false
           })
+        },
+        resetTemp(){
+          this.temp={
+            detail:{
+              position:'',
+              systemtype:''
+            }
+          }
         },
         deleteConfirm() {
           this.$confirm('此操作将删除主机, 是否继续?', '提示', {
@@ -239,7 +302,7 @@
           this.dialogDetailVisible = true
         },
         handleCreate(row){
-          this.temp = Object.assign({}, {})
+          this.resetTemp()
           this.dialogStatus = 'create'
           this.dialogFormVisible = true
           this.$nextTick(() => {
@@ -259,6 +322,72 @@
           this.btnStatus=true
           this.deleteConfirm()
           this.btnStatus=false
+        },
+        createData(){
+          this.$refs['dataForm'].validate((valid) => {
+            if (valid) {
+              this.btnStatus=true
+              create_Host(this.temp).then(() => {
+                // this.list.unshift(this.temp)
+                this.getList()
+                this.init()
+                this.dialogFormVisible = false
+                this.$message({
+                  showClose: true,
+                  message: '创建成功',
+                  type: 'success'
+                })
+                this.btnStatus=false
+              }).catch((error)=>{
+                this.btnStatus=false
+                this.dialogFormVisible = false
+                console.log(error)
+              })
+            }
+          })
+        },
+        updateData(){
+          this.$refs['dataForm'].validate((valid) => {
+            if (valid) {
+              this.btnStatus=true
+              update_Host(this.temp).then(() => {
+                this.getList()
+                this.init()
+                this.dialogFormVisible = false
+                this.$message({
+                  showClose: true,
+                  message: '更新成功',
+                  type: 'success'
+                })
+                this.btnStatus=false
+              }).catch((error)=>{
+                this.btnStatus=false
+                this.dialogFormVisible = false
+                console.log(error)
+              })
+            }
+          })
+
+        },
+        handleposition(){
+          this.dialogPositionVisible = true
+        },
+        handlesystype(){
+          this.dialogSystypeVisible = true
+        },
+        createFilter(queryString) {
+          return (restaurant) => {
+            return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+          };
+        },
+        querySearch(queryString, cb) {
+          const restaurants = this.systype
+          const results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants
+          // 调用 callback 返回建议列表的数据
+          cb(results)
+        },
+        handleSelect(item){
+          console.log(item)
         }
       }
     }
