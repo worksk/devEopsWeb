@@ -1,7 +1,5 @@
 import request from '@/utils/request'
 
-const host = '10.100.100.246:9999'
-
 /*
 * API_MODULE: GROUP
 * API_USE: FETCH,CREATE,UPDATE,DELETE
@@ -38,7 +36,7 @@ export function delete_Group(data){
 
 /*
 * API_MODULE: POSITION
-* API_USE: FETCH
+* API_USE: FETCH,DATA
 * */
 export function fetch_PositionList(){
   return request({
@@ -47,9 +45,17 @@ export function fetch_PositionList(){
   })
 }
 
+export function create_Position(data){
+  return request({
+    url: '/api-manager/v1/position/create/',
+    method: 'POST',
+    data: data
+  })
+}
+
 /*
 * API_MODULE: SYSTYPE
-* API_USE: FETCH
+* API_USE: FETCH,CREATE
 * */
 export function fetch_SystypeList(){
   return request({
@@ -58,13 +64,28 @@ export function fetch_SystypeList(){
   })
 }
 
+export function create_Systype(data){
+  return request({
+    url: '/api-manager/v1/systype/create/',
+    method: 'POST',
+    data: data
+  })
+}
+
 /*
 * API_MODULE: HOST
-* API_USE: FETCH,CREATE,UPDATE,DELETE
+* API_USE: FETCH,CREATE,UPDATE,DELETE,PASSWD
 * */
 export function fetch_HostList(id){
   return request({
     url: '/api-manager/v1/hostbygroup/'+'0'+'/',
+    method: 'GET'
+  })
+}
+
+export function fetch_HostPasswd(id){
+  return request({
+    url: '/api-manager/v1/host/'+id+'/passwd/',
     method: 'GET'
   })
 }

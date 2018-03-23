@@ -66,12 +66,12 @@ export const devEopsRouterMap = [
       meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
     },{
       path: 'user',
-      component: _import('dashboard/index'),
+      component: _import('auth/user'),
       name: 'user',
       meta: { title: '人员',icon:'street-view',hidden:false,cache:true}
     },{
       path: 'auth',
-      component: _import('dashboard/index'),
+      component: _import('auth/group'),
       name: 'auth',
       meta: { title: '权限组',icon:'eye-slash',hidden:false,cache:true}
     }]

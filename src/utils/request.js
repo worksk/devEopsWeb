@@ -17,12 +17,19 @@ service.interceptors.request.use(config => {
   Promise.reject(error)
 })
 
+function findError(error){
+  if(error.response.data.hasOwnProperty('detail')){
+    return error.response.data.detail
+  }else{
+    return '未知错误'
+  }
+}
 
 service.interceptors.response.use(
   response => response,
   error => {
     Message({
-      message: error.response.data,
+      message: findError(error),
       type: 'error',
       duration: 5 * 1000
     })

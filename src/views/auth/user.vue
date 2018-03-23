@@ -1,0 +1,218 @@
+<template>
+  <div class="manager-user-container">
+    <div class="filter-container">
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      </el-input>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <!--<el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>-->
+    </div>
+
+    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
+              style="width: 100%">
+
+      <el-table-column width="60px" align="center" label="ID">
+        <template slot-scope="user">
+          <span>{{ user.row.id }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="100" align="center" label="状态" class-name="status-col" >
+        <template slot-scope="user">
+          <el-tag :type="user.row.is_active | statusFilter">{{ activeState(user.row.is_active) }}</el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="90" align="center" label="用户名">
+        <template slot-scope="user">
+          <span>{{ user.row.username }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="100" align="center" label="名称">
+        <template slot-scope="user">
+          <span>{{ user.row.full_name }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="160" align="center" label="邮箱">
+        <template slot-scope="user">
+          <span>{{ user.row.email8531 }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="155" align="center" label="应用组关联">
+        <template slot-scope="user">
+          <span>{{ user.row.group_name }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="160" align="center" label="上次登陆">
+        <template slot-scope="user">
+          <span>{{ user.row.last_login |timeFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="操作" width="350" class-name="small-padding fixed-width">
+        <template slot-scope="user">
+          <el-button type="primary" @click="handleGroup(user.row)" size="mini" :disabled="btnStatus">管理组</el-button>
+          <el-button type="warning" @click="" size="mini" :disabled="btnStatus">编辑</el-button>
+          <el-button type="danger" @click="handleStatus(user.row)" size="mini" :disabled="btnStatus">改变状态</el-button>
+          <el-button type="primary" @click="handleDetail(user.row)" size="mini" :disabled="btnStatus">操作详情</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <div class="pagination-container">
+      <el-pagination background layout="total, sizes, prev, pager, next, jumper">
+      </el-pagination>
+    </div>
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogGroupVisible" width="60%" top="2vh">
+      <el-form ref="userGrpForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+
+        <el-form-item label="所属用户组" prop="users">
+          <el-transfer v-model="temp.groups" :data="groups" placeholder="请选择所属用户组" filterable>
+          </el-transfer>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogGroupVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button type="primary" @click="updateGroup" :disabled="btnStatus">提交</el-button>
+      </div>
+    </el-dialog>
+
+  </div>
+</template>
+
+<script>
+  import { fetch_UserList,update_User,fetch_PmnGroupList } from '@/api/auth'
+  export default {
+    data(){
+      return {
+        list: null,
+        listLoading: true,
+        btnStatus:false,
+        temp: {
+          groups:{
+
+          }
+        },
+        groups: [
+        ],
+        dialogStatus:'',
+        textMap:{
+          group: '管理组',
+          update: '编辑主机',
+          create: '新建主机'
+        },
+        dialogGroupVisible: false
+      }
+    },
+    created(){
+      this.init()
+    },
+    filters: {
+      statusFilter(is_active) {
+        if(is_active){
+          return 'success'
+        }else{
+          return 'danger'
+        }
+      },
+      timeFilter(last_login){
+        if(last_login){
+          const date = last_login.split('T')
+          const time = date[1].split('.')
+          return date[0]+' '+time[0]
+        }else{
+          return ''
+        }
+      }
+    },
+    methods: {
+      init(){
+        this.listLoading = true
+        fetch_UserList().then(response =>{
+          this.list=response.data
+          this.listLoading = false
+        })
+      },
+      getGroupList(){
+        fetch_PmnGroupList().then(response=>{
+          this.groups = []
+          for (const group of response.data){
+            this.groups.push({
+              key: group.id,
+              label: group.name,
+              disabled: false
+            })
+          }
+        })
+      },
+      activeState(is_active){
+        if(is_active){
+          return '可使用'
+        }else{
+          return '已禁用'
+        }
+      },
+      handleGroup(row){
+        this.dialogStatus = 'group'
+        this.dialogGroupVisible = true
+        this.temp = Object.assign({},row)
+        this.getGroupList()
+        console.log(this.temp)
+      },
+      handleStatus(row){
+        this.temp = Object.assign({},row)
+        this.$confirm('此操作将修改该用户状态, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(()=>{
+          this.temp.is_active = !this.temp.is_active
+          update_User(this.temp).then((response) => {
+            this.$message({
+              showClose: true,
+              message: '状态修改成功',
+              type: 'success'
+            })
+            this.init()
+          })
+        })
+      },
+      handleDetail(row){
+        return
+      },
+      updateGroup(){
+        this.$refs['userGrpForm'].validate((valid) => {
+          if (valid) {
+            this.btnStatus=true
+            update_User(this.temp).then(() => {
+              this.init()
+              this.dialogGroupVisible = false
+              this.$message({
+                showClose: true,
+                message: '更新组成功',
+                type: 'success'
+              })
+              this.btnStatus=false
+            }).catch((error)=>{
+              this.btnStatus=false
+              this.dialogGroupVisible = false
+              console.log(error)
+            })
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style rel="stylesheet/scss" lang="scss" scoped>
+  .manager-user-container {
+    padding: 32px;
+    /*background-color: rgb(240, 242, 245);*/
+  }
+</style>
