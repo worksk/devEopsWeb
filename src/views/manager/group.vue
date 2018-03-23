@@ -40,10 +40,11 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="337" class-name="small-padding fixed-width">
         <template slot-scope="group">
           <el-button type="primary" @click="handleImage(group.row)" size="mini" :disabled="btnStatus">架构图</el-button>
           <el-button type="warning" @click="handleUpdate(group.row)" size="mini" :disabled="btnStatus">编辑</el-button>
+          <el-button type="warning" @click="handlePermission(group.row)" size="mini" :disabled="btnStatus">权限组</el-button>
           <el-button type="danger" @click="handleDelete(group.row)" size="mini" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
@@ -86,6 +87,22 @@
       </div>
     </el-dialog>
 
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogPermissionVisible" width="60%" top="2vh">
+      <el-form ref="permissionForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+
+        <el-form-item label="所属权限组" prop="pmn_groups">
+          <el-transfer v-model="temp.pmn_groups" :data="pmn_groups" placeholder="请选择所属用户组" filterable>
+          </el-transfer>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogPermissionVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button type="primary" @click="updatePermission" :disabled="btnStatus">提交</el-button>
+      </div>
+    </el-dialog>
+
+
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogImgVisible" width="80%" top="2vh">
       <img :src="temp.framework" style="width:100%;height:100%;">
     </el-dialog>
@@ -94,8 +111,8 @@
 </template>
 
 <script>
-  import { fetch_GroupList,update_Group,delete_Group,create_Group,fetch_HostList } from '@/api/manager'
-  import { fetch_UserList } from '@/api/login'
+  import { fetch_GroupList,update_Group,delete_Group,create_Group } from '@/api/manager'
+  import { fetch_UserList,fetch_PmnGroupList } from '@/api/auth'
   export default {
     data(){
       return {
@@ -103,21 +120,25 @@
         listLoading: true,
         dialogFormVisible: false,
         dialogImgVisible: false,
+        dialogPermissionVisible:false,
         dialogStatus: '',
         btnStatus: false,
+        pmn_groups:[],
         users:[],
         // header:{'authorization':'JWT '+this.$store.getters.token},
         textMap: {
           update: '编辑应用组',
           create: '新建应用组',
-          img: '应用组架构图'
+          img: '应用组架构图',
+          permission: '权限组修改'
         },
         temp: {
           name: '',
           status: 0,
           info: '',
           users: [],
-          framework: ''
+          framework: '',
+          pmn_groups: []
         },
         rules: {
           name: [{ required: true, message: '应用组名称是必填的', trigger: 'change' }],
@@ -140,6 +161,7 @@
     created(){
       this.getList()
       this.getUserList()
+      this.getPermissionList()
     },
     filters: {
       statusFilter(status) {
@@ -170,6 +192,18 @@
             this.users.push({
               key: user.id,
               label: user.username,
+              disabled: false
+            })
+          }
+        })
+      },
+      getPermissionList(){
+        fetch_PmnGroupList().then(response => {
+          this.pmn_groups = []
+          for (const pmn of response.data){
+            this.pmn_groups.push({
+              key: pmn.id,
+              label: pmn.name,
               disabled: false
             })
           }
@@ -210,6 +244,35 @@
           this.$refs['dataForm'].clearValidate()
         })
       },
+      handlePermission(row){
+        this.temp = Object.assign({}, row) // copy obj
+        this.dialogStatus = 'permission'
+        this.dialogPermissionVisible = true
+        this.$nextTick(() =>{
+          this.$refs['permissionForm'].clearValidate()
+        })
+      },
+      updatePermission(){
+        this.$refs['permissionForm'].validate((valid) => {
+          if (valid) {
+            this.btnStatus=true
+            update_Group(this.temp).then(() => {
+              this.dialogPermissionVisible = false
+              this.getList()
+              this.$message({
+                showClose: true,
+                message: '创建成功',
+                type: 'success'
+              })
+              this.btnStatus=false
+            }).catch((error)=>{
+              this.dialogPermissionVisible = false
+              this.btnStatus=false
+            })
+          }
+        })
+
+      },
       handleCreate(){
         this.temp = Object.assign({}, {})
         this.dialogStatus = 'create'
@@ -233,7 +296,7 @@
               this.btnStatus=false
             }).catch((error)=>{
               this.btnStatus=false
-              console.log(error)
+              this.dialogFormVisible = false
             })
           }
         })
@@ -254,7 +317,7 @@
               this.btnStatus=false
             }).catch((error)=>{
               this.btnStatus=false
-              console.log(error)
+              this.dialogFormVisible = false
             })
           }
         })

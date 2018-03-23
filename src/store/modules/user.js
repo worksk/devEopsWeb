@@ -1,4 +1,4 @@
-import { loginByUsername,userInfo } from "@/api/login";
+import { loginByUsername,fetch_UserInfo } from "@/api/login";
 import { getToken, setToken, removeToken } from '@/utils/auth';
 
 const user = {
@@ -43,7 +43,7 @@ const user = {
   actions: {
     UserInfo({commit}){
       return new Promise((resolve,reject)=>{
-        userInfo().then(response =>{
+        fetch_UserInfo().then(response =>{
           commit('SET_ISADMIN',response.data.isadmin)
           commit('SET_USERNAME',response.data.username)
           commit('SET_NAME',response.data.name)

@@ -1,6 +1,9 @@
 import request from '@/utils/request'
 
-const host = '10.100.100.246:9999'
+/*
+* API_MODULE: LOGIN
+* API_USE: FETCH
+* */
 export function loginByUsername(username, password) {
   const data = {
     username,
@@ -13,16 +16,13 @@ export function loginByUsername(username, password) {
   })
 }
 
-export function userInfo(){
+/*
+* API_MODULE: USERINFO
+* API_USE: FETCH
+* */
+export function fetch_UserInfo(){
   return request({
-    url: '/api-auth/userinfo',
-    method: 'GET'
-  })
-}
-
-export function fetch_UserList(){
-  return request({
-    url: '/api-auth/v1/user/',
+    url: '/api-auth/userinfo/',
     method: 'GET'
   })
 }

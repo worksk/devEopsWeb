@@ -33,19 +33,19 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="140px" align="center" label="连接IP">
+      <el-table-column width="145px" align="center" label="连接IP">
         <template slot-scope="host">
           <span>{{ host.row.connect_ip }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="140px" align="center" label="业务IP">
+      <el-table-column width="145px" align="center" label="业务IP">
         <template slot-scope="host">
           <span>{{ host.row.service_ip }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="100" align="center" label="状态" class-name="status-col" >
+      <el-table-column width="115" align="center" label="状态" class-name="status-col" >
         <template slot-scope="host">
           <el-tag :type="host.row.status | statusFilter">{{ optionState[host.row.status].label }}</el-tag>
         </template>
@@ -53,6 +53,7 @@
 
       <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
         <template slot-scope="host">
+          <el-button type="primary" size="mini" @click="handleCopy(host.row)" :disabled="btnStatus">密码</el-button>
           <el-button type="primary" size="mini" @click="handleDetail(host.row)" :disabled="btnStatus">详细</el-button>
           <el-button type="warning" size="mini" @click="handleUpdate(host.row)" :disabled="btnStatus">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(host.row)" :disabled="btnStatus">删除</el-button>
@@ -65,6 +66,12 @@
       </el-pagination>
     </div>
 
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogPasswdVisible" width="20%" top="20vh">
+      <span>我是想加一点验证码验证的 你懂吧</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" icon="document" v-clipboard:copy='temp_passwd' v-clipboard:success='clipboardSuccess' @click="dialogPasswdVisible = false">copy</el-button>
+      </div>
+    </el-dialog>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" width="60%" top="2vh">
       <div slot="footer" class="dialog-footer">
@@ -102,11 +109,23 @@
           </el-tooltip>
         </el-form-item>
 
+        <el-form-item label="密码" prop="passwd">
+          <el-tooltip content="请输入记录的密码" placement="bottom" effect="light">
+            <el-input type="password" v-model="temp.passwd"></el-input>
+          </el-tooltip>
+        </el-form-item>
+
         <el-form-item label="状态" prop="status">
           <el-tooltip content="请输入该机器目前的状态" placement="top" effect="light">
             <el-select v-model="temp.status" placeholder="请选择主机状态">
               <el-option v-for="option in optionState" :key="option.label" :label="option.label" :value="option.value"></el-option>
             </el-select>
+          </el-tooltip>
+        </el-form-item>
+
+        <el-form-item label="阿里云ID" prop="detail.aliyun_id">
+          <el-tooltip content="请输入阿里云ID" placement="bottom" effect="light">
+            <el-input v-model="temp.detail.aliyun_id"></el-input>
           </el-tooltip>
         </el-form-item>
 
@@ -146,17 +165,16 @@
         title="新增系统类型"
         :visible.sync="dialogSystypeVisible"
         append-to-body>
-        <el-form>
-
+        <el-form ref="systypeForm" :model="systype_item" label-position="left" label-width="100px">
           <el-autocomplete
             class="inline-input"
             v-model="systype_item"
-            :fetch-suggestions="querySearch"
+            :fetch-suggestions="querySystypeSearch"
             placeholder="请输入内容"
-            :trigger-on-focus="false"
-            @select="handleSelect"
+            value-key="name"
           ></el-autocomplete>
-
+          <el-button type="primary" @click="updateSystypeData" :disabled="btnStatus">提交</el-button>
+          <el-button @click="dialogSystypeVisible = false" :disabled="btnStatus">取消</el-button>
         </el-form>
       </el-dialog>
 
@@ -165,7 +183,17 @@
         title="新增位置类型"
         :visible.sync="dialogPositionVisible"
         append-to-body>
-
+        <el-form ref="positionForm" :model="position_item" label-position="left" label-width="100px">
+          <el-autocomplete
+            class="inline-input"
+            v-model="position_item"
+            :fetch-suggestions="queryPositionSearch"
+            placeholder="请输入内容"
+            value-key="name"
+          ></el-autocomplete>
+          <el-button type="primary" @click="updatePositionData" :disabled="btnStatus">提交</el-button>
+          <el-button @click="dialogPositionVisible = false" :disabled="btnStatus">取消</el-button>
+        </el-form>
       </el-dialog>
 
     </el-dialog>
@@ -174,7 +202,7 @@
 </template>
 
 <script>
-  import { fetch_HostList,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host } from '@/api/manager'
+  import { fetch_HostList,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd } from '@/api/manager'
     export default {
       data(){
         return{
@@ -185,16 +213,19 @@
           dialogFormVisible:false,
           dialogSystypeVisible:false,
           dialogPositionVisible:false,
+          dialogPasswdVisible: false,
           systemtype:[],
+          position:[],
+          temp_passwd: '',
           systype_item: '',
           position_item: '',
-          position:[],
           systype:[],
           postype:[],
           textMap:{
             detail: '主机详情',
             update: '编辑主机',
-            create: '新建主机'
+            create: '新建主机',
+            passwd: '粘贴密码'
           },
           dialogStatus:'',
           temp: {
@@ -259,8 +290,6 @@
               this.systype[sys.id] = sys.name
             }
             this.systemtype = response.data
-            console.log(this.systype)
-            console.log(this.systemtype)
           })
         },
         getList(){
@@ -317,6 +346,26 @@
             this.$refs['dataForm'].clearValidate()
           })
         },
+        handleCopy(row){
+          fetch_HostPasswd(row.id).then((response) => {
+            console.log(response.data[0].password)
+            this.dialogStatus = 'passwd'
+            this.temp_passwd = response.data[0].password
+            this.dialogPasswdVisible = true
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '粘贴失败!'
+            })
+          })
+        },
+        clipboardSuccess() {
+          this.$message({
+            message: '复制成功',
+            type: 'success',
+            duration: 1500
+          })
+        },
         handleDelete(row){
           this.temp = Object.assign({},row)
           this.btnStatus=true
@@ -369,25 +418,77 @@
           })
 
         },
+        updateSystypeData(){
+          this.$refs['systypeForm'].validate((valid) =>{
+            if(valid){
+              this.btnStatus=true
+              create_Systype({'name':this.systype_item}).then(()=>{
+                this.init()
+                this.dialogSystypeVisible = false
+                this.$message({
+                  showClose: true,
+                  message: '新添系统类型',
+                  type: 'success'
+                })
+                this.btnStatus=false
+              }).catch((error)=>{
+                this.dialogSystypeVisible = false
+                this.btnStatus=false
+                console.log(error)
+              })
+            }
+          })
+        },
+        updatePositionData(){
+          this.$refs['positionForm'].validate((valid) =>{
+            if(valid){
+              this.btnStatus=true
+              create_Position({'name':this.position_item}).then(()=>{
+                this.init()
+                this.dialogPositionVisible = false
+                this.$message({
+                  showClose: true,
+                  message: '新添位置类型',
+                  type: 'success'
+                })
+                this.btnStatus=false
+              }).catch((error)=>{
+                this.dialogPositionVisible = false
+                this.btnStatus=false
+                console.log(error)
+              })
+            }
+          })
+        },
         handleposition(){
           this.dialogPositionVisible = true
+          this.systype_item=''
         },
         handlesystype(){
           this.dialogSystypeVisible = true
+          this.position_item=''
         },
-        createFilter(queryString) {
-          return (restaurant) => {
-            return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+        createSystypeFilter(queryString) {
+          return (systemtype) => {
+            return (systemtype.name.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
           };
         },
-        querySearch(queryString, cb) {
-          const restaurants = this.systype
-          const results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants
+        createPositionFilter(queryString) {
+          return (position) => {
+            return (position.name.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+          };
+        },
+        queryPositionSearch(queryString,cb) {
+          const restaurants = this.position
+          const results = queryString ? restaurants.filter(this.createPositionFilter(queryString)) : restaurants
           // 调用 callback 返回建议列表的数据
           cb(results)
         },
-        handleSelect(item){
-          console.log(item)
+        querySystypeSearch(queryString, cb) {
+          const restaurants = this.systemtype
+          const results = queryString ? restaurants.filter(this.createSystypeFilter(queryString)) : restaurants
+          // 调用 callback 返回建议列表的数据
+          cb(results)
         }
       }
     }
