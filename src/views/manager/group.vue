@@ -22,15 +22,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="155px" align="center" label="应用系统名称">
+      <el-table-column width="200px" align="center" label="应用系统名称">
         <template slot-scope="group">
           <span>{{ group.row.name }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="360px" align="center" label="应用系统信息">
-        <template slot-scope="group">
-          <span>{{ group.row.info }}</span>
         </template>
       </el-table-column>
 
@@ -40,7 +34,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="337" class-name="small-padding fixed-width">
+      <el-table-column width="360px" align="center" label="应用系统信息">
+        <template slot-scope="group">
+          <span>{{ group.row.info }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="操作" width="337" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="group">
           <el-button type="primary" @click="handleImage(group.row)" size="mini" :disabled="btnStatus">架构图</el-button>
           <el-button type="warning" @click="handleUpdate(group.row)" size="mini" :disabled="btnStatus">编辑</el-button>
@@ -79,6 +79,7 @@
             <el-transfer v-model="temp.users" :data="users" placeholder="请选择管理用户" filterable>
             </el-transfer>
         </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false" :disabled="btnStatus">取消</el-button>
@@ -112,7 +113,7 @@
 
 <script>
   import { fetch_GroupList,update_Group,delete_Group,create_Group } from '@/api/manager'
-  import { fetch_UserList,fetch_PmnGroupList } from '@/api/auth'
+  import { fetch_OpsUserList,fetch_PmnGroupList } from '@/api/auth'
   export default {
     data(){
       return {
@@ -160,8 +161,6 @@
     },
     created(){
       this.getList()
-      this.getUserList()
-      this.getPermissionList()
     },
     filters: {
       statusFilter(status) {
@@ -178,6 +177,16 @@
       }
     },
     methods:{
+      resetTemp(){
+        this.temp = {
+          name: '',
+          status: 0,
+          info: '',
+          users: [],
+          framework: '',
+          pmn_groups: []
+        }
+      },
       getList(){
         this.listLoading = true
         fetch_GroupList().then(response =>{
@@ -186,12 +195,12 @@
         })
       },
       getUserList(){
-        fetch_UserList().then(response=>{
+        fetch_OpsUserList().then(response=>{
           this.users = []
           for (const user of response.data){
             this.users.push({
               key: user.id,
-              label: user.username,
+              label: user.full_name,
               disabled: false
             })
           }
@@ -237,6 +246,8 @@
         this.btnStatus=false
       },
       handleUpdate(row){
+        this.getPermissionList()
+        this.getUserList()
         this.temp = Object.assign({}, row) // copy obj
         this.dialogStatus = 'update'
         this.dialogFormVisible = true
@@ -245,6 +256,7 @@
         })
       },
       handlePermission(row){
+        this.getPermissionList()
         this.temp = Object.assign({}, row) // copy obj
         this.dialogStatus = 'permission'
         this.dialogPermissionVisible = true
@@ -274,7 +286,9 @@
 
       },
       handleCreate(){
-        this.temp = Object.assign({}, {})
+        this.getPermissionList()
+        this.getUserList()
+        this.resetTemp()
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
@@ -286,13 +300,13 @@
           if (valid) {
             this.btnStatus=true
             create_Group(this.temp).then(() => {
-              this.list.unshift(this.temp)
               this.dialogFormVisible = false
               this.$message({
                 showClose: true,
                 message: '创建成功',
                 type: 'success'
               })
+              this.getList()
               this.btnStatus=false
             }).catch((error)=>{
               this.btnStatus=false

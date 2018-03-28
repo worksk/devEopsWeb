@@ -39,22 +39,23 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="145px" align="center" label="业务IP">
-        <template slot-scope="host">
-          <span>{{ host.row.service_ip }}</span>
-        </template>
-      </el-table-column>
-
       <el-table-column width="115" align="center" label="状态" class-name="status-col" >
         <template slot-scope="host">
           <el-tag :type="host.row.status | statusFilter">{{ optionState[host.row.status].label }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="300" class-name="small-padding fixed-width">
+      <el-table-column width="145px" align="center" label="业务IP">
+        <template slot-scope="host">
+          <span>{{ host.row.service_ip }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="操作" width="370" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="host">
           <el-button type="primary" size="mini" @click="handleCopy(host.row)" :disabled="btnStatus">密码</el-button>
           <el-button type="primary" size="mini" @click="handleDetail(host.row)" :disabled="btnStatus">详细</el-button>
+          <el-button type="warning" size="mini" @click="handleGroup(host.row)" :disabled="btnStatus">应用组</el-button>
           <el-button type="warning" size="mini" @click="handleUpdate(host.row)" :disabled="btnStatus">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(host.row)" :disabled="btnStatus">删除</el-button>
         </template>
@@ -73,11 +74,31 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" width="60%" top="2vh">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" width="40%" top="2vh">
+        <template v-for="detail in details">
+          <el-tag hit="true">{{ detail }}</el-tag>
+        </template>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogDetailVisible = false" :disabled="btnStatus">取消</el-button>
       </div>
+
     </el-dialog>
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogGroupVisible" width="60%" top="2vh">
+      <el-form ref="groupForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+
+        <el-form-item label="所属权限组" prop="pmn_groups">
+          <el-transfer v-model="temp.groups" :data="groups" placeholder="请选择所属应用组" filterable>
+          </el-transfer>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogGroupVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button type="primary" @click="updateGroups" :disabled="btnStatus">提交</el-button>
+      </div>
+    </el-dialog>
+
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="60%" top="2vh">
       <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
@@ -126,6 +147,12 @@
         <el-form-item label="阿里云ID" prop="detail.aliyun_id">
           <el-tooltip content="请输入阿里云ID" placement="bottom" effect="light">
             <el-input v-model="temp.detail.aliyun_id"></el-input>
+          </el-tooltip>
+        </el-form-item>
+
+        <el-form-item label="VMwareID" prop="detail.vmware_id">
+          <el-tooltip content="请输入VMware-UUID" placement="bottom" effect="light">
+            <el-input v-model="temp.detail.vmware_id"></el-input>
           </el-tooltip>
         </el-form-item>
 
@@ -202,37 +229,43 @@
 </template>
 
 <script>
-  import { fetch_HostList,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd } from '@/api/manager'
-    export default {
+  import { fetch_HostList,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd,detail_Host } from '@/api/manager';
+  import { fetch_GroupList } from "@/api/manager";
+
+  export default {
       data(){
         return{
           list: null,
           listLoading: true,
-          btnStatus:false,
-          dialogDetailVisible:false,
-          dialogFormVisible:false,
-          dialogSystypeVisible:false,
-          dialogPositionVisible:false,
+          btnStatus: false,
+          dialogDetailVisible: false,
+          dialogFormVisible: false,
+          dialogSystypeVisible: false,
+          dialogPositionVisible: false,
           dialogPasswdVisible: false,
-          systemtype:[],
-          position:[],
+          dialogGroupVisible: false,
+          systemtype: [],
+          position: [],
           temp_passwd: '',
           systype_item: '',
           position_item: '',
-          systype:[],
-          postype:[],
+          systype: [],
+          postype: [],
+          groups: [],
+          details: [],
           textMap:{
             detail: '主机详情',
             update: '编辑主机',
             create: '新建主机',
-            passwd: '粘贴密码'
+            passwd: '粘贴密码',
+            group: '修改应用组'
           },
           dialogStatus:'',
           temp: {
             detail:{
             }
           },
-          optionState:[
+          optionState: [
             {
               value: 0,
               label: '错误'
@@ -260,6 +293,7 @@
       created(){
         this.init()
         this.getList()
+        this.getGroupList()
       },
       filters:{
         statusFilter(status) {
@@ -292,6 +326,18 @@
             this.systemtype = response.data
           })
         },
+        getGroupList(){
+          fetch_GroupList().then(response => {
+            this.groups = []
+            for (const group of response.data){
+              this.groups.push({
+                key: group.id,
+                label: group.name,
+                disabled: false
+              })
+            }
+          })
+        },
         getList(){
           this.list = null
           this.listLoading = true
@@ -305,7 +351,8 @@
             detail:{
               position:'',
               systemtype:''
-            }
+            },
+            groups:[]
           }
         },
         deleteConfirm() {
@@ -325,10 +372,40 @@
             })
           })
         },
+        filterDetail(data){
+          const list=[]
+          if(data.type=='aliyun'){
+            list.push('地区 : ' + data.RegionId)
+            list.push('过期时间 : ' + data.ExpiredTime)
+            list.push('私网地址 : ' + data.VpcAttributes.PrivateIpAddress.IpAddress[0])
+            list.push('实例名称 : ' + data.InstanceName)
+            list.push('CPU核数 : ' + data.Cpu)
+            list.push('内存大小MB : ' + data.Memory)
+            list.push('带宽大小 : ' + data.InternetMaxBandwidthIn)
+          }else{
+            list.push('使用内存MB : ' + data.privateMemory +'/'+ data.memoryMB)
+            list.push('电源状态 : ' + data.powerState)
+            list.push('CPU核数 : ' + data.numCpu)
+            list.push('CPU使用 : ' + data.overallCpuUsage +'MHz')
+            list.push('私网地址 : ' + data.ipAddress)
+            list.push('存储使用B : ' + data.committed)
+          }
+          return list
+        },
         handleDetail(row){
           this.temp = Object.assign({},row)
           this.dialogStatus = 'detail'
-          this.dialogDetailVisible = true
+          detail_Host(row.id).then((response) =>{
+            this.details = this.filterDetail(response.data)
+            this.dialogDetailVisible = true
+          }).catch((error) => {
+            this.$message({
+              type: 'error',
+              message: '获取详细信息失败!'
+            })
+            console.log(error)
+            this.dialogDetailVisible = false
+          })
         },
         handleCreate(row){
           this.resetTemp()
@@ -336,6 +413,14 @@
           this.dialogFormVisible = true
           this.$nextTick(() => {
             this.$refs['dataForm'].clearValidate()
+          })
+        },
+        handleGroup(row) {
+          this.temp = Object.assign({}, row) // copy obj
+          this.dialogStatus = 'group'
+          this.dialogGroupVisible = true
+          this.$nextTick(() =>{
+            this.$refs['groupForm'].clearValidate()
           })
         },
         handleUpdate(row){
@@ -348,9 +433,8 @@
         },
         handleCopy(row){
           fetch_HostPasswd(row.id).then((response) => {
-            console.log(response.data[0].password)
             this.dialogStatus = 'passwd'
-            this.temp_passwd = response.data[0].password
+            this.temp_passwd = response.data[0].passwd
             this.dialogPasswdVisible = true
           }).catch(() => {
             this.$message({
@@ -371,6 +455,27 @@
           this.btnStatus=true
           this.deleteConfirm()
           this.btnStatus=false
+        },
+        updateGroups(row){
+          this.$refs['groupForm'].validate((valid) => {
+            if (valid) {
+              this.btnStatus=true
+              update_Host(this.temp).then(() => {
+                this.dialogGroupVisible = false
+                this.getList()
+                this.$message({
+                  showClose: true,
+                  message: '更新成功',
+                  type: 'success'
+                })
+                this.btnStatus=false
+              }).catch((error)=>{
+                this.dialogGroupVisible = false
+                this.btnStatus=false
+                console.log(error)
+              })
+            }
+          })
         },
         createData(){
           this.$refs['dataForm'].validate((valid) => {
@@ -416,7 +521,6 @@
               })
             }
           })
-
         },
         updateSystypeData(){
           this.$refs['systypeForm'].validate((valid) =>{
@@ -498,5 +602,10 @@
   .manager-host-container {
     padding: 32px;
     /*background-color: rgb(240, 242, 245);*/
+  }
+  .el-tag {
+    margin-left: 10px;
+    margin-bottom: 5px;
+    font-size: 15px;
   }
 </style>

@@ -74,6 +74,11 @@ export const devEopsRouterMap = [
       component: _import('auth/group'),
       name: 'auth',
       meta: { title: '权限组',icon:'eye-slash',hidden:false,cache:true}
+    },{
+      path: 'key',
+      component: _import('auth/key'),
+      name: 'key',
+      meta: { title: '密钥',icon:'key',hidden:false,cache:true}
     }]
   },{
     path: '/manager',
@@ -98,7 +103,7 @@ export const devEopsRouterMap = [
       path: 'storage',
       component: _import('dashboard/index'),
       name: 'storage',
-      meta: { title: '存储',icon:'hdd-o',hidden:false,cache:true}
+      meta: { title: '存储',icon:'hdd-o',hidden:true,cache:true}
     },{
       path: 'search',
       component: _import('dashboard/index'),
@@ -106,19 +111,19 @@ export const devEopsRouterMap = [
       meta: { title: '搜索',icon:'search',hidden:false,cache:true}
     }]
   },{
-    path: '/application',
+    path: '/ops',
     component: layout,
-    meta:{title: '应用管理',icon:'joomla'},
+    meta:{title: '运维操作',icon:'newspaper-o'},
     children: [{
       path: 'dashboard',
       component: _import('dashboard/index'),
       name: 'dashboard4',
-      meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
+      meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
     },{
-      path: 'redis',
-      component: _import('dashboard/index'),
-      name: 'redis',
-      meta: { title: 'Redis缓存',icon:'puzzle-piece',hidden:false,cache:true}
+      path: 'meta',
+      component: _import('ops/meta'),
+      name: 'meta',
+      meta: { title: 'Meta元操作',icon:'superpowers',hidden:false,cache:true}
     }]
   }
 ]

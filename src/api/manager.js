@@ -74,7 +74,7 @@ export function create_Systype(data){
 
 /*
 * API_MODULE: HOST
-* API_USE: FETCH,CREATE,UPDATE,DELETE,PASSWD
+* API_USE: FETCH,CREATE,UPDATE,DELETE,PASSWD,DETAIL
 * */
 export function fetch_HostList(id){
   return request({
@@ -111,5 +111,12 @@ export function delete_Host(data){
     url: '/api-manager/v1/host/'+data.id+'/delete/',
     method: 'DELETE',
     data:data
+  })
+}
+
+export function detail_Host(id){
+  return request({
+    url: '/api-manager/v1/host/'+id+'/detail/',
+    method: 'GET'
   })
 }
