@@ -24,6 +24,7 @@ Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(VueI18n)
 Vue.use(VueClipboard)
+
 Vue.component('icon', Icon)
 
 

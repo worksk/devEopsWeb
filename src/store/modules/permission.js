@@ -16,7 +16,7 @@ const permission = {
   actions: {
     GenerateRouter({commit}){
       return new Promise((resolve) => {
-        if(store.getters.isadmin){
+        if(true){ //store.getters.isadmin
           commit('SET_ROUTERS',devEopsRouterMap)
           resolve()
         }else{

@@ -20,7 +20,10 @@ service.interceptors.request.use(config => {
 function findError(error){
   if(error.response.data.hasOwnProperty('detail')){
     return error.response.data.detail
-  }else{
+  }else if(error.response.data.hasOwnProperty('non_field_errors')){
+    return error.response.data.non_field_errors
+  }
+  else{
     return '未知错误'
   }
 }

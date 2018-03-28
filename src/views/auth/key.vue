@@ -1,0 +1,230 @@
+<template>
+  <div class="manager-key-container">
+    <div class="filter-container">
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      </el-input>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+    </div>
+
+    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
+              style="width: 100%">
+
+      <el-table-column width="120px" align="center" label="ID">
+        <template slot-scope="key">
+          <span>{{ key.row.id }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="250px" align="center" label="名称">
+        <template slot-scope="key">
+          <span>{{ key.row.name }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="210px" align="center" label="所属应用组">
+        <template slot-scope="key">
+          <span>{{ key.row.group_name }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="100px" align="center" label="公钥">
+        <template slot-scope="key">
+          <el-button type="primary" size="mini" v-clipboard:copy='key.row.public_key' v-clipboard:success='clipboardSuccess'>复制</el-button>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="220px" align="center" label="上次使用密钥时间">
+        <template slot-scope="key">
+          <span>{{ key.row.fetch_time | filter_time }}</span>
+        </template>
+      </el-table-column>
+
+
+      <el-table-column align="center" label="操作" width="300px" class-name="small-padding fixed-width">
+        <template slot-scope="key">
+          <el-button type="primary" @click="handleUpdate(key.row)" size="mini" :disabled="btnStatus">编辑</el-button>
+          <el-button type="danger"  @click="handleDelete(key.row)" size="mini" :disabled="btnStatus">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <div class="pagination-container">
+      <el-pagination background layout="total, sizes, prev, pager, next, jumper">
+      </el-pagination>
+    </div>
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogKeyVisible" width="60%" top="2vh">
+      <el-form ref="keyForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+
+        <el-form-item label="ID" prop="id">
+          <el-input v-model="temp.id" disabled></el-input>
+        </el-form-item>
+
+        <el-form-item label="密钥名称" prop="name">
+          <el-input v-model="temp.name"></el-input>
+        </el-form-item>
+
+        <el-form-item label="公钥" prop="name">
+          <el-input v-model="temp.public_key"></el-input>
+        </el-form-item>
+
+        <el-form-item label="私钥" prop="name">
+          <el-input type="textarea" v-model="temp.private_key" rows="10"></el-input>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogKeyVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button v-if="dialogStatus=='create'" type="primary" @click="createData" :disabled="btnStatus">提交</el-button>
+        <el-button v-else type="primary" @click="updateData" :disabled="btnStatus">提交</el-button>
+      </div>
+    </el-dialog>
+
+  </div>
+</template>
+
+<script>
+  import { fetch_KeyList,create_Key,update_Key,delete_Key } from '@/api/auth'
+  export default {
+    data(){
+      return {
+        list: null,
+        listLoading: true,
+        btnStatus:false,
+        dialogKeyVisible: false,
+        temp: {
+          id: '',
+          name: '',
+          private_key: '',
+          public_key: ''
+        },
+        textMap:{
+          update: '编辑密钥',
+          create: '新建密钥',
+          delete: '删除密钥'
+        }
+      }
+    },
+    created(){
+      this.init()
+    },
+    filters: {
+      filter_time(data){
+        const ary = data.split('T')
+        const bry = ary[1].split('.')
+        return ary[0] + ' ' + bry[0]
+      }
+    },
+    methods: {
+      init(){
+        this.listLoading = true
+        fetch_KeyList().then(response =>{
+          this.list=response.data
+          this.listLoading = false
+        })
+      },
+      clipboardSuccess() {
+        this.$message({
+          message: '复制成功',
+          type: 'success',
+          duration: 1500
+        })
+      },
+      resetTemp(){
+        this.temp = {
+          name: "",
+          private_key: "",
+          public_key: ""
+        }
+      },
+      handleCreate(row){
+        this.resetTemp()
+        this.dialogStatus = 'create'
+        this.dialogKeyVisible = true
+        this.$nextTick(() => {
+          this.$refs['keyForm'].clearValidate()
+        })
+      },
+      handleUpdate(row){
+        this.temp = Object.assign({}, row) // copy obj
+        this.dialogStatus = 'update'
+        this.dialogKeyVisible = true
+        this.$nextTick(() => {
+          this.$refs['keyForm'].clearValidate()
+        })
+      },
+      createData(){
+        this.$refs['keyForm'].validate((valid) => {
+          if (valid) {
+            this.btnStatus=true
+            create_Key(this.temp).then(() => {
+              this.init()
+              this.dialogKeyVisible = false
+              this.$message({
+                showClose: true,
+                message: '创建成功',
+                type: 'success'
+              })
+              this.btnStatus=false
+            }).catch((error)=>{
+              this.btnStatus=false
+              this.dialogKeyVisible = false
+              console.log(error)
+            })
+          }
+        })
+      },
+      updateData(){
+        this.$refs['keyForm'].validate((valid) => {
+          if (valid) {
+            this.btnStatus=true
+            update_Key(this.temp).then(() => {
+              this.init()
+              this.dialogKeyVisible = false
+              this.$message({
+                showClose: true,
+                message: '更新成功',
+                type: 'success'
+              })
+              this.btnStatus=false
+            }).catch((error)=>{
+              this.btnStatus=false
+              this.dialogKeyVisible = false
+              console.log(error)
+            })
+          }
+        })
+      },
+      handleDelete(row){
+        this.temp = Object.assign({},row)
+        this.btnStatus=true
+        this.deleteConfirm()
+        this.btnStatus=false
+      },
+      deleteConfirm() {
+        this.$confirm('此操作将删除密钥, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(()=>{
+          delete_Key(this.temp).then((response) => {
+            this.$message({
+              showClose: true,
+              message: '删除成功',
+              type: 'success'
+            })
+            this.init()
+          })
+        })
+      },
+    }
+  }
+</script>
+
+<style rel="stylesheet/scss" lang="scss" scoped>
+  .manager-key-container {
+    padding: 32px;
+    /*background-color: rgb(240, 242, 245);*/
+  }
+</style>

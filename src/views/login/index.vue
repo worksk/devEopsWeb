@@ -36,7 +36,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import Awesome from "@/components/Awesome/index";
     export default {
       components: {Awesome},
