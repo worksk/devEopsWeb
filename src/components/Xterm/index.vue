@@ -41,9 +41,13 @@
         cursorBlink: true
       })
       this.term.open(this.$refs.yoshell,false)
-      this.socket = new WebSocket('ws://10.100.100.246:9999/ops/'+this.meta_id+'/')
+      this.socket = new WebSocket('ws://10.100.100.246:9999/ops/ansible/'+this.meta_id+'/')
       this.term.attach(this.socket)
       this.term.focus()
+    },
+    beforeDestroy(){
+      this.socket.close()
+      this.term.close()
     }
   }
 </script>
