@@ -72,7 +72,7 @@
 </template>
 
 <script>
-  import { fetch_PmnGroupList,fetch_Permission,update_PmnGroup,create_PmnGroup } from '@/api/auth'
+  import { fetch_PmnGroupList,fetch_Permission,update_PmnGroup } from '@/api/auth'
   export default {
     data() {
       return {
@@ -99,7 +99,7 @@
     methods: {
       init() {
         this.listLoading = true
-        fetch_PmnGroupList().then(response => {
+        update_PmnGroup().then(response => {
           this.list = response.data
           this.listLoading = false
         })
@@ -119,8 +119,15 @@
           }
         })
       },
+      resetTemp(){
+        this.temp={
+          name: '',
+          permissions: {
+          }
+        }
+      },
       handleCreate() {
-        this.temp = Object.assign({}, {})
+        this.resetTemp()
         this.dialogStatus = 'create'
         this.dialogGroupVisible = true
         this.$nextTick(() => {
@@ -131,7 +138,7 @@
         this.$refs['groupForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            create_PmnGroup(this.temp).then(() => {
+            create_Group(this.temp).then(() => {
               this.init()
               this.dialogGroupVisible = false
               this.$message({

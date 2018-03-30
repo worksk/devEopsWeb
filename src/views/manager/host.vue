@@ -17,7 +17,13 @@
 
       <el-table-column width="180px" align="center" label="UUID">
         <template slot-scope="host">
-          <span>{{ host.row.uuid| uuidFilter }}</span>
+          <span>{{ host.row.detail| uuidFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="180px" align="center" label="主机名">
+        <template slot-scope="host">
+          <span>{{ host.row.hostname }}</span>
         </template>
       </el-table-column>
 
@@ -63,7 +69,7 @@
     </el-table>
 
     <div class="pagination-container">
-      <el-pagination background layout="total, sizes, prev, pager, next, jumper">
+      <el-pagination background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :total="pagination.count">
       </el-pagination>
     </div>
 
@@ -102,9 +108,6 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="60%" top="2vh">
       <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
-        <el-form-item label="主机UUID" prop="uuid">
-          <el-input v-model="temp.uuid" disabled></el-input>
-        </el-form-item>
 
         <el-form-item label="主机信息" prop="detail.info">
           <el-tooltip content="请输入该主机涉及的服务内容" placement="bottom" effect="light">
@@ -145,7 +148,7 @@
         </el-form-item>
 
         <el-form-item label="阿里云ID" prop="detail.aliyun_id">
-          <el-tooltip content="请输入阿里云ID" placement="bottom" effect="light">
+          <el-tooltip content="请输入阿里云UUID" placement="bottom" effect="light">
             <el-input v-model="temp.detail.aliyun_id"></el-input>
           </el-tooltip>
         </el-form-item>
@@ -253,6 +256,10 @@
           postype: [],
           groups: [],
           details: [],
+          pagination: {
+            page: 1,
+            count: 0
+          },
           textMap:{
             detail: '主机详情',
             update: '编辑主机',
@@ -304,9 +311,15 @@
           }
           return statusMap[status]
         },
-        uuidFilter(uuid) {
-          const ary = uuid.split('-')
-          return ary[0] + '-' + ary[1] + '-'+ ary[2]
+        uuidFilter(detail) {
+          if (detail.aliyun_id){
+            return detail.aliyun_id
+          }else if(detail.vmware_id){
+            const ary = detail.vmware_id.split('-')
+            return ary[0] + '-' + ary[1] + '-'+ ary[2]
+          }else{
+            return 'None'
+          }
         }
       },
       methods:{
@@ -326,6 +339,10 @@
             this.systemtype = response.data
           })
         },
+        handleCurrentChange(val) {
+          this.pagination.page = val
+          this.getList()
+        },
         getGroupList(){
           fetch_GroupList().then(response => {
             this.groups = []
@@ -341,8 +358,9 @@
         getList(){
           this.list = null
           this.listLoading = true
-          fetch_HostList(0).then(response =>{
-            this.list=response.data
+          fetch_HostList(this.pagination).then(response =>{
+            this.pagination.count = response.data.count
+            this.list=response.data.results
             this.listLoading = false
           })
         },
