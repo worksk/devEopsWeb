@@ -47,7 +47,7 @@
     },
     beforeDestroy(){
       this.socket.close()
-      this.term.close()
+      this.term.destroy()
     }
   }
 </script>

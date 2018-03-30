@@ -88,6 +88,6 @@ export function delete_Key(data){
   return request({
     url: '/api-auth/v1/key/'+data.id+'/delete/',
     method: 'DELETE',
-    data:data
+    data: data
   })
 }
