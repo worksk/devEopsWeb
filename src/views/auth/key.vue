@@ -49,8 +49,9 @@
       </el-table-column>
     </el-table>
 
+
     <div class="pagination-container">
-      <el-pagination background layout="total, sizes, prev, pager, next, jumper">
+      <el-pagination background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :total="pagination.count">
       </el-pagination>
     </div>
 
@@ -70,7 +71,7 @@
         </el-form-item>
 
         <el-form-item label="私钥" prop="name">
-          <el-input type="textarea" v-model="temp.private_key" rows="10"></el-input>
+          <el-input type="textarea" v-model="temp.private_key" :rows="10"></el-input>
         </el-form-item>
 
       </el-form>
@@ -85,7 +86,7 @@
 </template>
 
 <script>
-  import { fetch_KeyList,create_Key,update_Key,delete_Key } from '@/api/auth'
+  import { fetch_KeyListByPage,create_Key,update_Key,delete_Key } from '@/api/auth'
   export default {
     data(){
       return {
@@ -93,11 +94,16 @@
         listLoading: true,
         btnStatus:false,
         dialogKeyVisible: false,
+        dialogStatus:'',
         temp: {
           id: '',
           name: '',
           private_key: '',
           public_key: ''
+        },
+        pagination: {
+          page: 1,
+          count: 0
         },
         textMap:{
           update: '编辑密钥',
@@ -119,8 +125,9 @@
     methods: {
       init(){
         this.listLoading = true
-        fetch_KeyList().then(response =>{
-          this.list=response.data
+        fetch_KeyListByPage(this.pagination).then(response =>{
+          this.pagination.count = response.data.count
+          this.list = response.data.results
           this.listLoading = false
         })
       },
@@ -145,6 +152,10 @@
         this.$nextTick(() => {
           this.$refs['keyForm'].clearValidate()
         })
+      },
+      handleCurrentChange(val) {
+        this.pagination.page = val
+        this.init()
       },
       handleUpdate(row){
         this.temp = Object.assign({}, row) // copy obj

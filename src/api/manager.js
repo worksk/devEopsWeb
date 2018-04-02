@@ -11,6 +11,13 @@ export function fetch_GroupList(){
   })
 }
 
+export function fetch_GroupListByPage(){
+  return request({
+    url: '/api-manager/v1/group/bypage/',
+    method: 'GET'
+  })
+}
+
 export function create_Group(data){
   return request({
     url: '/api-manager/v1/group/create/',
@@ -76,9 +83,16 @@ export function create_Systype(data){
 * API_MODULE: HOST
 * API_USE: FETCH,CREATE,UPDATE,DELETE,PASSWD,DETAIL
 * */
-export function fetch_HostList(pagination){
+export function fetch_HostList(){
   return request({
-    url: '/api-manager/v1/hostbygroup/0/'+'?page='+pagination.page,
+    url: '/api-manager/v1/host/',
+    method: 'GET'
+  })
+}
+
+export function fetch_HostListByPage(pagination){
+  return request({
+    url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page,
     method: 'GET'
   })
 }

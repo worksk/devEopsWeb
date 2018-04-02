@@ -13,7 +13,7 @@
           <awesome :awesclass="route.meta.icon"></awesome>
           <span>{{ route.meta.title }}</span>
         </template>
-        <template v-for="child in route.children" v-if="!child.hidden">
+        <template v-for="child in route.children" v-if="!child.meta.hidden">
           <router-link :to="route.path+'/'+child.path" :key="child.name">
             <el-menu-item :index="route.path+'/'+child.path">
               <awesome :awesclass="child.meta.icon"></awesome>
