@@ -47,7 +47,7 @@
 
       <el-table-column width="115" align="center" label="状态" class-name="status-col" >
         <template slot-scope="host">
-          <el-tag :type="host.row.status | statusFilter">{{ optionState[host.row.status].label }}</el-tag>
+          <el-tag :type="host.row._status | statusFilter">{{ optionState[host.row._status].label }}</el-tag>
         </template>
       </el-table-column>
 
@@ -139,9 +139,9 @@
           </el-tooltip>
         </el-form-item>
 
-        <el-form-item label="状态" prop="status">
+        <el-form-item label="状态" prop="_status">
           <el-tooltip content="请输入该机器目前的状态" placement="top" effect="light">
-            <el-select v-model="temp.status" placeholder="请选择主机状态">
+            <el-select v-model="temp._status" placeholder="请选择主机状态">
               <el-option v-for="option in optionState" :key="option.label" :label="option.label" :value="option.value"></el-option>
             </el-select>
           </el-tooltip>
@@ -232,7 +232,7 @@
 </template>
 
 <script>
-  import { fetch_HostList,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd,detail_Host } from '@/api/manager';
+  import { fetch_HostListByPage,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd,detail_Host } from '@/api/manager';
   import { fetch_GroupList } from "@/api/manager";
 
   export default {
@@ -291,7 +291,7 @@
               ],
             service_ip:[{ pattern: /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/, message: '您输入的IP地址有误',trigger:'blur'}],
             sshport: [{ required: true, message: '连接端口是您管理主机的重要信息', trigger: 'change' }],
-            status: [{ required: true, message:'您未填写该主机目前的状态', trigger: 'blur'}],
+            _status: [{ required: true, message:'您未填写该主机目前的状态', trigger: 'blur'}],
             'detail.position': [{ required: true, message:'请填写该主机目前所在的位置', trigger: 'blur'}],
             'detail.systemtype': [{ required: true, message:'请填写该主机的操作系统类型', trigger: 'blur'}]
           }
@@ -303,13 +303,13 @@
         this.getGroupList()
       },
       filters:{
-        statusFilter(status) {
+        statusFilter(_status) {
           const statusMap = {
             0: 'danger',
             1: 'success',
             2: 'info'
           }
-          return statusMap[status]
+          return statusMap[_status]
         },
         uuidFilter(detail) {
           if (detail.aliyun_id){
@@ -358,7 +358,7 @@
         getList(){
           this.list = null
           this.listLoading = true
-          fetch_HostList(this.pagination).then(response =>{
+          fetch_HostListByPage(this.pagination).then(response =>{
             this.pagination.count = response.data.count
             this.list=response.data.results
             this.listLoading = false

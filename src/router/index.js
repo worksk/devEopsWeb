@@ -33,7 +33,7 @@ export const devEopsRouterMap = [
       path: 'dashboard',
       component: _import('dashboard/index'),
       name: 'dashboard',
-      meta: { title: '仪表盘',icon:'dashboard',hidden:false,cache:true}
+      meta: { title: '仪表盘',icon:'dashboard',hidden:true,cache:true}
     }]
   },{
     path: '/timeline',
@@ -43,7 +43,7 @@ export const devEopsRouterMap = [
       path: 'dashboard',
       component: _import('dashboard/index'),
       name: 'dashboard1',
-      meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
+      meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
     },{
       path: 'record',
       component: _import('dashboard/index'),
@@ -63,7 +63,7 @@ export const devEopsRouterMap = [
       path: 'dashboard',
       component: _import('dashboard/index'),
       name: 'dashboard2',
-      meta: { title: '概况',icon:'dashboard',hidden:false,cache:true}
+      meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
     },{
       path: 'user',
       component: _import('auth/user'),
@@ -79,6 +79,11 @@ export const devEopsRouterMap = [
       component: _import('auth/key'),
       name: 'key',
       meta: { title: '密钥',icon:'key',hidden:false,cache:true}
+    },{
+      path: 'jumper',
+      component: _import('auth/jumper'),
+      name: 'jumper',
+      meta: { title: '跳板机',icon:'rocket',hidden:false,cache:true}
     }]
   },{
     path: '/manager',
@@ -108,7 +113,7 @@ export const devEopsRouterMap = [
       path: 'search',
       component: _import('dashboard/index'),
       name: 'search',
-      meta: { title: '搜索',icon:'search',hidden:false,cache:true}
+      meta: { title: '搜索',icon:'search',hidden:true,cache:true}
     }]
   },{
     path: '/ops',

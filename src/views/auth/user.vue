@@ -63,7 +63,7 @@
     </el-table>
 
     <div class="pagination-container">
-      <el-pagination background layout="total, sizes, prev, pager, next, jumper">
+      <el-pagination background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :total="pagination.count">
       </el-pagination>
     </div>
 
@@ -86,17 +86,20 @@
 </template>
 
 <script>
-  import { fetch_UserList,update_User,fetch_PmnGroupList } from '@/api/auth'
+  import { fetch_UserListByPage,update_User,fetch_PmnGroupList } from '@/api/auth'
   export default {
     data(){
       return {
         list: null,
         listLoading: true,
         btnStatus:false,
+        dialogStatus:'',
         temp: {
-          groups:{
-
-          }
+          groups:[]
+        },
+        pagination: {
+          page: 1,
+          count: 0
         },
         groups: [
         ],
@@ -133,10 +136,15 @@
     methods: {
       init(){
         this.listLoading = true
-        fetch_UserList().then(response =>{
-          this.list=response.data
+        fetch_UserListByPage(this.pagination).then(response =>{
+          this.pagination.count = response.data.count
+          this.list=response.data.results
           this.listLoading = false
         })
+      },
+      handleCurrentChange(val) {
+        this.pagination.page = val
+        this.getList()
       },
       getGroupList(){
         fetch_PmnGroupList().then(response=>{
