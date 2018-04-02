@@ -30,7 +30,7 @@
 
       <el-table-column width="100" align="center" label="状态" class-name="status-col" >
         <template slot-scope="group">
-          <el-tag :type="group.row.status | statusFilter">{{ optionState[group.row.status].label }}</el-tag>
+          <el-tag :type="group.row._status | statusFilter">{{ optionState[group.row._status].label }}</el-tag>
         </template>
       </el-table-column>
 
@@ -51,7 +51,7 @@
     </el-table>
 
     <div class="pagination-container">
-      <el-pagination background layout="total, sizes, prev, pager, next, jumper">
+      <el-pagination background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :total="pagination.count">
       </el-pagination>
     </div>
 
@@ -70,8 +70,8 @@
             <el-input type="textarea" v-model="temp.info"></el-input>
           </el-tooltip>
         </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="temp.status" placeholder="请选择应用组状态">
+        <el-form-item label="状态" prop="_status">
+          <el-select v-model="temp._status" placeholder="请选择应用组状态">
             <el-option v-for="option in optionState" :key="option.label" :label="option.label" :value="option.value"></el-option>
           </el-select>
         </el-form-item>
@@ -79,7 +79,16 @@
             <el-transfer v-model="temp.users" :data="users" placeholder="请选择管理用户" filterable>
             </el-transfer>
         </el-form-item>
-
+        <el-form-item label="添加密钥对" prop="key">
+          <el-select v-model="temp.key" placeholder="请选择密钥对">
+            <el-option v-for="key in this.keys" :key="key.label" :label="key.label" :value="key.value"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="添加跳板机" prop="key">
+          <el-select v-model="temp.jumper" placeholder="请选择密钥对">
+            <el-option v-for="jumper in this.jumpers" :key="jumper.label" :label="jumper.label" :value="jumper.value"></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false" :disabled="btnStatus">取消</el-button>
@@ -112,8 +121,9 @@
 </template>
 
 <script>
-  import { fetch_GroupList,update_Group,delete_Group,create_Group } from '@/api/manager'
-  import { fetch_OpsUserList,fetch_PmnGroupList } from '@/api/auth'
+  import { fetch_GroupListByPage,update_Group,delete_Group,create_Group } from '@/api/manager'
+  import { fetch_OpsUserList,fetch_PmnGroupList,fetch_KeyList,fetch_JumperList } from '@/api/auth'
+
   export default {
     data(){
       return {
@@ -122,20 +132,28 @@
         dialogFormVisible: false,
         dialogImgVisible: false,
         dialogPermissionVisible:false,
+        dialogKeyVisible:false,
         dialogStatus: '',
         btnStatus: false,
+        keys: [],
+        jumpers: [],
         pmn_groups:[],
         users:[],
+        pagination: {
+          page: 1,
+          count: 0
+        },
         // header:{'authorization':'JWT '+this.$store.getters.token},
         textMap: {
           update: '编辑应用组',
           create: '新建应用组',
           img: '应用组架构图',
-          permission: '权限组修改'
+          permission: '权限组修改',
+          key: '选择密钥对'
         },
         temp: {
           name: '',
-          status: 0,
+          _status: 0,
           info: '',
           users: [],
           framework: '',
@@ -144,7 +162,7 @@
         rules: {
           name: [{ required: true, message: '应用组名称是必填的', trigger: 'change' }],
           info: [{ required: true, message: '应用组信息是必填的', trigger: 'change' }],
-          status: [{ required: true, message: '应用组状态是必填的', trigger: 'change' }]
+          _status: [{ required: true, message: '应用组状态是必填的', trigger: 'change' }]
         },
         optionState:[
           {
@@ -156,6 +174,9 @@
           }, {
             value: 2,
             label: '暂停中'
+          }, {
+            value: 3,
+            label: '不可达'
           }]
       }
     },
@@ -163,13 +184,14 @@
       this.getList()
     },
     filters: {
-      statusFilter(status) {
+      statusFilter(_status) {
         const statusMap = {
           0: 'danger',
           1: 'success',
-          2: 'info'
+          2: 'warning',
+          3: 'info'
         }
-        return statusMap[status]
+        return statusMap[_status]
       },
       uuidFilter(uuid) {
         const ary = uuid.split('-')
@@ -180,19 +202,46 @@
       resetTemp(){
         this.temp = {
           name: '',
-          status: 0,
+          _status: 0,
           info: '',
           users: [],
           framework: '',
           pmn_groups: []
         }
       },
+      getJumperList(){
+        fetch_JumperList().then(response=>{
+          this.jumpers = []
+          for (const jumper of response.data){
+            this.jumpers.push({
+              value: jumper.id,
+              label: jumper.name
+            })
+          }
+        })
+      },
+      getKeyList(){
+        fetch_KeyList().then(response=>{
+          this.keys = []
+          for (const key of response.data){
+            this.keys.push({
+              value: key.id,
+              label: key.name
+            })
+          }
+        })
+      },
       getList(){
         this.listLoading = true
-        fetch_GroupList().then(response =>{
-          this.list=response.data
+        fetch_GroupListByPage(this.pagination).then(response =>{
+          this.pagination.count = response.data.count
+          this.list=response.data.results
           this.listLoading = false
         })
+      },
+      handleCurrentChange(val) {
+        this.pagination.page = val
+        this.getList()
       },
       getUserList(){
         fetch_OpsUserList().then(response=>{
@@ -246,6 +295,8 @@
         this.btnStatus=false
       },
       handleUpdate(row){
+        this.getKeyList()
+        this.getJumperList()
         this.getPermissionList()
         this.getUserList()
         this.temp = Object.assign({}, row) // copy obj
@@ -288,6 +339,8 @@
       handleCreate(){
         this.getPermissionList()
         this.getUserList()
+        this.getKeyList()
+        this.getJumperList()
         this.resetTemp()
         this.dialogStatus = 'create'
         this.dialogFormVisible = true

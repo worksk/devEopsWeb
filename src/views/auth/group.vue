@@ -42,7 +42,7 @@
     </el-table>
 
     <div class="pagination-container">
-      <el-pagination background layout="total, sizes, prev, pager, next, jumper">
+      <el-pagination background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :total="pagination.count">
       </el-pagination>
     </div>
     <!--<el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogGroupVisible" width="60%" top="2vh">-->
@@ -72,7 +72,7 @@
 </template>
 
 <script>
-  import { fetch_PmnGroupList,fetch_Permission,update_PmnGroup } from '@/api/auth'
+  import { fetch_PmnGroupListByPage,fetch_Permission,create_PmnGroup,update_PmnGroup } from '@/api/auth'
   export default {
     data() {
       return {
@@ -81,8 +81,13 @@
         btnStatus: false,
         permissions: [],
         permissions_tag: [],
+        dialogStatus:'',
+        pagination: {
+          page: 1,
+          count: 0
+        },
         temp: {
-          permissions: {}
+          permissions: []
         },
         dialogStatus: '',
         textMap: {
@@ -99,8 +104,9 @@
     methods: {
       init() {
         this.listLoading = true
-        update_PmnGroup().then(response => {
-          this.list = response.data
+        fetch_PmnGroupListByPage(this.pagination).then(response => {
+          this.pagination.count = response.data.count
+          this.list = response.data.results
           this.listLoading = false
         })
         fetch_Permission().then(response => {
@@ -119,17 +125,22 @@
           }
         })
       },
+      handleCurrentChange(val) {
+        this.pagination.page = val
+        this.init()
+      },
       resetTemp(){
         this.temp={
           name: '',
-          permissions: {
-          }
+          permissions: []
         }
       },
       handleCreate() {
         this.resetTemp()
         this.dialogStatus = 'create'
         this.dialogGroupVisible = true
+        console.log(this.permissions)
+        console.log(this.temp)
         this.$nextTick(() => {
           this.$refs['groupForm'].clearValidate()
         })
@@ -138,7 +149,7 @@
         this.$refs['groupForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            create_Group(this.temp).then(() => {
+            create_PmnGroup(this.temp).then(() => {
               this.init()
               this.dialogGroupVisible = false
               this.$message({
