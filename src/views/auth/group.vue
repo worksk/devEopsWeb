@@ -62,7 +62,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogPermissionVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button @click="dialogGroupVisible = false" :disabled="btnStatus">取消</el-button>
         <el-button v-if="dialogStatus=='create'" type="primary" @click="createGroup" :disabled="btnStatus">提交</el-button>
         <el-button v-else type="primary" @click="updateGroup" :disabled="btnStatus">提交</el-button>
       </div>

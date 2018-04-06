@@ -83,9 +83,9 @@ export function create_Systype(data){
 * API_MODULE: HOST
 * API_USE: FETCH,CREATE,UPDATE,DELETE,PASSWD,DETAIL
 * */
-export function fetch_HostList(){
+export function fetch_HostList(group_id){
   return request({
-    url: '/api-manager/v1/host/',
+    url: '/api-manager/v1/host/'+'?groups='+group_id,
     method: 'GET'
   })
 }
@@ -113,7 +113,6 @@ export function create_Host(data){
 }
 
 export function update_Host(data){
-  console.log(data)
   return request({
     url: '/api-manager/v1/host/'+data.id+'/update/',
     method: 'PUT',
