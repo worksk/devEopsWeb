@@ -41,3 +41,18 @@ export function delete_Meta(data){
     data: data
   })
 }
+
+export function checkFile_Meta(id){
+  return request({
+    url: '/api-ops/v1/meta/'+id+'/check/',
+    method: 'GET'
+  })
+}
+
+export function uploadFile_Meta(id,data){
+  return request({
+    url: '/api-ops/v1/meta/'+ id + '/opsdir/',
+    method: 'PUT',
+    data: data
+  })
+}

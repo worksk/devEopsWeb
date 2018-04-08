@@ -48,6 +48,24 @@
 
     <el-dialog
       width="70%"
+      title="上传文件"
+      :visible.sync="dialogFileVisible">
+
+      <el-upload
+        action="string"
+        :http-request="uploadFile"
+        class="upload-demo">
+        <el-button size="small" type="primary">点击上传</el-button>
+        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+      </el-upload>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFileVisible = false" :disabled="btnStatus">取消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+      width="70%"
       title="执行元操作"
       :visible.sync="dialogXtermVisible">
       <xterm :meta_id="meta_id"></xterm>
@@ -80,6 +98,12 @@
               <el-table-column width="250px" align="center" label="参数">
                 <template slot-scope="content">
                   <span>{{ content.row.args }}</span>
+                </template>
+              </el-table-column>
+
+              <el-table-column width="250px" align="center" label="需要上传文件">
+                <template slot-scope="content">
+                  <span>{{ content.row.need_file | needFile }}</span>
                 </template>
               </el-table-column>
 
@@ -122,9 +146,12 @@
                 <el-input placeholder="src=/etc/hosts dest=/tmp/hosts" v-model="content.args">
                   <template slot="prepend">参数:  </template>
                 </el-input>
+                <el-checkbox v-model="content.need_file">是否需要上传文件</el-checkbox>
             </div>
+          <div slot="footer" class="dialog-footer">
             <el-button type="primary" @click="createContent" :disabled="btnStatus">提交</el-button>
             <el-button @click="dialogCreateContentVisible = false" :disabled="btnStatus">取消</el-button>
+          </div>
         </el-dialog>
 
       </el-dialog>
@@ -157,7 +184,7 @@
 </template>
 
 <script>
-  import { fetch_MetaListByPage,create_Meta,update_Meta,delete_Meta } from '@/api/ops';
+  import { fetch_MetaListByPage,create_Meta,update_Meta,delete_Meta,checkFile_Meta,uploadFile_Meta } from '@/api/ops';
   import { fetch_GroupList,fetch_HostList } from '@/api/manager';
   import Xterm from '@/components/Xterm/index';
   export default {
@@ -181,9 +208,10 @@
         dialogMetaVisible:false,
         dialogAssetVisible:false,
         dialogCreateContentVisible:false,
+        dialogFileVisible:false,
         meta_id: null,
         content: {
-
+          need_file:false
         },
         temp: {
           contents: [],
@@ -198,6 +226,13 @@
       this.init()
     },
     filters:{
+      needFile(value){
+        if(value){
+          return '需要'
+        }else{
+          return '不需要'
+        }
+      }
     },
     methods:{
       init(){
@@ -219,7 +254,19 @@
           type: 'warning'
         }).then(()=>{
           this.meta_id = row.id
-          this.dialogXtermVisible = true
+          checkFile_Meta(row.id).then(response=>{
+            if(response.data.length==0){
+              this.dialogXtermVisible = true // 直接执行
+            }else{
+              this.dialogFileVisible = true
+            }
+          }).catch(error=>{
+            this.$message({
+              showClose: true,
+              message: '确定元操作状态失败',
+              type: 'error'
+            })
+          })
         }).catch(()=>{
           this.meta_id = null
           this.dialogXtermVisible = false
@@ -227,6 +274,7 @@
       },
       resetContent(){
         this.content = {
+          need_file:false
         }
       },
       resetTemp(){
@@ -234,6 +282,19 @@
           contents: [],
           hosts:[]
         }
+      },
+      uploadFile(item){
+        const formData=new FormData()
+        formData.append('ops_dir',item.file)
+        uploadFile_Meta(this.meta_id,formData).then(response=>{
+          this.dialogXtermVisible = true
+        }).catch((error)=>{
+          this.$message({
+            showClose: true,
+            message: '上传文件失败'+error,
+            type: 'success'
+          })
+        })
       },
       fetch_Host(value){
         fetch_HostList(value).then(response=>{

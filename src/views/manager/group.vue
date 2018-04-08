@@ -89,6 +89,16 @@
             <el-option v-for="jumper in this.jumpers" :key="jumper.label" :label="jumper.label" :value="jumper.value"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item v-if="dialogStatus=='update'" label="修改架构图片" prop="framework">
+          <el-upload
+            action="string"
+            :http-request="uploadFramework"
+            :limit="5"
+            class="upload-demo">
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          </el-upload>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false" :disabled="btnStatus">取消</el-button>
@@ -114,16 +124,15 @@
 
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogImgVisible" width="80%" top="2vh">
-      <img :src="temp.framework" style="width:100%;height:100%;">
+      <img :src="temp._framework" style="width:100%;height:100%;">
     </el-dialog>
 
   </div>
 </template>
 
 <script>
-  import { fetch_GroupListByPage,update_Group,delete_Group,create_Group } from '@/api/manager'
+  import { fetch_GroupListByPage,update_Group,delete_Group,create_Group,framework_Group } from '@/api/manager'
   import { fetch_OpsUserList,fetch_PmnGroupList,fetch_KeyList,fetch_JumperList } from '@/api/auth'
-
   export default {
     data(){
       return {
@@ -156,7 +165,7 @@
           _status: 0,
           info: '',
           users: [],
-          framework: '',
+          _framework: '',
           pmn_groups: []
         },
         rules: {
@@ -199,13 +208,25 @@
       }
     },
     methods:{
+      uploadFramework(item){
+        const formData=new FormData()
+        formData.append('_framework',item.file)
+        console.log('上传的文件名称',item.file.name)
+        console.log('更新的组ID',this.temp.id)
+        framework_Group(this.temp.id,formData).then(response=>{
+          console.log('上传完文件后返回的文件新的URI',response)
+          this.temp._framework = response.data._framework
+        }).catch((error)=>{
+          this.temp._framework = ''
+        })
+      },
       resetTemp(){
         this.temp = {
           name: '',
           _status: 0,
           info: '',
           users: [],
-          framework: '',
+          _framework: '',
           pmn_groups: []
         }
       },
