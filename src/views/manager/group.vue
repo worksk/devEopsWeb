@@ -93,7 +93,7 @@
           <el-upload
             action="string"
             :http-request="uploadFramework"
-            :limit="5"
+            :limit="1"
             class="upload-demo">
             <el-button size="small" type="primary">点击上传</el-button>
             <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
@@ -133,6 +133,7 @@
 <script>
   import { fetch_GroupListByPage,update_Group,delete_Group,create_Group,framework_Group } from '@/api/manager'
   import { fetch_OpsUserList,fetch_PmnGroupList,fetch_KeyList,fetch_JumperList } from '@/api/auth'
+  import { create_File } from '@/api/utils'
   export default {
     data(){
       return {
@@ -165,7 +166,7 @@
           _status: 0,
           info: '',
           users: [],
-          _framework: '',
+          file: '',
           pmn_groups: []
         },
         rules: {
@@ -210,12 +211,10 @@
     methods:{
       uploadFramework(item){
         const formData=new FormData()
-        formData.append('_framework',item.file)
-        console.log('上传的文件名称',item.file.name)
-        console.log('更新的组ID',this.temp.id)
-        framework_Group(this.temp.id,formData).then(response=>{
-          console.log('上传完文件后返回的文件新的URI',response)
-          this.temp._framework = response.data._framework
+        formData.append('file',item.file)
+        formData.append('type',0)
+        create_File(formData).then(response=>{
+          this.temp._framework = response.data.id
         }).catch((error)=>{
           this.temp._framework = ''
         })
