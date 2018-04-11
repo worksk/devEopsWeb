@@ -89,7 +89,8 @@
             <el-option v-for="jumper in this.jumpers" :key="jumper.label" :label="jumper.label" :value="jumper.value"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item v-if="dialogStatus=='update'" label="修改架构图片" prop="framework">
+        <!--v-if="dialogStatus=='update'"-->
+        <el-form-item label="修改架构图片" prop="framework">
           <el-upload
             action="string"
             :http-request="uploadFramework"
@@ -124,7 +125,7 @@
 
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogImgVisible" width="80%" top="2vh">
-      <img :src="temp._framework" style="width:100%;height:100%;">
+      <img :src="temp.framework" style="width:100%;height:100%;">
     </el-dialog>
 
   </div>
@@ -211,7 +212,7 @@
     methods:{
       uploadFramework(item){
         const formData=new FormData()
-        formData.append('file',item.file)
+        formData.append('image',item.file)
         formData.append('type',0)
         create_File(formData).then(response=>{
           this.temp._framework = response.data.id
