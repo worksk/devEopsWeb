@@ -20,7 +20,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="150px" align="center" label="所属应用组">
+      <el-table-column width="250px" align="center" label="所属应用组">
         <template slot-scope="meta">
           <span>{{ meta.row.group_name }}</span>
         </template>
@@ -32,9 +32,8 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="370" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column align="center" label="操作" width="280" class-name="small-padding fixed-width">
         <template slot-scope="meta">
-          <el-button type="warning" size="mini" @click="handleRun(meta.row)" :disabled="btnStatus">执行</el-button>
           <el-button type="warning" size="mini" @click="handleUpdate(meta.row)" :disabled="btnStatus">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(meta.row)" :disabled="btnStatus">删除</el-button>
         </template>
@@ -84,13 +83,13 @@
             <el-table :data="temp.contents" border fit highlight-current-row
                       style="width: 100%"
                       :default-sort="{prop: 'sort', order: 'ascending'}">
-              <el-table-column width="150px" align="center" label="名称">
+              <el-table-column width="120px" align="center" label="名称">
                 <template slot-scope="content">
                   <span>{{ content.row.name }}</span>
                 </template>
               </el-table-column>
 
-              <el-table-column width="150px" align="center" label="模块">
+              <el-table-column width="130px" align="center" label="模块">
                 <template slot-scope="content">
                   <span>{{ content.row.module }}</span>
                 </template>
@@ -102,13 +101,13 @@
                 </template>
               </el-table-column>
 
-              <el-table-column width="250px" align="center" label="需要上传文件">
+              <el-table-column width="120px" align="center" label="需要上传文件">
                 <template slot-scope="content">
                   <span>{{ content.row.need_file | needFile }}</span>
                 </template>
               </el-table-column>
 
-              <el-table-column width="150px" align="center" label="排序" prop="sort">
+              <el-table-column width="100px" align="center" label="排序" prop="sort">
                 <template slot-scope="content">
                   <span>{{ content.row.sort }}</span>
                 </template>
@@ -127,7 +126,7 @@
         </el-input>
 
         <div slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="handleContentCreate" :disabled="btnStatus">新增操作</el-button>
+          <el-button type="warning" @click="handleContentCreate" :disabled="btnStatus">新增操作</el-button>
           <el-button type="primary" @click="handleAsset" :disabled="btnStatus">下一步</el-button>
           <el-button @click="dialogMetaVisible = false" :disabled="btnStatus">取消</el-button>
         </div>
@@ -158,10 +157,10 @@
       </el-dialog>
 
       <el-dialog
-        width="70%"
+        width="40%"
         title="确定操作范围Step2"
         :visible.sync="dialogAssetVisible">
-        <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Host">
+        <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Host" filterable>
           <el-option
             v-for="item in group_options"
             :key="item.value"

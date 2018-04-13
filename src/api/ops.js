@@ -76,6 +76,13 @@ export function fetch_MissionListByPage(pagination){
   })
 }
 
+export function fetch_MissionListByUser(){
+  return request({
+    url: '/api-ops/v1/mission/byuser/',
+    method: 'GET' 
+  })
+}
+
 export function create_Mission(data){
   return request({
     url: '/api-ops/v1/mission/create/',

@@ -20,7 +20,7 @@
         type: Number,
         default: 100
       },
-      meta_id:{
+      work_id:{
         type: Number,
         default: 0
       }
@@ -41,11 +41,12 @@
         cursorBlink: true
       })
       this.term.open(this.$refs.yoshell,false)
-      this.socket = new WebSocket('ws://10.100.100.246:9999/ops/ansible/'+this.meta_id+'/')
+      this.socket = new WebSocket('ws://10.100.100.246:9999/ops/ansible/'+this.work_id+'/')
       this.term.attach(this.socket)
       this.term.focus()
     },
     beforeDestroy(){
+      console.log('销毁操作')
       this.socket.close()
       this.term.destroy()
     }

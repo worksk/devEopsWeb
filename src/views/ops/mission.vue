@@ -14,28 +14,28 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="是否需要验证执行">
+      <el-table-column width="150px" align="center" label="是否需要验证执行">
         <template slot-scope="mission">
           <span>{{ mission.row.need_validate | NeedValidate }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="应用组">
+      <el-table-column width="250px" align="center" label="应用组">
         <template slot-scope="mission">
           <span>{{ mission.row.group_name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="150px" align="center" label="信息">
+      <el-table-column width="500px" align="center" label="信息">
         <template slot-scope="mission">
           <span>{{ mission.row.info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="370" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column align="center" label="操作" width="230" class-name="small-padding fixed-width">
         <template slot-scope="mission">
           <el-button type="warning" size="mini" @click="handleUpdate(mission.row)" :disabled="btnStatus">编辑</el-button>
-          <!-- <el-button type="danger" size="mini" @click="handleDelete(meta.row)" :disabled="btnStatus">删除</el-button> -->
+          <el-button type="danger" size="mini" @click="handleDelete(mission.row)" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -47,8 +47,8 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogMissionVisible" width="50%" top="20vh">
         <el-form ref="missionForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
-        
-        <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Meta">
+
+        <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Meta" filterable>
           <el-option
             v-for="item in group_options"
             :key="item.value"
@@ -63,7 +63,7 @@
         <el-input placeholder="更新vote预发布代码" v-model="temp.info">
           <template slot="prepend">信息: </template>
         </el-input>
-        
+
         <el-checkbox v-model="temp.need_validate">是否需要管理员验证</el-checkbox>
 
       </el-form>
@@ -212,6 +212,7 @@
         this.$refs['missionForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
+            console.log(this.temp.need_validate)
             update_Mission(this.temp).then(() => {
               this.init()
               this.dialogMissionVisible = false
@@ -227,6 +228,28 @@
               console.log(error)
             })
           }
+        })
+      },
+      handleDelete(row){
+        this.temp = Object.assign({},row)
+        this.btnStatus=true
+        this.deleteConfirm()
+        this.btnStatus=false
+      },
+      deleteConfirm() {
+        this.$confirm('此操作将删除任务, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(()=>{
+          delete_Mission(this.temp).then((response) => {
+            this.$message({
+              showClose: true,
+              message: '删除成功',
+              type: 'success'
+            })
+            this.init()
+          })
         })
       }
     }
