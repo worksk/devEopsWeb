@@ -45,7 +45,7 @@
       </el-pagination>
     </div>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogMissionVisible" width="50%" top="20vh">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogMissionVisible" width="60%" top="20vh">
         <el-form ref="missionForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
 
         <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Meta" filterable>
@@ -145,6 +145,7 @@
       },
       handleCreate(){
         this.dialogStatus = 'create'
+        this.metas = []
         this.resetTemp()
         this.fetch_Group()
         this.dialogMissionVisible = true

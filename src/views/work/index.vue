@@ -9,31 +9,37 @@
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="70px" align="center" label="ID">
+      <el-table-column width="60px" align="center" label="ID">
         <template slot-scope="work">
           <span>{{ work.row.id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="UUID">
+      <el-table-column width="320px" align="center" label="UUID">
         <template slot-scope="work">
           <span>{{ work.row.uuid }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="应用组">
-        <template slot-scope="work">
-          <span>{{ work.row.info }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="150px" align="center" label="信息">
+      <el-table-column width="250px" align="center" label="关联任务内容">
         <template slot-scope="work">
           <span>{{ work.row.mission_info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="370" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column width="120px" align="center" label="提交用户">
+        <template slot-scope="work">
+          <span>{{ work.row.username }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="300px" align="center" label="工单信息">
+        <template slot-scope="work">
+          <span>{{ work.row.info }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="work">
           <el-button size="mini" v-if="work.row.status==2" type="danger" @click="handleRun(work.row)" :disabled="btnStatus">执行</el-button>
           <el-button size="mini" v-else-if="work.row.status==3" type="primary" disabled>执行完毕</el-button>
@@ -48,16 +54,23 @@
       </el-pagination>
     </div>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogWorkVisible" width="50%" top="20vh">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogWorkVisible" width="60%" top="20vh">
       <el-form ref="workForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
-        
-        <el-select v-model="temp.mission" placeholder="请选择执行的任务" filterable>
-          <el-option v-for="option in optionMission" :key="option.label" :label="option.label" :value="option.value"></el-option>
-        </el-select>
+        <el-row :gutter="20">
+          <el-col :span="16">
+            <el-select v-model="temp.mission" placeholder="请选择执行的任务" filterable>
+              <el-option v-for="option in optionMission" :key="option.label" :label="option.label" :value="option.value"></el-option>
+            </el-select>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="16">
+            <el-input placeholder="重大BUG发版" v-model="temp.info" label="123">
+              <template slot="prepend">执行原因: </template>
+            </el-input>
+          </el-col>
+        </el-row>
 
-        <el-input placeholder="重大BUG发版" v-model="temp.info">
-          <template slot="prepend">执行原因: </template>
-        </el-input>
 
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -72,7 +85,7 @@
       :visible.sync="dialogXtermVisible">
       <xterm :work_id="work_id"></xterm>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogXtermVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button @click="closeXterm" :disabled="btnStatus">取消</el-button>
       </div>
     </el-dialog>
 
@@ -182,6 +195,10 @@
             this.meta_id = null
             this.dialogXtermVisible = false
           })
+        },
+        closeXterm(){
+          this.dialogXtermVisible = false
+          this.init()
         }
       }
     }
