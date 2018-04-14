@@ -20,7 +20,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="150px" align="center" label="所属应用组">
+      <el-table-column width="250px" align="center" label="所属应用组">
         <template slot-scope="meta">
           <span>{{ meta.row.group_name }}</span>
         </template>
@@ -32,9 +32,8 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="370" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column align="center" label="操作" width="280" class-name="small-padding fixed-width">
         <template slot-scope="meta">
-          <el-button type="warning" size="mini" @click="handleRun(meta.row)" :disabled="btnStatus">执行</el-button>
           <el-button type="warning" size="mini" @click="handleUpdate(meta.row)" :disabled="btnStatus">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(meta.row)" :disabled="btnStatus">删除</el-button>
         </template>
@@ -45,6 +44,25 @@
       <el-pagination background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :total="pagination.count">
       </el-pagination>
     </div>
+
+    <el-dialog
+      width="70%"
+      title="上传文件"
+      :visible.sync="dialogFileVisible">
+
+      <el-upload
+        action="string"
+        :http-request="uploadFile"
+        :limit="1"
+        class="upload-demo">
+        <el-button size="small" type="primary">点击上传</el-button>
+        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+      </el-upload>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFileVisible = false" :disabled="btnStatus">取消</el-button>
+      </div>
+    </el-dialog>
 
     <el-dialog
       width="70%"
@@ -65,13 +83,13 @@
             <el-table :data="temp.contents" border fit highlight-current-row
                       style="width: 100%"
                       :default-sort="{prop: 'sort', order: 'ascending'}">
-              <el-table-column width="150px" align="center" label="名称">
+              <el-table-column width="120px" align="center" label="名称">
                 <template slot-scope="content">
                   <span>{{ content.row.name }}</span>
                 </template>
               </el-table-column>
 
-              <el-table-column width="150px" align="center" label="模块">
+              <el-table-column width="130px" align="center" label="模块">
                 <template slot-scope="content">
                   <span>{{ content.row.module }}</span>
                 </template>
@@ -83,7 +101,13 @@
                 </template>
               </el-table-column>
 
-              <el-table-column width="150px" align="center" label="排序" prop="sort">
+              <el-table-column width="120px" align="center" label="需要上传文件">
+                <template slot-scope="content">
+                  <span>{{ content.row.need_file | needFile }}</span>
+                </template>
+              </el-table-column>
+
+              <el-table-column width="100px" align="center" label="排序" prop="sort">
                 <template slot-scope="content">
                   <span>{{ content.row.sort }}</span>
                 </template>
@@ -102,7 +126,7 @@
         </el-input>
 
         <div slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="handleContentCreate" :disabled="btnStatus">新增操作</el-button>
+          <el-button type="warning" @click="handleContentCreate" :disabled="btnStatus">新增操作</el-button>
           <el-button type="primary" @click="handleAsset" :disabled="btnStatus">下一步</el-button>
           <el-button @click="dialogMetaVisible = false" :disabled="btnStatus">取消</el-button>
         </div>
@@ -122,18 +146,21 @@
                 <el-input placeholder="src=/etc/hosts dest=/tmp/hosts" v-model="content.args">
                   <template slot="prepend">参数:  </template>
                 </el-input>
+                <el-checkbox v-model="content.need_file">是否需要上传文件</el-checkbox>
             </div>
+          <div slot="footer" class="dialog-footer">
             <el-button type="primary" @click="createContent" :disabled="btnStatus">提交</el-button>
             <el-button @click="dialogCreateContentVisible = false" :disabled="btnStatus">取消</el-button>
+          </div>
         </el-dialog>
 
       </el-dialog>
 
       <el-dialog
-        width="70%"
+        width="40%"
         title="确定操作范围Step2"
         :visible.sync="dialogAssetVisible">
-        <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Host">
+        <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Host" filterable>
           <el-option
             v-for="item in group_options"
             :key="item.value"
@@ -157,7 +184,7 @@
 </template>
 
 <script>
-  import { fetch_MetaListByPage,create_Meta,update_Meta,delete_Meta } from '@/api/ops';
+  import { fetch_MetaListByPage,create_Meta,update_Meta,delete_Meta,checkFile_Meta,uploadFile_Meta } from '@/api/ops';
   import { fetch_GroupList,fetch_HostList } from '@/api/manager';
   import Xterm from '@/components/Xterm/index';
   export default {
@@ -181,9 +208,10 @@
         dialogMetaVisible:false,
         dialogAssetVisible:false,
         dialogCreateContentVisible:false,
+        dialogFileVisible:false,
         meta_id: null,
         content: {
-
+          need_file:false
         },
         temp: {
           contents: [],
@@ -198,6 +226,13 @@
       this.init()
     },
     filters:{
+      needFile(value){
+        if(value){
+          return '需要'
+        }else{
+          return '不需要'
+        }
+      }
     },
     methods:{
       init(){
@@ -219,7 +254,19 @@
           type: 'warning'
         }).then(()=>{
           this.meta_id = row.id
-          this.dialogXtermVisible = true
+          checkFile_Meta(row.id).then(response=>{
+            if(response.data.length==0){
+              this.dialogXtermVisible = true // 直接执行
+            }else{
+              this.dialogFileVisible = true
+            }
+          }).catch(error=>{
+            this.$message({
+              showClose: true,
+              message: '确定元操作状态失败',
+              type: 'error'
+            })
+          })
         }).catch(()=>{
           this.meta_id = null
           this.dialogXtermVisible = false
@@ -227,6 +274,7 @@
       },
       resetContent(){
         this.content = {
+          need_file:false
         }
       },
       resetTemp(){
@@ -234,6 +282,19 @@
           contents: [],
           hosts:[]
         }
+      },
+      uploadFile(item){
+        const formData=new FormData()
+        formData.append('ops_dir',item.file)
+        uploadFile_Meta(this.meta_id,formData).then(response=>{
+          this.dialogXtermVisible = true
+        }).catch((error)=>{
+          this.$message({
+            showClose: true,
+            message: '上传文件失败'+error,
+            type: 'success'
+          })
+        })
       },
       fetch_Host(value){
         fetch_HostList(value).then(response=>{

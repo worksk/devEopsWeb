@@ -41,6 +41,14 @@ export function delete_Group(data){
   })
 }
 
+export function framework_Group(id,data){
+  return request({
+    url: '/api-manager/v1/group/'+ id + '/framework/',
+    method: 'PUT',
+    data: data
+  })
+}
+
 /*
 * API_MODULE: POSITION
 * API_USE: FETCH,DATA

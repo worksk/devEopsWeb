@@ -89,6 +89,17 @@
             <el-option v-for="jumper in this.jumpers" :key="jumper.label" :label="jumper.label" :value="jumper.value"></el-option>
           </el-select>
         </el-form-item>
+        <!--v-if="dialogStatus=='update'"-->
+        <el-form-item label="修改架构图片" prop="framework">
+          <el-upload
+            action="string"
+            :http-request="uploadFramework"
+            :limit="1"
+            class="upload-demo">
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          </el-upload>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false" :disabled="btnStatus">取消</el-button>
@@ -121,9 +132,9 @@
 </template>
 
 <script>
-  import { fetch_GroupListByPage,update_Group,delete_Group,create_Group } from '@/api/manager'
+  import { fetch_GroupListByPage,update_Group,delete_Group,create_Group,framework_Group } from '@/api/manager'
   import { fetch_OpsUserList,fetch_PmnGroupList,fetch_KeyList,fetch_JumperList } from '@/api/auth'
-
+  import { create_File } from '@/api/utils'
   export default {
     data(){
       return {
@@ -156,7 +167,7 @@
           _status: 0,
           info: '',
           users: [],
-          framework: '',
+          file: '',
           pmn_groups: []
         },
         rules: {
@@ -199,13 +210,23 @@
       }
     },
     methods:{
+      uploadFramework(item){
+        const formData=new FormData()
+        formData.append('image',item.file)
+        formData.append('type',0)
+        create_File(formData).then(response=>{
+          this.temp._framework = response.data.id
+        }).catch((error)=>{
+          this.temp._framework = ''
+        })
+      },
       resetTemp(){
         this.temp = {
           name: '',
           _status: 0,
           info: '',
           users: [],
-          framework: '',
+          _framework: '',
           pmn_groups: []
         }
       },

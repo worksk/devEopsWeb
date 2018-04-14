@@ -13,6 +13,9 @@
         <i class="el-icon-arrow-down el-icon--right"></i>
       </span>
         <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item>
+            <span style="display:block;">{{ name }}</span>
+          </el-dropdown-item>
           <router-link to="/dashboard">
           <el-dropdown-item>
               仪表盘

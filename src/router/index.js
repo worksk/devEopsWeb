@@ -129,6 +129,20 @@ export const devEopsRouterMap = [
       component: _import('ops/meta'),
       name: 'meta',
       meta: { title: 'Meta元操作',icon:'superpowers',hidden:false,cache:true}
+    },{
+      path: 'mission',
+      component: _import('ops/mission'),
+      name: 'mission',
+      meta: { title: '任务',icon:'superpowers',hidden:false,cache:true}
+    }]
+  },{
+    path:'',
+    component: layout,
+    children: [{
+      path: 'work',
+      component: _import('work/index'),
+      name: 'work',
+      meta: { title: '工单',icon:'dashboard',hidden:true,cache:true}
     }]
   }
 ]
