@@ -413,7 +413,7 @@
         handleDetail(row){
           this.temp = Object.assign({},row)
           this.dialogStatus = 'detail'
-          detail_Host(row.id).then((response) =>{
+          detail_Host(row.uuid).then((response) =>{
             this.details = this.filterDetail(response.data)
             this.dialogDetailVisible = true
           }).catch((error) => {
@@ -450,7 +450,7 @@
           })
         },
         handleCopy(row){
-          fetch_HostPasswd(row.id).then((response) => {
+          fetch_HostPasswd(row.uuid).then((response) => {
             this.dialogStatus = 'passwd'
             this.temp_passwd = response.data[0].passwd
             this.dialogPasswdVisible = true

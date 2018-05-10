@@ -110,7 +110,7 @@ export function create_Key(data){
 
 export function update_Key(data){
   return request({
-    url: '/api-auth/v1/key/'+data.id+'/update/',
+    url: '/api-auth/v1/key/'+data.uuid+'/update/',
     method: 'PUT',
     data: data
   })
@@ -118,7 +118,7 @@ export function update_Key(data){
 
 export function delete_Key(data){
   return request({
-    url: '/api-auth/v1/key/'+data.id+'/delete/',
+    url: '/api-auth/v1/key/'+data.uuid+'/delete/',
     method: 'DELETE',
     data: data
   })
@@ -152,7 +152,7 @@ export function create_Jumper(data){
 
 export function update_Jumper(data){
   return request({
-    url: '/api-auth/v1/jumper/'+data.id+'/update/',
+    url: '/api-auth/v1/jumper/'+data.uuid+'/update/',
     method: 'PUT',
     data: data
   })
@@ -160,7 +160,7 @@ export function update_Jumper(data){
 
 export function delete_Jumper(data){
   return request({
-    url: '/api-auth/v1/jumper/'+data.id+'/delete/',
+    url: '/api-auth/v1/jumper/'+data.uuid+'/delete/',
     method: 'DELETE',
     data: data
   })
@@ -168,7 +168,7 @@ export function delete_Jumper(data){
 
 export function status_Jumper(data){
   return request({
-    url: '/api-auth/v1/jumper/'+data.id+'/status/',
+    url: '/api-auth/v1/jumper/'+data.uuid+'/status/',
     method: 'GET'
   })
 }

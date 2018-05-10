@@ -25,9 +25,10 @@ export function create_Group(data){
     data:data
   })
 }
+
 export function update_Group(data){
   return request({
-    url: '/api-manager/v1/group/'+data.id+'/update/',
+    url: '/api-manager/v1/group/'+data.uuid+'/update/',
     method: 'PUT',
     data:data
   })
@@ -35,7 +36,7 @@ export function update_Group(data){
 
 export function delete_Group(data){
   return request({
-    url: '/api-manager/v1/group/'+data.id+'/delete/',
+    url: '/api-manager/v1/group/'+data.uuid+'/delete/',
     method: 'DELETE',
     data:data
   })
@@ -98,16 +99,16 @@ export function fetch_HostList(group_id){
   })
 }
 
-export function fetch_HostListByPage(pagination){
-  return request({
-    url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page,
-    method: 'GET'
-  })
+export function fetch_HostListByPage(pagination){//group_id
+    return request({
+      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page,//+'&groups='+group_id,
+      method: 'GET'
+    })
 }
 
-export function fetch_HostPasswd(id){
+export function fetch_HostPasswd(uuid){
   return request({
-    url: '/api-manager/v1/host/'+id+'/passwd/',
+    url: '/api-manager/v1/host/'+uuid+'/passwd/',
     method: 'GET'
   })
 }
@@ -122,7 +123,7 @@ export function create_Host(data){
 
 export function update_Host(data){
   return request({
-    url: '/api-manager/v1/host/'+data.id+'/update/',
+    url: '/api-manager/v1/host/'+data.uuid+'/update/',
     method: 'PUT',
     data:data
   })
@@ -130,15 +131,15 @@ export function update_Host(data){
 
 export function delete_Host(data){
   return request({
-    url: '/api-manager/v1/host/'+data.id+'/delete/',
+    url: '/api-manager/v1/host/'+data.uuid+'/delete/',
     method: 'DELETE',
     data:data
   })
 }
 
-export function detail_Host(id){
+export function detail_Host(uuid){
   return request({
-    url: '/api-manager/v1/host/'+id+'/detail/',
+    url: '/api-manager/v1/host/'+uuid+'/detail/',
     method: 'GET'
   })
 }

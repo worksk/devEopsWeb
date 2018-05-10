@@ -4,7 +4,7 @@ import store from '@/store'
 import { getToken } from "@/utils/auth"
 
 const service = axios.create({
-  baseURL: "http://10.100.100.246:9999/",
+	baseURL: "http://10.100.100.246:8888/",
   timeout: 5000
 })
 

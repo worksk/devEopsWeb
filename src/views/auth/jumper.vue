@@ -10,19 +10,19 @@
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="120px" align="center" label="ID">
+      <el-table-column width="180px" align="center" label="UUID">
         <template slot-scope="jumper">
           <span>{{ jumper.row.id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="250px" align="center" label="连接地址">
+      <el-table-column width="150px" align="center" label="连接地址">
         <template slot-scope="jumper">
           <span>{{ jumper.row.connect_ip }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="210px" align="center" label="连接端口">
+      <el-table-column width="150px" align="center" label="连接端口">
         <template slot-scope="jumper">
           <span>{{ jumper.row.sshport }}</span>
         </template>
@@ -46,7 +46,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="300px" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="300px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="jumper">
           <el-button type="primary" @click="handleStatus(jumper.row)" size="mini" :disabled="btnStatus">刷新</el-button>
           <el-button type="warning" @click="handleUpdate(jumper.row)" size="mini" :disabled="btnStatus">编辑</el-button>

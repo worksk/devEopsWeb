@@ -10,7 +10,7 @@
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="120px" align="center" label="ID">
+      <el-table-column width="180px" align="center" label="UUID">
         <template slot-scope="key">
           <span>{{ key.row.id }}</span>
         </template>
@@ -34,14 +34,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="220px" align="center" label="上次使用密钥时间">
+      <el-table-column width="220px" align="center" label="创建密钥时间">
         <template slot-scope="key">
           <span>{{ key.row.fetch_time | filter_time }}</span>
         </template>
       </el-table-column>
 
-
-      <el-table-column align="center" label="操作" width="300px" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="200px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="key">
           <el-button type="primary" @click="handleUpdate(key.row)" size="mini" :disabled="btnStatus">编辑</el-button>
           <el-button type="danger"  @click="handleDelete(key.row)" size="mini" :disabled="btnStatus">删除</el-button>

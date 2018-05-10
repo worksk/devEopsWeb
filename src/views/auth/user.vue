@@ -144,7 +144,7 @@
       },
       handleCurrentChange(val) {
         this.pagination.page = val
-        this.getList()
+        this.init()
       },
       getGroupList(){
         fetch_PmnGroupList().then(response=>{

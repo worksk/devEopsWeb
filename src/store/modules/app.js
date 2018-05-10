@@ -7,7 +7,7 @@ const app ={
     }
   },
   mutations: {
-    TOGGLE_SIDEBAR: state =>{
+    TOGGLE_SIDEBAR: state => {
       if(state.topsidebar.opened){
         Cookies.set('topSidebarStatus',1)
       }else{

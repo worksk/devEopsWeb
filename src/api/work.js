@@ -18,17 +18,17 @@ export function fetch_WorkListByPage(pagination){
     })
   }
 
-  export function status_Work(id){
+  export function status_Work(uuid){
     return request({
-      url: '/api-work/v1/codework/'+id+'/exam/',
+      url: '/api-work/v1/codework/'+uuid+'/exam/',
       method: 'PUT',
       data: {'status':2}
     })
   }
 
-  export function run_Work(id){
+  export function run_Work(uuid){
     return request({
-      url: '/api-work/v1/codework/'+id+'/run/',
+      url: '/api-work/v1/codework/'+uuid+'/run/',
       method: 'GET'
     })
   }

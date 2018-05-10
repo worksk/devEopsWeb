@@ -10,15 +10,9 @@
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="70px" align="center" label="ID">
-        <template slot-scope="group">
-          <span>{{ group.row.id }}</span>
-        </template>
-      </el-table-column>
-
       <el-table-column width="180px" align="center" label="UUID">
         <template slot-scope="group">
-          <span>{{ group.row.uuid| uuidFilter }}</span>
+          <span>{{ group.row.id }}</span>
         </template>
       </el-table-column>
 
@@ -34,15 +28,16 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="360px" align="center" label="应用系统信息">
+      <el-table-column width="300px" align="center" label="应用系统信息">
         <template slot-scope="group">
           <span>{{ group.row.info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="337" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column align="center" label="操作" width="400" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="group">
           <el-button type="primary" @click="handleImage(group.row)" size="mini" :disabled="btnStatus">架构图</el-button>
+          <el-button type="warning" @click="handleVariable(group.row)" size="mini" :disabled="btnStatus">参数</el-button>
           <el-button type="warning" @click="handleUpdate(group.row)" size="mini" :disabled="btnStatus">编辑</el-button>
           <el-button type="warning" @click="handlePermission(group.row)" size="mini" :disabled="btnStatus">权限组</el-button>
           <el-button type="danger" @click="handleDelete(group.row)" size="mini" :disabled="btnStatus">删除</el-button>
@@ -58,7 +53,7 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="60%" top="2vh">
       <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
         <el-form-item label="应用组UUID" prop="id">
-          <el-input v-model="temp.uuid" disabled></el-input>
+          <el-input v-model="temp.id" disabled></el-input>
         </el-form-item>
         <el-form-item label="应用组名称" prop="name">
           <el-tooltip content="请输入您的业务系统名称，如:[预发布]新媒体云服务平台" placement="top" effect="light">
@@ -123,6 +118,59 @@
       </div>
     </el-dialog>
 
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogVariableVisible" width="60%" top="2vh">
+        <el-table :data="var_data" border fit highlight-current-row
+                      style="width: 100%">
+          <el-table-column width="120px" align="center" label="ID">
+            <template slot-scope="vars">
+              <span>{{ vars.row.id }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column width="230px" align="center" label="Key">
+            <template slot-scope="vars">
+              <span>{{ vars.row.key }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column width="250px" align="center" label="Value">
+            <template slot-scope="vars">
+              <span>{{ vars.row.value }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column width="220px" align="center" label="删除">
+            <template slot-scope="vars">
+              <el-button type="primary" size="mini" @click="handleVariableDelete(vars.row)" :disabled="btnStatus">刪除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div slot="footer" class="dialog-footer">
+          <el-button type="warning" @click="handleVariableCreate" :disabled="btnStatus">新增操作</el-button>
+          <el-button @click="dialogVariableVisible = false" :disabled="btnStatus">关闭</el-button>
+        </div>
+        <el-form ref="variableForm" :model="tempvar" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+          <el-dialog
+            width="30%"
+            title="新增参数"
+            :visible.sync="dialogCreateVariableVisible"
+            append-to-body>
+              <div :model="tempvar">
+                  <el-input placeholder="检出代码" v-model="tempvar.key">
+                    <template slot="prepend">Key:</template>
+                  </el-input>
+                  <el-input placeholder="copy" v-model="tempvar.value">
+                    <template slot="prepend">Value:  </template>
+                  </el-input>
+              </div>
+            <div slot="footer" class="dialog-footer">
+              <el-button type="primary" @click="createVariable" :disabled="btnStatus">提交</el-button>
+              <el-button @click="dialogCreateVariableVisible = false" :disabled="btnStatus">取消</el-button>
+            </div>
+          </el-dialog>
+      </el-form>
+    </el-dialog>
+
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogImgVisible" width="80%" top="2vh">
       <img :src="temp.framework" style="width:100%;height:100%;">
@@ -134,6 +182,7 @@
 <script>
   import { fetch_GroupListByPage,update_Group,delete_Group,create_Group,framework_Group } from '@/api/manager'
   import { fetch_OpsUserList,fetch_PmnGroupList,fetch_KeyList,fetch_JumperList } from '@/api/auth'
+  import { fetch_VariableList,create_Variable,delete_Variable} from '@/api/variable'
   import { create_File } from '@/api/utils'
   export default {
     data(){
@@ -144,24 +193,29 @@
         dialogImgVisible: false,
         dialogPermissionVisible:false,
         dialogKeyVisible:false,
+        dialogVariableVisible:false,
+        dialogCreateVariableVisible:false,
         dialogStatus: '',
         btnStatus: false,
         keys: [],
         jumpers: [],
+        var_data: [],
+        vars_group: null,
         pmn_groups:[],
         users:[],
         pagination: {
           page: 1,
           count: 0
         },
-        // header:{'authorization':'JWT '+this.$store.getters.token},
         textMap: {
           update: '编辑应用组',
           create: '新建应用组',
           img: '应用组架构图',
           permission: '权限组修改',
-          key: '选择密钥对'
+          key: '选择密钥对',
+          variable: '修正参数'
         },
+        tempvar:{},
         temp: {
           name: '',
           _status: 0,
@@ -203,10 +257,6 @@
           3: 'info'
         }
         return statusMap[_status]
-      },
-      uuidFilter(uuid) {
-        const ary = uuid.split('-')
-        return ary[0] + '-' + ary[1] + '-'+ ary[2]
       }
     },
     methods:{
@@ -314,6 +364,65 @@
         this.btnStatus=true
         this.deleteConfirm()
         this.btnStatus=false
+      },
+      handleVariable(row){
+        this.dialogStatus = 'variable'
+        this.vars_group = row.id
+        this.getVars()
+        this.dialogVariableVisible = true
+      },
+      handleVariableCreate(){
+        this.tempvar={group:this.vars_group}
+        this.dialogCreateVariableVisible=true
+      },
+      handleVariableDelete(row){
+        this.btnStatus=true
+        this.tempvar = Object.assign({},row)
+        this.deleteVariableConfirm()
+        this.btnStatus=false
+      },
+      getVars(){
+        fetch_VariableList(this.vars_group).then(response =>{
+          this.var_data = response.data
+        })
+      },
+      deleteVariableConfirm() {
+        this.$confirm('此操作将删除参数, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(()=>{
+          delete_Variable(this.tempvar).then((response) => {
+            this.$message({
+              showClose: true,
+              message: '删除成功',
+              type: 'success'
+            })
+            this.getVars()
+            this.dialogCreateVariableVisible = false
+          })
+        })
+      },
+      createVariable(){
+        this.$refs['variableForm'].validate((valid) => {
+          if (valid) {
+            this.btnStatus=true
+            create_Variable(this.tempvar).then(() => {
+              this.dialogFormVisible = false
+              this.$message({
+                showClose: true,
+                message: '创建成功',
+                type: 'success'
+              })
+              this.getVars()
+              this.btnStatus=false
+              this.dialogCreateVariableVisible = false
+            }).catch((error)=>{
+              this.btnStatus=false
+              this.dialogCreateVariableVisible = false
+            })
+          }
+        })
       },
       handleUpdate(row){
         this.getKeyList()

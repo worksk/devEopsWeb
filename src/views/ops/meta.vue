@@ -14,9 +14,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="UUID">
+      <el-table-column width="300px" align="center" label="ID">
         <template slot-scope="meta">
-          <span>{{ meta.row.uuid }}</span>
+          <span>{{ meta.row.id }}</span>
         </template>
       </el-table-column>
 

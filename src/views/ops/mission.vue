@@ -26,9 +26,15 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="500px" align="center" label="信息">
+      <el-table-column width="480px" align="center" label="信息">
         <template slot-scope="mission">
           <span>{{ mission.row.info }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="70px" align="center" label="次数">
+        <template slot-scope="mission">
+          <span>{{ mission.row.counts }}</span>
         </template>
       </el-table-column>
 
