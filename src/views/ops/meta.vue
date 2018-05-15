@@ -8,15 +8,15 @@
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
-      <el-table-column width="70px" align="center" label="ID">
+      <!-- <el-table-column width="70px" align="center" label="ID">
         <template slot-scope="meta">
           <span>{{ meta.row.id }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
 
       <el-table-column width="300px" align="center" label="ID">
         <template slot-scope="meta">
-          <span>{{ meta.row.id }}</span>
+          <span>{{ meta.row.uuid }}</span>
         </template>
       </el-table-column>
 

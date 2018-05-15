@@ -18,9 +18,9 @@ export function fetch_WorkListByPage(pagination){
     })
   }
 
-  export function status_Work(uuid){
+  export function check_Work(uuid){
     return request({
-      url: '/api-work/v1/codework/'+uuid+'/exam/',
+      url: '/api-work/v1/codework/'+uuid+'/check/',
       method: 'PUT',
       data: {'status':2}
     })
@@ -29,6 +29,7 @@ export function fetch_WorkListByPage(pagination){
   export function run_Work(uuid){
     return request({
       url: '/api-work/v1/codework/'+uuid+'/run/',
-      method: 'GET'
+      method: 'PUT',
+      data: {'status':4}
     })
   }

@@ -50,6 +50,14 @@ export function framework_Group(id,data){
   })
 }
 
+export function selectHost_Group(uuid,data){
+  return request({
+    url: '/api-manager/v1/group/'+ uuid + '/selecthost/',
+    method: 'PUT',
+    data: data
+  })
+}
+
 /*
 * API_MODULE: POSITION
 * API_USE: FETCH,DATA
@@ -99,11 +107,18 @@ export function fetch_HostList(group_id){
   })
 }
 
-export function fetch_HostListByPage(pagination){//group_id
+export function fetch_HostListByPage(pagination,group_id){
+  if(group_id!=0){
     return request({
-      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page,//+'&groups='+group_id,
+      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page+'&groups='+group_id,
       method: 'GET'
     })
+  }else{
+    return request({
+      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page,
+      method: 'GET'
+    })
+  }
 }
 
 export function fetch_HostPasswd(uuid){

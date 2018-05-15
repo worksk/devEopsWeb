@@ -1,9 +1,9 @@
 <template>
   <div class="manager-key-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled="">
       </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled="">搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
     </div>
 
@@ -12,7 +12,7 @@
 
       <el-table-column width="180px" align="center" label="UUID">
         <template slot-scope="key">
-          <span>{{ key.row.id }}</span>
+          <span>{{ key.row.uuid }}</span>
         </template>
       </el-table-column>
 
@@ -30,7 +30,7 @@
 
       <el-table-column width="100px" align="center" label="公钥">
         <template slot-scope="key">
-          <el-button type="primary" size="mini" v-clipboard:copy='key.row.public_key' v-clipboard:success='clipboardSuccess'>复制</el-button>
+          <el-button type="primary" size="mini" v-clipboard:copy='key.row.pub_key' v-clipboard:success='clipboardSuccess'>复制</el-button>
         </template>
       </el-table-column>
 
@@ -42,7 +42,7 @@
 
       <el-table-column align="center" label="操作" width="200px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="key">
-          <el-button type="primary" @click="handleUpdate(key.row)" size="mini" :disabled="btnStatus">编辑</el-button>
+          <!-- <el-button type="primary" @click="handleUpdate(key.row)" size="mini" :disabled="btnStatus">编辑</el-button> -->
           <el-button type="danger"  @click="handleDelete(key.row)" size="mini" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
@@ -65,13 +65,13 @@
           <el-input v-model="temp.name"></el-input>
         </el-form-item>
 
-        <el-form-item label="公钥" prop="name">
+        <!-- <el-form-item label="公钥" prop="name">
           <el-input v-model="temp.public_key"></el-input>
-        </el-form-item>
+        </el-form-item> -->
 
-        <el-form-item label="私钥" prop="name">
+        <!-- <el-form-item label="私钥" prop="name">
           <el-input type="textarea" v-model="temp.private_key" :rows="10"></el-input>
-        </el-form-item>
+        </el-form-item> -->
 
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -97,8 +97,7 @@
         temp: {
           id: '',
           name: '',
-          private_key: '',
-          public_key: ''
+          pub_key: ''
         },
         pagination: {
           page: 1,
@@ -139,9 +138,7 @@
       },
       resetTemp(){
         this.temp = {
-          name: "",
-          private_key: "",
-          public_key: ""
+          name: ""
         }
       },
       handleCreate(row){

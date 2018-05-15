@@ -4,6 +4,7 @@ const app ={
   state: {
     topsidebar:{
       opened: !+Cookies.get('topSidebarStatus')
+      // opened: 1
     }
   },
   mutations: {

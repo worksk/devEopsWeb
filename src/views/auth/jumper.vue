@@ -1,9 +1,9 @@
 <template>
   <div class="manager-jumper-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled="">
       </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled="">搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
     </div>
 
@@ -12,7 +12,7 @@
 
       <el-table-column width="180px" align="center" label="UUID">
         <template slot-scope="jumper">
-          <span>{{ jumper.row.id }}</span>
+          <span>{{ jumper.row.uuid }}</span>
         </template>
       </el-table-column>
 

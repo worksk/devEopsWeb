@@ -1,21 +1,32 @@
 <template>
   <div class="manager-host-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      <el-select v-model="group_id" placeholder="请选择" @change="changeGroup" filterable clearable>
+        <el-option
+          v-for="item in groups"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled="">
       </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled>搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      <el-button class="filter-item" @click="handleMultipleGroup()" style="margin-left: 10px;" type="primary" icon="el-icon-goods" :disabled="btnStatus">归类</el-button>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
-              style="width: 100%">
+      ref="multipleTable"
+      style="width: 100%"
+      tooltip-effect="dark"
+      @selection-change="handleSelectionChange">
 
-      <el-table-column width="70px" align="center" label="ID">
-        <template slot-scope="host">
-          <span>{{ host.row.id }}</span>
-        </template>
+      <el-table-column
+      type="selection"
+      width="55px">
       </el-table-column>
 
-      <el-table-column width="180px" align="center" label="UUID">
+      <el-table-column width="180px" align="center" label="Aliyun | VmWare">
         <template slot-scope="host">
           <span>{{ host.row.detail| uuidFilter }}</span>
         </template>
@@ -72,6 +83,21 @@
       <el-pagination background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :total="pagination.count">
       </el-pagination>
     </div>
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogSelectHostVisible" width="20%" top="20vh">
+      <el-select v-model="group_id" placeholder="请选择" filterable clearable>
+        <el-option
+          v-for="item in groups"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogSelectHostVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button type="primary" @click="selectGroup" :disabled="btnStatus">提交</el-button>
+      </div>
+    </el-dialog>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogPasswdVisible" width="20%" top="20vh">
       <span>我是想加一点验证码验证的 你懂吧</span>
@@ -233,7 +259,7 @@
 
 <script>
   import { fetch_HostListByPage,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd,detail_Host } from '@/api/manager';
-  import { fetch_GroupList } from "@/api/manager";
+  import { fetch_GroupList,selectHost_Group } from "@/api/manager";
 
   export default {
       data(){
@@ -247,6 +273,7 @@
           dialogPositionVisible: false,
           dialogPasswdVisible: false,
           dialogGroupVisible: false,
+          dialogSelectHostVisible: false,
           systemtype: [],
           position: [],
           temp_passwd: '',
@@ -256,6 +283,12 @@
           postype: [],
           groups: [],
           details: [],
+          multipleSelection: [],
+          group_id: {
+            key: 0,
+            value: 0,
+            label: '全部'
+          },
           pagination: {
             page: 1,
             count: 0
@@ -299,7 +332,7 @@
       },
       created(){
         this.init()
-        this.getList()
+        this.getList(0)
         this.getGroupList()
       },
       filters:{
@@ -341,13 +374,14 @@
         },
         handleCurrentChange(val) {
           this.pagination.page = val
-          this.getList()
+          this.getList(this.group_id)
         },
         getGroupList(){
           fetch_GroupList().then(response => {
             this.groups = []
             for (const group of response.data){
               this.groups.push({
+                value: group.id,
                 key: group.id,
                 label: group.name,
                 disabled: false
@@ -355,10 +389,10 @@
             }
           })
         },
-        getList(){
+        getList(group_id){
           this.list = null
           this.listLoading = true
-          fetch_HostListByPage(this.pagination).then(response =>{
+          fetch_HostListByPage(this.pagination,group_id).then(response =>{
             this.pagination.count = response.data.count
             this.list=response.data.results
             this.listLoading = false
@@ -373,6 +407,16 @@
             groups:[]
           }
         },
+        changeGroup(value){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+          this.getList(value)
+        },
+        handleSelectionChange(val) {
+          this.multipleSelection = val;
+        },
         deleteConfirm() {
           this.$confirm('此操作将删除主机, 是否继续?', '提示', {
             confirmButtonText: '确定',
@@ -386,7 +430,7 @@
                 type: 'success'
               })
               this.init()
-              this.getList()
+              this.getList(this.group_id)
             })
           })
         },
@@ -431,6 +475,15 @@
           this.dialogFormVisible = true
           this.$nextTick(() => {
             this.$refs['dataForm'].clearValidate()
+          })
+        },
+        handleMultipleGroup(){
+          dialogSelectHostVisible = true
+
+        },
+        selectGroup(uuid,){
+          selectHost_Group(uuid,this.multipleSelection).then((response)=>{
+
           })
         },
         handleGroup(row) {
@@ -480,7 +533,7 @@
               this.btnStatus=true
               update_Host(this.temp).then(() => {
                 this.dialogGroupVisible = false
-                this.getList()
+                this.getList(this.group_id)
                 this.$message({
                   showClose: true,
                   message: '更新成功',
@@ -501,7 +554,7 @@
               this.btnStatus=true
               create_Host(this.temp).then(() => {
                 // this.list.unshift(this.temp)
-                this.getList()
+                this.getList(this.group_id)
                 this.init()
                 this.dialogFormVisible = false
                 this.$message({
@@ -523,7 +576,7 @@
             if (valid) {
               this.btnStatus=true
               update_Host(this.temp).then(() => {
-                this.getList()
+                this.getList(this.group_id)
                 this.init()
                 this.dialogFormVisible = false
                 this.$message({

@@ -1,9 +1,9 @@
 <template>
   <div class="manager-group-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled>
       </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled>搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
     </div>
 
@@ -12,7 +12,7 @@
 
       <el-table-column width="180px" align="center" label="UUID">
         <template slot-scope="group">
-          <span>{{ group.row.id }}</span>
+          <span>{{ group.row.uuid }}</span>
         </template>
       </el-table-column>
 
@@ -140,7 +140,7 @@
           </el-table-column>
           <el-table-column width="220px" align="center" label="删除">
             <template slot-scope="vars">
-              <el-button type="primary" size="mini" @click="handleVariableDelete(vars.row)" :disabled="btnStatus">刪除</el-button>
+              <el-button type="danger" size="mini" @click="handleVariableDelete(vars.row)" :disabled="btnStatus">刪除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -156,16 +156,16 @@
             :visible.sync="dialogCreateVariableVisible"
             append-to-body>
               <div :model="tempvar">
-                  <el-input placeholder="检出代码" v-model="tempvar.key">
-                    <template slot="prepend">Key:</template>
+                  <el-input placeholder="NGINX_HOME" v-model="tempvar.key">
+                    <template slot="prepend">Key</template>
                   </el-input>
-                  <el-input placeholder="copy" v-model="tempvar.value">
-                    <template slot="prepend">Value:  </template>
+                  <el-input placeholder="/usr/local/nginx" v-model="tempvar.value">
+                    <template slot="prepend">Value</template>
                   </el-input>
               </div>
             <div slot="footer" class="dialog-footer">
               <el-button type="primary" @click="createVariable" :disabled="btnStatus">提交</el-button>
-              <el-button @click="dialogCreateVariableVisible = false" :disabled="btnStatus">取消</el-button>
+              <el-button @click="dialogCreateVariableVisible = false" :disabled="btnStatus">关闭</el-button>
             </div>
           </el-dialog>
       </el-form>
