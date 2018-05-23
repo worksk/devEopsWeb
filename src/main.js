@@ -13,6 +13,8 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import VueI18n from 'vue-i18n'
 import VueClipboard from 'vue-clipboard2'
+import echarts from 'echarts'
+import wordcloud from 'echarts-wordcloud'
 //awesome
 import 'vue-awesome/icons/flag'
 import 'vue-awesome/icons'
@@ -24,7 +26,9 @@ Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(VueI18n)
 Vue.use(VueClipboard)
-
+Vue.use(echarts)
+Vue.use(wordcloud)
+Vue.prototype.$echarts = echarts 
 Vue.component('icon', Icon)
 
 

@@ -10,54 +10,54 @@
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="60px" align="center" label="ID">
+      <el-table-column width="100px" align="center" label="ID">
         <template slot-scope="user">
           <span>{{ user.row.id }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="100" align="center" label="状态" class-name="status-col" >
+      <el-table-column width="150px" align="center" label="状态" class-name="status-col" >
         <template slot-scope="user">
           <el-tag :type="user.row.is_active | statusFilter">{{ activeState(user.row.is_active) }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column width="90" align="center" label="用户名">
+      <el-table-column width="100px" align="center" label="用户名">
         <template slot-scope="user">
           <span>{{ user.row.username }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="100" align="center" label="名称">
+      <el-table-column width="150px" align="center" label="名称">
         <template slot-scope="user">
           <span>{{ user.row.full_name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="160" align="center" label="邮箱">
+      <el-table-column width="180px" align="center" label="邮箱">
         <template slot-scope="user">
           <span>{{ user.row.email8531 }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="155" align="center" label="应用组关联">
+      <el-table-column width="300px" align="center" label="应用组关联">
         <template slot-scope="user">
           <span>{{ user.row.group_name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="160" align="center" label="上次登陆">
+      <el-table-column width="160px" align="center" label="上次登陆">
         <template slot-scope="user">
           <span>{{ user.row.last_login |timeFilter }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="350" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="500px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="user">
-          <el-button type="primary" @click="handleGroup(user.row)" size="mini" :disabled="btnStatus">管理组</el-button>
-          <el-button type="warning" @click="" size="mini" :disabled="btnStatus">编辑</el-button>
-          <el-button type="danger" @click="handleStatus(user.row)" size="mini" :disabled="btnStatus">改变状态</el-button>
-          <el-button type="primary" @click="handleDetail(user.row)" size="mini" :disabled="btnStatus">操作详情</el-button>
+          <el-button type="primary" size="medium" @click="handleGroup(user.row)" :disabled="btnStatus">管理组</el-button>
+          <el-button type="warning" size="medium" @click="" :disabled="btnStatus">编辑</el-button>
+          <el-button type="danger" size="medium" @click="handleStatus(user.row)" :disabled="btnStatus">改变状态</el-button>
+          <el-button type="primary" size="medium" @click="handleDetail(user.row)" :disabled="btnStatus">操作详情</el-button>
         </template>
       </el-table-column>
     </el-table>

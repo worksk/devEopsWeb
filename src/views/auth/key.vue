@@ -10,31 +10,31 @@
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="180px" align="center" label="UUID">
+      <el-table-column width="260px" align="center" label="UUID">
         <template slot-scope="key">
           <span>{{ key.row.uuid }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="250px" align="center" label="名称">
+      <el-table-column width="260px" align="center" label="名称">
         <template slot-scope="key">
           <span>{{ key.row.name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="210px" align="center" label="所属应用组">
+      <el-table-column width="260px" align="center" label="所属应用组">
         <template slot-scope="key">
           <span>{{ key.row.group_name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="100px" align="center" label="公钥">
+      <el-table-column width="200px" align="center" label="公钥">
         <template slot-scope="key">
-          <el-button type="primary" size="mini" v-clipboard:copy='key.row.pub_key' v-clipboard:success='clipboardSuccess'>复制</el-button>
+          <el-button type="primary" v-clipboard:copy='key.row.pub_key' v-clipboard:success='clipboardSuccess'>复制</el-button>
         </template>
       </el-table-column>
 
-      <el-table-column width="220px" align="center" label="创建密钥时间">
+      <el-table-column width="520px" align="center" label="创建密钥时间">
         <template slot-scope="key">
           <span>{{ key.row.fetch_time | filter_time }}</span>
         </template>
@@ -43,7 +43,7 @@
       <el-table-column align="center" label="操作" width="200px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="key">
           <!-- <el-button type="primary" @click="handleUpdate(key.row)" size="mini" :disabled="btnStatus">编辑</el-button> -->
-          <el-button type="danger"  @click="handleDelete(key.row)" size="mini" :disabled="btnStatus">删除</el-button>
+          <el-button type="danger"  size="medium" @click="handleDelete(key.row)" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

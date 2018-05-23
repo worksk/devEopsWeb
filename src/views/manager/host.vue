@@ -9,9 +9,9 @@
           :value="item.value">
         </el-option>
       </el-select>
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled="">
+      <el-input style="width: 200px;" v-model="search_ip" class="filter-item" placeholder="IP检索">
       </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled>搜索</el-button>
+      <el-button class="filter-item" @click="searchByIP()" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
       <el-button class="filter-item" @click="handleMultipleGroup()" style="margin-left: 10px;" type="primary" icon="el-icon-goods" :disabled="btnStatus">归类</el-button>
     </div>
@@ -26,25 +26,25 @@
       width="55px">
       </el-table-column>
 
-      <el-table-column width="180px" align="center" label="Aliyun | VmWare">
+      <el-table-column width="260px" align="center" label="Aliyun | VmWare">
         <template slot-scope="host">
           <span>{{ host.row.detail| uuidFilter }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="180px" align="center" label="主机名">
+      <el-table-column width="200px" align="center" label="主机名">
         <template slot-scope="host">
           <span>{{ host.row.hostname }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="120px" align="center" label="操作系统">
+      <el-table-column width="150px" align="center" label="操作系统">
         <template slot-scope="host">
           <span>{{ systype[host.row.detail.systemtype] }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="120px" align="center" label="环境">
+      <el-table-column width="150px" align="center" label="环境">
         <template slot-scope="host">
           <span>{{ postype[host.row.detail.position] }}</span>
         </template>
@@ -68,13 +68,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="370" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column align="center" label="操作" width="450px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="host">
-          <el-button type="primary" size="mini" @click="handleCopy(host.row)" :disabled="btnStatus">密码</el-button>
-          <el-button type="primary" size="mini" @click="handleDetail(host.row)" :disabled="btnStatus">详细</el-button>
-          <el-button type="warning" size="mini" @click="handleGroup(host.row)" :disabled="btnStatus">应用组</el-button>
-          <el-button type="warning" size="mini" @click="handleUpdate(host.row)" :disabled="btnStatus">编辑</el-button>
-          <el-button type="danger" size="mini" @click="handleDelete(host.row)" :disabled="btnStatus">删除</el-button>
+          <el-button type="primary" size="medium" @click="handleCopy(host.row)" :disabled="btnStatus">密码</el-button>
+          <el-button type="primary" size="medium" @click="handleDetail(host.row)" :disabled="btnStatus">详细</el-button>
+          <el-button type="warning" size="medium" @click="handleGroup(host.row)" :disabled="btnStatus">应用组</el-button>
+          <el-button type="warning" size="medium" @click="handleUpdate(host.row)" :disabled="btnStatus">编辑</el-button>
+          <el-button type="danger" size="medium" @click="handleDelete(host.row)" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -85,7 +85,7 @@
     </div>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogSelectHostVisible" width="20%" top="20vh">
-      <el-select v-model="group_id" placeholder="请选择" filterable clearable>
+      <el-select v-model="hostselectgroup" placeholder="请选择" filterable clearable>
         <el-option
           v-for="item in groups"
           :key="item.value"
@@ -108,17 +108,15 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" width="40%" top="2vh">
         <template v-for="detail in details">
-          <el-tag hit="true">{{ detail }}</el-tag>
+          <el-tag :hit="true">{{ detail }}</el-tag>
         </template>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogDetailVisible = false" :disabled="btnStatus">取消</el-button>
       </div>
-
     </el-dialog>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogGroupVisible" width="60%" top="2vh">
       <el-form ref="groupForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
-
         <el-form-item label="所属权限组" prop="pmn_groups">
           <el-transfer v-model="temp.groups" :data="groups" placeholder="请选择所属应用组" filterable>
           </el-transfer>
@@ -258,7 +256,7 @@
 </template>
 
 <script>
-  import { fetch_HostListByPage,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd,detail_Host } from '@/api/manager';
+  import { fetch_HostListByPage,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd,detail_HostByUUID } from '@/api/manager';
   import { fetch_GroupList,selectHost_Group } from "@/api/manager";
 
   export default {
@@ -268,7 +266,7 @@
           listLoading: true,
           btnStatus: false,
           dialogDetailVisible: false,
-          dialogFormVisible: false,
+          dialogFormVisible: false,                                     
           dialogSystypeVisible: false,
           dialogPositionVisible: false,
           dialogPasswdVisible: false,
@@ -277,6 +275,7 @@
           systemtype: [],
           position: [],
           temp_passwd: '',
+          search_ip: '',
           systype_item: '',
           position_item: '',
           systype: [],
@@ -284,11 +283,8 @@
           groups: [],
           details: [],
           multipleSelection: [],
-          group_id: {
-            key: 0,
-            value: 0,
-            label: '全部'
-          },
+          group_id: null,
+          hostselectgroup: null,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
           pagination: {
             page: 1,
             count: 0
@@ -298,7 +294,8 @@
             update: '编辑主机',
             create: '新建主机',
             passwd: '粘贴密码',
-            group: '修改应用组'
+            group: '修改应用组',
+            selecthost: '批量归类主机'
           },
           dialogStatus:'',
           temp: {
@@ -332,7 +329,7 @@
       },
       created(){
         this.init()
-        this.getList(0)
+        this.getList('')
         this.getGroupList()
       },
       filters:{
@@ -392,7 +389,7 @@
         getList(group_id){
           this.list = null
           this.listLoading = true
-          fetch_HostListByPage(this.pagination,group_id).then(response =>{
+          fetch_HostListByPage(this.pagination,group_id,this.search_ip).then(response =>{
             this.pagination.count = response.data.count
             this.list=response.data.results
             this.listLoading = false
@@ -457,7 +454,7 @@
         handleDetail(row){
           this.temp = Object.assign({},row)
           this.dialogStatus = 'detail'
-          detail_Host(row.uuid).then((response) =>{
+          detail_HostByUUID(row.uuid).then((response) =>{
             this.details = this.filterDetail(response.data)
             this.dialogDetailVisible = true
           }).catch((error) => {
@@ -465,9 +462,11 @@
               type: 'error',
               message: '获取详细信息失败!'
             })
-            console.log(error)
             this.dialogDetailVisible = false
           })
+        },
+        searchByIP(){
+          this.getList(this.group_id)
         },
         handleCreate(row){
           this.resetTemp()
@@ -478,13 +477,36 @@
           })
         },
         handleMultipleGroup(){
-          dialogSelectHostVisible = true
-
+          if(this.multipleSelection.length == 0){
+            this.$message({
+              type: 'error',
+              message: '您未选择任何归类主机'
+            })
+            return 
+          }
+          this.dialogSelectHostVisible = true
+          this.dialogStatus = 'selecthost'
         },
-        selectGroup(uuid,){
-          selectHost_Group(uuid,this.multipleSelection).then((response)=>{
-
+        selectGroup(){
+          const list = []
+          for (const select of this.multipleSelection){
+            list.push(select.id)
+          }
+          selectHost_Group(this.hostselectgroup,{'hosts':list}).then((response)=>{
+            this.$message({
+              showClose: true,
+              message: '归类成功',
+              type: 'success'
+            })
+            this.getList(this.group_id)
+          }).catch((error)=>{
+            this.$message({
+              showClose: true,
+              message: '归类失败',
+              type: 'danger'
+            })
           })
+          this.dialogSelectHostVisible = false
         },
         handleGroup(row) {
           this.temp = Object.assign({}, row) // copy obj

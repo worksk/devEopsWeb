@@ -2,7 +2,7 @@
     <div class="login-container">
       <el-form class="login-form" autoComplete="on" :model="loginForm" ref="loginForm" label-position="left">
         <div class="title-container">
-          <h3 class="title">devEops<b>Beta</b></h3>
+          <h3 class="title">devEops<b> 2.0</b></h3>
         </div>
         <el-form-item prop="username">
           <el-row>

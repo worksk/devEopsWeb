@@ -10,37 +10,37 @@
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="180px" align="center" label="UUID">
+      <el-table-column width="260px" align="center" label="UUID">
         <template slot-scope="group">
           <span>{{ group.row.uuid }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="200px" align="center" label="应用系统名称">
+      <el-table-column width="260px" align="center" label="应用系统名称">
         <template slot-scope="group">
           <span>{{ group.row.name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="100" align="center" label="状态" class-name="status-col" >
+      <el-table-column width="150px" align="center" label="状态" class-name="status-col" >
         <template slot-scope="group">
           <el-tag :type="group.row._status | statusFilter">{{ optionState[group.row._status].label }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="应用系统信息">
+      <el-table-column width="500px" align="center" label="应用系统信息">
         <template slot-scope="group">
           <span>{{ group.row.info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="400" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column align="center" label="操作" width="500px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="group">
-          <el-button type="primary" @click="handleImage(group.row)" size="mini" :disabled="btnStatus">架构图</el-button>
-          <el-button type="warning" @click="handleVariable(group.row)" size="mini" :disabled="btnStatus">参数</el-button>
-          <el-button type="warning" @click="handleUpdate(group.row)" size="mini" :disabled="btnStatus">编辑</el-button>
-          <el-button type="warning" @click="handlePermission(group.row)" size="mini" :disabled="btnStatus">权限组</el-button>
-          <el-button type="danger" @click="handleDelete(group.row)" size="mini" :disabled="btnStatus">删除</el-button>
+          <el-button type="primary" @click="handleImage(group.row)" :disabled="btnStatus">架构图</el-button>
+          <el-button type="warning" @click="handleVariable(group.row)" :disabled="btnStatus">参数</el-button>
+          <el-button type="warning" @click="handleUpdate(group.row)" :disabled="btnStatus">编辑</el-button>
+          <el-button type="warning" @click="handlePermission(group.row)" :disabled="btnStatus">权限组</el-button>
+          <el-button type="danger" @click="handleDelete(group.row)" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

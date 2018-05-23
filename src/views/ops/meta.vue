@@ -26,16 +26,16 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="信息">
+      <el-table-column width="700px" align="center" label="信息">
         <template slot-scope="meta">
           <span>{{ meta.row.info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="280" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="280" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="meta">
-          <el-button type="warning" size="mini" @click="handleUpdate(meta.row)" :disabled="btnStatus">编辑</el-button>
-          <el-button type="danger" size="mini" @click="handleDelete(meta.row)" :disabled="btnStatus">删除</el-button>
+          <el-button type="warning" @click="handleUpdate(meta.row)" :disabled="btnStatus">编辑</el-button>
+          <el-button type="danger" @click="handleDelete(meta.row)" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

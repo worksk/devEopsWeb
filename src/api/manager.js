@@ -50,9 +50,9 @@ export function framework_Group(id,data){
   })
 }
 
-export function selectHost_Group(uuid,data){
+export function selectHost_Group(id,data){
   return request({
-    url: '/api-manager/v1/group/'+ uuid + '/selecthost/',
+    url: '/api-manager/v1/group/'+ id + '/selecthost/',
     method: 'PUT',
     data: data
   })
@@ -107,15 +107,15 @@ export function fetch_HostList(group_id){
   })
 }
 
-export function fetch_HostListByPage(pagination,group_id){
-  if(group_id!=0){
+export function fetch_HostListByPage(pagination,group_id,search_ip){
+  if(group_id!=''){
     return request({
-      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page+'&groups='+group_id,
+      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page+'&groups='+group_id+'&connect_ip='+search_ip,
       method: 'GET'
-    })
+    })                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
   }else{
     return request({
-      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page,
+      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page+'&connect_ip='+search_ip,
       method: 'GET'
     })
   }
@@ -152,9 +152,16 @@ export function delete_Host(data){
   })
 }
 
-export function detail_Host(uuid){
+export function detail_HostByUUID(uuid){
   return request({
-    url: '/api-manager/v1/host/'+uuid+'/detail/',
+    url: '/api-manager/v1/host/'+uuid+'/detail/byuuid/',
+    method: 'GET'
+  })
+}
+
+export function detail_HostByAliID(ali_id){
+  return request({
+    url: '/api-manager/v1/host/'+ali_id+'/detail/byalid/',
     method: 'GET'
   })
 }

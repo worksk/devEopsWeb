@@ -10,13 +10,13 @@
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="180px" align="center" label="UUID">
+      <el-table-column width="260px" align="center" label="UUID">
         <template slot-scope="jumper">
           <span>{{ jumper.row.uuid }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="150px" align="center" label="连接地址">
+      <el-table-column width="170px" align="center" label="连接地址">
         <template slot-scope="jumper">
           <span>{{ jumper.row.connect_ip }}</span>
         </template>
@@ -28,19 +28,19 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="115" align="center" label="状态" class-name="status-col" >
+      <el-table-column width="150px" align="center" label="状态" class-name="status-col" >
         <template slot-scope="jumper">
           <el-tag :type="jumper.row.status | statusFilter">{{ optionState[jumper.row.status].label }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column width="210px" align="center" label="名称">
+      <el-table-column width="300px" align="center" label="名称">
         <template slot-scope="jumper">
           <span>{{ jumper.row.name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="210px" align="center" label="信息">
+      <el-table-column width="300px" align="center" label="信息">
         <template slot-scope="jumper">
           <span>{{ jumper.row.info }}</span>
         </template>
@@ -48,9 +48,9 @@
 
       <el-table-column align="center" label="操作" width="300px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="jumper">
-          <el-button type="primary" @click="handleStatus(jumper.row)" size="mini" :disabled="btnStatus">刷新</el-button>
-          <el-button type="warning" @click="handleUpdate(jumper.row)" size="mini" :disabled="btnStatus">编辑</el-button>
-          <el-button type="danger"  @click="handleDelete(jumper.row)" size="mini" :disabled="btnStatus">删除</el-button>
+          <el-button type="primary" size="medium" @click="handleStatus(jumper.row)" :disabled="btnStatus">刷新</el-button>
+          <el-button type="warning" size="medium" @click="handleUpdate(jumper.row)" :disabled="btnStatus">编辑</el-button>
+          <el-button type="danger"  size="medium" @click="handleDelete(jumper.row)" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
