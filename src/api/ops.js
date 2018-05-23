@@ -28,7 +28,7 @@ export function create_Meta(data){
 
 export function update_Meta(data){
   return request({
-    url: '/api-ops/v1/meta/'+data.id+'/update/',
+    url: '/api-ops/v1/meta/'+data.uuid+'/update/',
     method: 'PUT',
     data: data
   })
@@ -36,7 +36,7 @@ export function update_Meta(data){
 
 export function delete_Meta(data){
   return request({
-    url: '/api-ops/v1/meta/'+data.id+'/delete/',
+    url: '/api-ops/v1/meta/'+data.uuid+'/delete/',
     method: 'DELETE',
     data: data
   })
@@ -93,7 +93,7 @@ export function create_Mission(data){
 
 export function update_Mission(data){
   return request({
-    url: '/api-ops/v1/mission/'+data.id+'/update/',
+    url: '/api-ops/v1/mission/'+data.uuid+'/update/',
     method: 'PUT',
     data: data
   })
@@ -101,7 +101,7 @@ export function update_Mission(data){
 
 export function delete_Mission(data){
   return request({
-    url: '/api-ops/v1/mission/'+data.id+'/delete/',
+    url: '/api-ops/v1/mission/'+data.uuid+'/delete/',
     method: 'DELETE',
     data: data
   })

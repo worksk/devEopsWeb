@@ -1,21 +1,30 @@
 <template>
   <div class="manager-mission-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      <el-date-picker
+        v-model="select_time"
+        type="daterange"
+        align="right"
+        unlink-panels
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期">
+      </el-date-picker>
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled>
       </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled>搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="60px" align="center" label="ID">
+      <!-- <el-table-column width="60px" align="center" label="ID">
         <template slot-scope="work">
           <span>{{ work.row.id }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
 
-      <el-table-column width="320px" align="center" label="UUID">
+      <el-table-column width="180px" align="center" label="UUID">
         <template slot-scope="work">
           <span>{{ work.row.uuid }}</span>
         </template>
@@ -27,24 +36,37 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="120px" align="center" label="提交用户">
+      <el-table-column width="100px" align="center" label="提交用户">
         <template slot-scope="work">
           <span>{{ work.row.username }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="300px" align="center" label="工单信息">
+      <el-table-column width="280px" align="center" label="工单信息">
         <template slot-scope="work">
           <span>{{ work.row.info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="200" class-name="small-padding fixed-width" fixed="right">
+      <el-table-column width="200px" align="center" label="创建时间">
+        <template slot-scope="work">
+          <span>{{ work.row.create_time | timeFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="200px" align="center" label="完成时间">
+        <template slot-scope="work">
+          <span>{{ work.row.finish_time | timeFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="操作" width="100px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="work">
           <el-button size="mini" v-if="work.row.status==2" type="danger" @click="handleRun(work.row)" :disabled="btnStatus">执行</el-button>
+          <el-button size="mini" v-else-if="work.row.status==4" type="warning" disabled>执行中</el-button>
           <el-button size="mini" v-else-if="work.row.status==3" type="primary" disabled>执行完毕</el-button>
           <el-button size="mini" v-else-if="work.row.status==1" type="primary" @click="uploadWork(work.row)" :disabled="btnStatus">上传文件</el-button>
-          <el-button size="mini" v-else-if="work.row.status==0" type="warning" @click="examWork(work.row)" :disabled="btnStatus">审核</el-button>
+          <el-button size="mini" v-else-if="work.row.status==0" type="warning" @click="checkWork(work.row)" :disabled="btnStatus">审核</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -82,11 +104,12 @@
     <el-dialog
       width="70%"
       title="执行任务"
-      :visible.sync="dialogXtermVisible">
-      <xterm :work_id="work_id"></xterm>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="closeXterm" :disabled="btnStatus">取消</el-button>
-      </div>
+      :visible.sync="dialogXtermVisible"
+      :before-close="handleClose">
+      <xterm :work_uuid="work_uuid"></xterm>
+      <!-- <div slot="footer" class="dialog-footer">
+        <el-button @click="closeXterm" :disabled="btnStatus">关闭</el-button>
+      </div> -->
     </el-dialog>
 
   </div>
@@ -94,7 +117,7 @@
 
 <script>
     import { fetch_MissionListByUser } from '@/api/ops';
-    import { fetch_WorkListByPage,create_Work,status_Work } from '@/api/work';
+    import { fetch_WorkListByPage,create_Work,check_Work,run_Work } from '@/api/work';
     import Xterm from '@/components/Xterm/index';
     export default {
       data(){
@@ -106,7 +129,8 @@
           dialogWorkVisible: false,
           dialogXtermVisible: false,
           mission_item: null,
-          work_id: null,
+          select_time: '',
+          work_uuid: null,
           textMap:{
             create: '新建工单',
             update: '修改工单'
@@ -125,6 +149,18 @@
       },
       created(){
         this.init()
+      },
+      filters: {
+        timeFilter(last_login){
+          console.log(last_login)
+          if(last_login){
+            const date = last_login.split('T')
+            const time = date[1].split('.')
+            return date[0]+' '+time[0]
+          }else{
+            return ''
+          }
+        }
       },
       methods: {
         init(){
@@ -178,27 +214,36 @@
           this.pagination.page = val
           this.init()
         },
-        examWork(row){
-          status_Work(row.id).then((response)=>{
+        checkWork(row){
+          check_Work(row.uuid).then((response)=>{
             this.init()
           })
         },
         handleRun(row){
-          this.$confirm('此操作将执行该并对业务系统造成影响, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(()=>{
-            this.work_id = row.id
-            this.dialogXtermVisible = true
-          }).catch(()=>{
-            this.meta_id = null
-            this.dialogXtermVisible = false
+          run_Work(row.uuid).then((response)=>{
+            this.$confirm('此操作将执行该并对业务系统造成影响, 是否继续?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(()=>{
+              this.work_uuid = row.uuid
+              this.dialogXtermVisible = true
+            }).catch(()=>{
+              this.meta_id = null
+              this.dialogXtermVisible = false
+            })
           })
         },
-        closeXterm(){
+        closeXterm(){ 
           this.dialogXtermVisible = false
           this.init()
+        },
+        handleClose(done) {
+        this.$confirm('您确定的工单已经执行完毕了吗？')
+          .then(_ => {
+            done();
+          })
+          .catch(_ => {});
         }
       }
     }

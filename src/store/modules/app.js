@@ -4,10 +4,11 @@ const app ={
   state: {
     topsidebar:{
       opened: !+Cookies.get('topSidebarStatus')
+      // opened: 1
     }
   },
   mutations: {
-    TOGGLE_SIDEBAR: state =>{
+    TOGGLE_SIDEBAR: state => {
       if(state.topsidebar.opened){
         Cookies.set('topSidebarStatus',1)
       }else{

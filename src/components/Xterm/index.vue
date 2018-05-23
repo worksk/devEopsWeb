@@ -20,7 +20,7 @@
         type: Number,
         default: 100
       },
-      work_id:{
+      work_uuid:{
         type: Number,
         default: 0
       }
@@ -41,7 +41,7 @@
         cursorBlink: true
       })
       this.term.open(this.$refs.yoshell,false)
-      this.socket = new WebSocket('ws://10.100.100.246:9999/ops/ansible/'+this.work_id+'/')
+      this.socket = new WebSocket('ws://10.100.100.246:8888/ops/ansible/'+this.work_uuid+'/')
       this.term.attach(this.socket)
       this.term.focus()
     },

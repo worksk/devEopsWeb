@@ -1,56 +1,56 @@
 <template>
   <div class="manager-jumper-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled="">
       </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled="">搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
     </div>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="120px" align="center" label="ID">
+      <el-table-column width="260px" align="center" label="UUID">
         <template slot-scope="jumper">
-          <span>{{ jumper.row.id }}</span>
+          <span>{{ jumper.row.uuid }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="250px" align="center" label="连接地址">
+      <el-table-column width="170px" align="center" label="连接地址">
         <template slot-scope="jumper">
           <span>{{ jumper.row.connect_ip }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="210px" align="center" label="连接端口">
+      <el-table-column width="150px" align="center" label="连接端口">
         <template slot-scope="jumper">
           <span>{{ jumper.row.sshport }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="115" align="center" label="状态" class-name="status-col" >
+      <el-table-column width="150px" align="center" label="状态" class-name="status-col" >
         <template slot-scope="jumper">
           <el-tag :type="jumper.row.status | statusFilter">{{ optionState[jumper.row.status].label }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column width="210px" align="center" label="名称">
+      <el-table-column width="300px" align="center" label="名称">
         <template slot-scope="jumper">
           <span>{{ jumper.row.name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="210px" align="center" label="信息">
+      <el-table-column width="300px" align="center" label="信息">
         <template slot-scope="jumper">
           <span>{{ jumper.row.info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="300px" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="300px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="jumper">
-          <el-button type="primary" @click="handleStatus(jumper.row)" size="mini" :disabled="btnStatus">刷新</el-button>
-          <el-button type="warning" @click="handleUpdate(jumper.row)" size="mini" :disabled="btnStatus">编辑</el-button>
-          <el-button type="danger"  @click="handleDelete(jumper.row)" size="mini" :disabled="btnStatus">删除</el-button>
+          <el-button type="primary" size="medium" @click="handleStatus(jumper.row)" :disabled="btnStatus">刷新</el-button>
+          <el-button type="warning" size="medium" @click="handleUpdate(jumper.row)" :disabled="btnStatus">编辑</el-button>
+          <el-button type="danger"  size="medium" @click="handleDelete(jumper.row)" :disabled="btnStatus">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

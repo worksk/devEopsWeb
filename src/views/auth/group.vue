@@ -1,16 +1,16 @@
 <template>
   <div class="manager-permission-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
+      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled="">
       </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled="">搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
     </div>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
-      <el-table-column width="80px" align="center" label="ID">
+      <el-table-column width="120px" align="center" label="ID">
         <template slot-scope="group">
           <span>{{ group.row.id }}</span>
         </template>
@@ -22,7 +22,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="700px" align="center" label="名称">
+      <el-table-column width="1000px" align="center" label="名称">
         <div slot-scope="group">
           <template v-for="permission in group.row.permissions">
               <el-tag>{{ permissions_tag[permission] }}</el-tag>
@@ -31,9 +31,9 @@
         </div>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="220" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="220" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="group">
-          <el-button type="primary" @click="handleUpdate(group.row)" size="mini" :disabled="btnStatus">编辑</el-button>
+          <el-button type="primary" size="medium" @click="handleUpdate(group.row)" :disabled="btnStatus">编辑</el-button>
           <!--<el-button type="warning" @click="" size="mini" :disabled="btnStatus">编辑</el-button>-->
           <!--<el-button type="danger" @click="handleStatus(user.row)" size="mini" :disabled="btnStatus">改变状态</el-button>-->
           <!--<el-button type="primary" @click="handleDetail(user.row)" size="mini" :disabled="btnStatus">操作详情</el-button>-->

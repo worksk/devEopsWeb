@@ -105,6 +105,11 @@ export const devEopsRouterMap = [
       name: 'host',
       meta: { title: '主机',icon:'laptop',hidden:false,cache:true}
     },{
+      path: 'expired',
+      component: _import('manager/expired'),
+      name: 'expired',
+      meta: { title: '过期列表',icon:'clock-o',hidden:false,cache:true}
+    },{
       path: 'storage',
       component: _import('dashboard/index'),
       name: 'storage',
@@ -134,6 +139,16 @@ export const devEopsRouterMap = [
       component: _import('ops/mission'),
       name: 'mission',
       meta: { title: '任务',icon:'superpowers',hidden:false,cache:true}
+    }]
+  },{
+    path: '/app',
+    component: layout,
+    meta:{title: '应用实例',icon:'newspaper-o'},
+    children: [{
+      path: 'rds',
+      component: _import('application/expired'),
+      name: 'mission',
+      meta: { title: '过期实例',icon:'clock-o',hidden:false,cache:true}
     }]
   },{
     path:'',

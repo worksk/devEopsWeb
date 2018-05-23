@@ -8,9 +8,9 @@
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
-      <el-table-column width="70px" align="center" label="ID">
+      <el-table-column width="260px" align="center" label="UUID">
         <template slot-scope="mission">
-          <span>{{ mission.row.id }}</span>
+          <span>{{ mission.row.uuid }}</span>
         </template>
       </el-table-column>
 
@@ -26,13 +26,19 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="500px" align="center" label="信息">
+      <el-table-column width="70px" align="center" label="次数">
+        <template slot-scope="mission">
+          <span>{{ mission.row.counts }}</span>
+        </template>
+      </el-table-column>
+      
+      <el-table-column width="580px" align="center" label="信息">
         <template slot-scope="mission">
           <span>{{ mission.row.info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="230" class-name="small-padding fixed-width">
+      <el-table-column align="center" label="操作" width="230" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="mission">
           <el-button type="warning" size="mini" @click="handleUpdate(mission.row)" :disabled="btnStatus">编辑</el-button>
           <el-button type="danger" size="mini" @click="handleDelete(mission.row)" :disabled="btnStatus">删除</el-button>
