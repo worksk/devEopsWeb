@@ -2,12 +2,12 @@
   <div class="dashboard-editor-container">
     <router-view></router-view>
     <el-row>
-        <el-col :span="10" :offset="3">
-          <el-card class="box-card">
-            <echarts width="600px" height="300px" ref="groupsele"></echarts>
-          </el-card>
-        </el-col>
-        <el-col :span="7" :offset="1">
+      <el-col :span="16" :offset="1">
+        <el-card class="box-card">
+          <echarts width="980px" height="550px" ref="groupsele"></echarts>
+        </el-card>
+      </el-col>
+        <el-col :span="6" :offset="1">
           <el-card class=box-card>
               <el-carousel height="300px">
                 <el-carousel-item>
@@ -24,23 +24,16 @@
         </el-col>
     </el-row>
     <el-row>
-      <el-col :span="13" :offset="1">
+      <el-col :span="16" :offset="1">
         <el-card class="box-card">
-          <echarts width="800px" height="300px" ref="systemele"></echarts>
+          <echarts width="980px" height="550px" ref="systemele"></echarts>
         </el-card>
       </el-col>
-      <el-col :span="8" :offset="1">
+      <!-- <el-col :span="5" :offset="1">
         <el-card class="box-card">
-          <echarts width="480px" height="300px" ref="positionele"></echarts>
+          <echarts width="230px" height="300px" ref="wordele"></echarts>
         </el-card>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="10" :offset="7">
-        <el-card class="box-card">
-          <echarts width="530px" height="300px" ref="wordele"></echarts>
-        </el-card>
-      </el-col>
+      </el-col> -->
     </el-row>
   </div>
 </template>
@@ -95,7 +88,6 @@ export default {
     },
     draw(){
       this.$refs.systemele.Reload(Pie('系统类型统计', this.data.systemtype))
-      this.$refs.positionele.Reload(Pie('资产类型统计', this.data.position))
       this.$refs.groupsele.Reload(Pie('应用组统计', this.data.groups))
       this.$refs.wordele.Reload(Trends('系统类型字符云', this.data.systemtype))
     }

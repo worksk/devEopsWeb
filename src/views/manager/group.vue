@@ -52,8 +52,8 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="60%" top="2vh">
       <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
-        <el-form-item label="应用组UUID" prop="id">
-          <el-input v-model="temp.id" disabled></el-input>
+        <el-form-item label="应用组UUID" prop="uuid">
+          <el-input v-model="temp.uuid" disabled></el-input>
         </el-form-item>
         <el-form-item label="应用组名称" prop="name">
           <el-tooltip content="请输入您的业务系统名称，如:[预发布]新媒体云服务平台" placement="top" effect="light">

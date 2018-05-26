@@ -329,7 +329,7 @@
       },
       created(){
         this.init()
-        this.getList('')
+        this.getList(this.group_id)
         this.getGroupList()
       },
       filters:{
@@ -387,6 +387,9 @@
           })
         },
         getList(group_id){
+          console.log('组编号',typeof(this.group_id))
+          console.log('页号',this.pagination.page)
+          console.log('IP搜索', this.search_ip)
           this.list = null
           this.listLoading = true
           fetch_HostListByPage(this.pagination,group_id,this.search_ip).then(response =>{
@@ -431,7 +434,7 @@
             })
           })
         },
-        filterDetail(data){
+        filterDetail(data){//后续修改
           const list=[]
           if(data.type=='aliyun'){
             list.push('地区 : ' + data.RegionId)
@@ -466,6 +469,10 @@
           })
         },
         searchByIP(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
           this.getList(this.group_id)
         },
         handleCreate(row){

@@ -33,3 +33,11 @@ export function fetch_WorkListByPage(pagination){
       data: {'status':4}
     })
   }
+
+  export function upload_Work(uuid,data){
+    return request({
+      url: '/api-work/v1/codework/'+uuid+'/upload/',
+      method: 'PUT',
+      data: {"files":data}
+    })
+  }

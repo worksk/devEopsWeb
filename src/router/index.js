@@ -56,6 +56,22 @@ export const devEopsRouterMap = [
       meta: { title: '计划',icon:'hourglass-half',hidden:false,cache:true}
     }]
   },{
+    path: '/db',
+    component: layout,
+    meta:{title: '数据库',icon:'address-card-o'},
+    children: [{
+      path: 'dashboard',
+      component: _import('dashboard/index'),
+      name: 'dashboard2',
+      meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
+    },{
+      path: 'user',
+      component: _import('db/index'),
+      name: 'user',
+      meta: { title: '主机',icon:'street-view',hidden:false,cache:true}
+    }]
+  },
+  {
     path: '/authority',
     component: layout,
     meta:{title: '人员管理',icon:'address-card-o'},

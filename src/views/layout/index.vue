@@ -1,6 +1,6 @@
 <template>
     <div class="app-wrapper" :class="{hideSidebar:!topsidebar.opened}">
-        <left-sidebar class="sidebar-container"></left-sidebar>
+      <left-sidebar class="sidebar-container"></left-sidebar>
       <div class="main-container">
         <top-sidebar></top-sidebar>
         <tags></tags>

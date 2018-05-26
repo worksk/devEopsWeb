@@ -44,36 +44,7 @@
       <el-pagination background layout="total, prev, pager, next, jumper" @current-change="handleCurrentChange" :total="pagination.count">
       </el-pagination>
     </div>
-
-    <el-dialog
-      width="70%"
-      title="上传文件"
-      :visible.sync="dialogFileVisible">
-
-      <el-upload
-        action="string"
-        :http-request="uploadFile"
-        :limit="1"
-        class="upload-demo">
-        <el-button size="small" type="primary">点击上传</el-button>
-        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-      </el-upload>
-
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFileVisible = false" :disabled="btnStatus">取消</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog
-      width="70%"
-      title="执行元操作"
-      :visible.sync="dialogXtermVisible">
-      <xterm :meta_id="meta_id"></xterm>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogXtermVisible = false" :disabled="btnStatus">取消</el-button>
-      </div>
-    </el-dialog>
-
+    
     <el-form ref="metaForm" :model="temp" label-position="left" label-width="100px">
       <el-dialog
         width="70%"
@@ -184,7 +155,7 @@
 </template>
 
 <script>
-  import { fetch_MetaListByPage,create_Meta,update_Meta,delete_Meta,checkFile_Meta,uploadFile_Meta } from '@/api/ops';
+  import { fetch_MetaListByPage,create_Meta,update_Meta,delete_Meta,checkFile_Meta } from '@/api/ops';
   import { fetch_GroupList,fetch_HostList } from '@/api/manager';
   import Xterm from '@/components/Xterm/index';
   export default {
@@ -204,7 +175,6 @@
         },
         group_options:[],
         hosts:[],
-        dialogXtermVisible:false,
         dialogMetaVisible:false,
         dialogAssetVisible:false,
         dialogCreateContentVisible:false,
@@ -247,31 +217,6 @@
         this.pagination.page = val
         this.init()
       },
-      handleRun(row){
-        this.$confirm('此操作将执行该元操作并对业务系统造成影响, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(()=>{
-          this.meta_id = row.id
-          checkFile_Meta(row.id).then(response=>{
-            if(response.data.length==0){
-              this.dialogXtermVisible = true // 直接执行
-            }else{
-              this.dialogFileVisible = true
-            }
-          }).catch(error=>{
-            this.$message({
-              showClose: true,
-              message: '确定元操作状态失败',
-              type: 'error'
-            })
-          })
-        }).catch(()=>{
-          this.meta_id = null
-          this.dialogXtermVisible = false
-        })
-      },
       resetContent(){
         this.content = {
           need_file:false
@@ -282,19 +227,6 @@
           contents: [],
           hosts:[]
         }
-      },
-      uploadFile(item){
-        const formData=new FormData()
-        formData.append('ops_dir',item.file)
-        uploadFile_Meta(this.meta_id,formData).then(response=>{
-          this.dialogXtermVisible = true
-        }).catch((error)=>{
-          this.$message({
-            showClose: true,
-            message: '上传文件失败'+error,
-            type: 'success'
-          })
-        })
       },
       fetch_Host(value){
         fetch_HostList(value).then(response=>{

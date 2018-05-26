@@ -108,7 +108,7 @@ export function fetch_HostList(group_id){
 }
 
 export function fetch_HostListByPage(pagination,group_id,search_ip){
-  if(group_id!=''){
+  if(group_id!=null && group_id!=""){
     return request({
       url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page+'&groups='+group_id+'&connect_ip='+search_ip,
       method: 'GET'

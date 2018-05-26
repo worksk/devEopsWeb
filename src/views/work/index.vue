@@ -65,7 +65,7 @@
           <el-button size="mini" v-if="work.row.status==2" type="danger" @click="handleRun(work.row)" :disabled="btnStatus">执行</el-button>
           <el-button size="mini" v-else-if="work.row.status==4" type="warning" disabled>执行中</el-button>
           <el-button size="mini" v-else-if="work.row.status==3" type="primary" disabled>执行完毕</el-button>
-          <el-button size="mini" v-else-if="work.row.status==1" type="primary" @click="uploadWork(work.row)" :disabled="btnStatus">上传文件</el-button>
+          <el-button size="mini" v-else-if="work.row.status==1" type="warning" @click="handleUploadWork(work.row)" :disabled="btnStatus">上传文件</el-button>
           <el-button size="mini" v-else-if="work.row.status==0" type="warning" @click="checkWork(work.row)" :disabled="btnStatus">审核</el-button>
         </template>
       </el-table-column>
@@ -93,12 +93,59 @@
           </el-col>
         </el-row>
 
-
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogWorkVisible = false" :disabled="btnStatus">取消</el-button>
         <el-button v-if="dialogStatus=='create'" type="primary" @click="createWork" :disabled="btnStatus">提交</el-button>
       </div>
+    </el-dialog>
+
+
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogUploadVisible" width="60%" top="20vh">
+      <el-table :data="upload_tb" border fit highlight-current-row
+              style="width: 100%">
+      <el-table-column width="200px" align="center" label="上传文件名">
+        <template slot-scope="file">
+          <span>{{ file.row.name}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="500px" align="center" label="UUID">
+        <template slot-scope="file">
+          <span>{{ file.row.uuid}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="200px" align="center" label="上传">
+        <template slot-scope="file">
+          <el-button size="small" type="primary" @click="hanldUploadFile(file.row.name)">点击上传</el-button>
+        </template>
+      </el-table-column>
+
+      </el-table>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogUploadVisible = false" :disabled="btnStatus">取消</el-button>
+        <el-button type="primary" @click="uploadWork()" :disabled="btnStatus">提交</el-button>
+      </div>
+
+        <el-dialog
+          width="20%"
+          :title="temp_filename"
+          :visible.sync="dialogFileVisible"
+          append-to-body>
+            <el-upload
+              ref="uploadele"
+              action="string"
+              :limit="1"
+              :http-request="httpFileUpload"
+              class="upload-demo">
+              <el-button size="small" type="primary">点击上传</el-button>
+              <div slot="tip" class="el-upload__tip">请根据文件名上传工单所需要文件</div>
+            </el-upload>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFileVisible = false" :disabled="btnStatus">关闭</el-button>
+          </div>
+        </el-dialog>
+
     </el-dialog>
 
     <el-dialog
@@ -117,7 +164,8 @@
 
 <script>
     import { fetch_MissionListByUser } from '@/api/ops';
-    import { fetch_WorkListByPage,create_Work,check_Work,run_Work } from '@/api/work';
+    import { fetch_WorkListByPage,create_Work,check_Work,run_Work,upload_Work } from '@/api/work';
+    import { create_File } from '@/api/utils';
     import Xterm from '@/components/Xterm/index';
     export default {
       data(){
@@ -126,14 +174,19 @@
           listLoading: true,
           btnStatus: false,
           dialogStatus:'',
+          dialogUploadVisible: false,
           dialogWorkVisible: false,
           dialogXtermVisible: false,
+          dialogFileVisible: false,
+          upload_tb: [],
+          temp_filename: null,
           mission_item: null,
           select_time: '',
           work_uuid: null,
           textMap:{
             create: '新建工单',
-            update: '修改工单'
+            update: '修改工单',
+            upload: '上传任务所需文件'
           },
           pagination: {
             page: 1,
@@ -152,7 +205,6 @@
       },
       filters: {
         timeFilter(last_login){
-          console.log(last_login)
           if(last_login){
             const date = last_login.split('T')
             const time = date[1].split('.')
@@ -219,6 +271,51 @@
             this.init()
           })
         },
+        handleUploadWork(row){
+          this.work_uuid = row.uuid
+          this.upload_tb = []
+          for(let file in row.files){
+            this.upload_tb.push({'name':row.files[file],'uuid':''})
+          }
+          this.dialogStatus = 'upload'
+          this.dialogUploadVisible = true
+          this.btnStatus = false
+        },
+        hanldUploadFile(filename){
+          if(this.temp_filename!=null){ //判断是否需要表单清空
+            this.$refs.uploadele.clearFiles()
+          }
+          this.dialogFileVisible = true
+          this.temp_filename = filename
+        },
+        httpFileUpload(item){
+          let formData=new FormData()
+          formData.append('file',item.file)
+          formData.append('type',1)
+          formData.append('name',this.temp_filename)
+          create_File(formData).then(response=>{
+            for(let tb in this.upload_tb){
+              if(this.upload_tb[tb].name == this.temp_filename){
+                this.upload_tb[tb].uuid = response.data.uuid
+              }
+            }
+          })
+        },
+        uploadWork(){
+          let uuid_list = []
+          for(let tb in this.upload_tb){
+            uuid_list.push(this.upload_tb[tb].uuid)
+          }
+          upload_Work(this.work_uuid,uuid_list).then((response)=>{
+            this.$message({
+              showClose: true,
+              message: '上传文件成功',
+              type: 'success'
+            })
+            this.dialogUploadVisible = false
+            this.init()
+          })
+        },
         handleRun(row){
           run_Work(row.uuid).then((response)=>{
             this.$confirm('此操作将执行该并对业务系统造成影响, 是否继续?', '提示', {
@@ -244,6 +341,7 @@
             done();
           })
           .catch(_ => {});
+          this.init()
         }
       }
     }

@@ -206,7 +206,7 @@ export function Pie(title,data){
                 name: title,
                 type:'pie',
                 radius : '55%',
-                center: ['50%', '60%'],
+                center: ['70%', '60%'],
                 data: dt
             }
         ]
