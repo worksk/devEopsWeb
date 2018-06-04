@@ -5,6 +5,7 @@
       </el-input>
       <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      <el-button class="filter-item" @click="handleExpired()" style="margin-left: 10px;" type="primary" icon="el-icon-time" :disabled="btnStatus">过期资源</el-button>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
       ref="multipleTable"
@@ -155,6 +156,9 @@
             }
           ]
           this.listLoading = false
+        },
+        handleExpired(){
+            this.$router.push({path:'/db/expired'})
         },
         // handleCurrentChange(val) {
         //   this.pagination.page = val

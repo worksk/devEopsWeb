@@ -14,6 +14,7 @@
       <el-button class="filter-item" @click="searchByIP()" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
       <el-button class="filter-item" @click="handleMultipleGroup()" style="margin-left: 10px;" type="primary" icon="el-icon-goods" :disabled="btnStatus">归类</el-button>
+      <el-button class="filter-item" @click="handleExpired()" style="margin-left: 10px;" type="primary" icon="el-icon-time" :disabled="btnStatus">过期资源</el-button>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
       ref="multipleTable"
@@ -387,9 +388,6 @@
           })
         },
         getList(group_id){
-          console.log('组编号',typeof(this.group_id))
-          console.log('页号',this.pagination.page)
-          console.log('IP搜索', this.search_ip)
           this.list = null
           this.listLoading = true
           fetch_HostListByPage(this.pagination,group_id,this.search_ip).then(response =>{
@@ -617,10 +615,12 @@
               }).catch((error)=>{
                 this.btnStatus=false
                 this.dialogFormVisible = false
-                console.log(error)
               })
             }
           })
+        },
+        handleExpired(){
+            this.$router.push({path:'/manager/expired'})
         },
         updateSystypeData(){
           this.$refs['systypeForm'].validate((valid) =>{
