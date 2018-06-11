@@ -1,45 +1,46 @@
 import request from '@/utils/request'
+import { objectIterator } from '@/utils/iterator'
+
 /*
 * API_MODULE: DNS
 * API_USE: FETCH,CREATE,UPDATE,DELETE
 * */
-export function fetch_DNSList(level){
+export function fetch_DNSList(obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-dns/v1/dns/?level='+level,
+    url: '/api-dns/v1/dns/'+st,
     method: 'GET'
   })
 }
 
-export function fetch_DNSListByPage(pagination,level){
-  if(level==0){
-    level=""
-  }
+export function fetch_DNSListByPage(pagination,obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-dns/v1/dns/bypage/'+'?page='+pagination.page+'&level='+level,
+    url: '/api-dns/v1/dns/bypage/'+st+'&page='+pagination.page,
     method: 'GET'
   })
 }
 
-export function create_DNS(data){
+export function create_DNS(obj){
   return request({
     url: '/api-dns/v1/dns/create/',
     method: 'POST',
-    data: data
+    data: obj
   })
 }
 
-export function update_DNS(data){
+export function update_DNS(obj){
   return request({
-    url: '/api-dns/v1/dns/'+data.uuid+'/update/',
+    url: '/api-dns/v1/dns/'+obj.uuid+'/update/',
     method: 'PUT',
-    data: data
+    data: obj
   })
 }
 
-export function delete_DNS(data){
+export function delete_DNS(obj){
   return request({
-    url: '/api-dns/v1/dns/'+data.uuid+'/delete/',
+    url: '/api-dns/v1/dns/'+obj.uuid+'/delete/',
     method: 'DELETE',
-    data: data
+    data: obj
   })
 }

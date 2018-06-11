@@ -8,7 +8,8 @@
         unlink-panels
         range-separator="至"
         start-placeholder="开始日期"
-        end-placeholder="结束日期">
+        end-placeholder="结束日期"
+        value-format="yyyy-MM-dd">
       </el-date-picker>
       <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled>
       </el-input>
@@ -317,6 +318,7 @@
           })
         },
         handleRun(row){
+          console.log(this.select_time)
           run_Work(row.uuid).then((response)=>{
             this.$confirm('此操作将执行该并对业务系统造成影响, 是否继续?', '提示', {
               confirmButtonText: '确定',

@@ -27,10 +27,10 @@ export default new Router({
 
 export const devEopsRouterMap = [
   {
-    path:'/dashboard',
+    path:'',
     component: layout,
     children: [{
-      path: 'dashboard',
+      path: '/dashboard',
       component: _import('dashboard/index'),
       name: 'dashboard',
       meta: { title: '仪表盘',icon:'dashboard',hidden:true,cache:true}
@@ -86,13 +86,13 @@ export const devEopsRouterMap = [
       meta: { title: '跳板机',icon:'rocket',hidden:false,cache:true}
     }]
   },{
-    path:'/dns',
+    path:'',
     component: layout,
     children: [{
       path: 'dns',
       component: _import('dns/index'),
       name: 'dns',
-      meta: { title: '域名',icon:'dashboard',hidden:true,cache:true}
+      meta: { title: '域名',icon:'codepen',hidden:true,cache:true}
     }]
   },{
     path: '/manager',

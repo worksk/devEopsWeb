@@ -1,10 +1,27 @@
 <template>
   <div class="manager-host-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="" :disabled="btnStatus">
-      </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
-      <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      <el-row style="margin-bottom:5px;">
+        <el-select v-model="search_obj.group" placeholder="请选择" @change="changeGroup" filterable clearable>
+          <el-option
+            v-for="item in groups"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-switch
+          v-model="detailSearch"
+          inactive-text="详细检索">
+        </el-switch>
+        <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      </el-row>
+      <el-row v-show="detailSearch" style="margin-bottom:5px;">
+        <el-input style="width: 200px;" v-model="search_obj.dig" class="filter-item" placeholder="外网解析"></el-input>
+        <el-input style="width: 200px;" v-model="search_obj.inner_dig" class="filter-item" placeholder="内网解析"></el-input>
+        <el-input style="width: 200px;" v-model="search_obj.dns_name" class="filter-item" placeholder="域名名称"></el-input>
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchDNS" :disabled="btnStatus">搜索</el-button>
+      </el-row>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
       ref="multipleTable"
@@ -49,28 +66,28 @@
     </el-table>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDNSVisible" width="60%" top="2vh">
-      <el-form ref="dnsForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form ref="dnsForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
 
         <el-form-item label="分域名" prop="name">
           <el-tooltip content="请输入该域名的内容 如果op.8531.cn 请输入op" placement="top" effect="light">
-            <el-input v-model="temp.name"></el-input>
+            <el-input v-model="commit_obj.name"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="公网解析" prop="dig">
           <el-tooltip content="请输入该域名的公网解析" placement="top" effect="light">
-            <el-input v-model="temp.dig"></el-input>
+            <el-input v-model="commit_obj.dig"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="私网解析" prop="inner_dig">
           <el-tooltip content="请输入该域名的私网解析" placement="top" effect="light">
-            <el-input v-model="temp.inner_dig"></el-input>
+            <el-input v-model="commit_obj.inner_dig"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="所属应用组" prop="group">
-          <el-select v-model="temp.group" placeholder="请选择" filterable clearable>
+          <el-select v-model="commit_obj.group" placeholder="请选择" filterable clearable>
             <el-option
               v-for="item in groups"
               :key="item.label"
@@ -81,7 +98,7 @@
         </el-form-item>
 
         <el-form-item label="上级域名层级" prop="level">
-          <el-select v-model="temp_level" placeholder="请选择" @change="changeLevel">
+          <el-select v-model="search_obj.level" placeholder="请选择" @change="changeLevel">
             <el-option
               v-for="item in levelOptions"
               :key="item.label"
@@ -92,7 +109,7 @@
         </el-form-item>
 
         <el-form-item label="上级域名" prop="father">
-          <el-select v-model="temp.father" placeholder="请选择" filterable clearable>
+          <el-select v-model="commit_obj.father" placeholder="请选择" filterable clearable>
             <el-option
               v-for="item in fatherDNS"
               :key="item.label"
@@ -126,7 +143,7 @@
           list: null,
           listLoading: true,
           btnStatus: false,
-          dialogDNSVisible: false,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+          dialogDNSVisible: false,
           pagination: {
             page: 1,
             count: 0
@@ -152,17 +169,33 @@
           ],
           fatherDNS:[
           ],
-          temp: {
+          search_obj:{
           },
-          temp_level:null
+          commit_obj: {
+          },
+          detailSearch: null
         }
       },
       created(){
         this.init()
+        this.getGroupList()
       },
       methods:{
+        handleChange(val) {
+          if(val.length==0){
+            this.reset_search()
+            this.init()
+          }
+        },
+        reset_search(){
+          let group_ip = this.search_obj.group
+          this.search_obj = {'group':group_ip}
+        },
+        reset_commit(){
+          this.commit_obj = {}
+        },
         init(){
-          fetch_DNSListByPage(this.pagination,this.level).then((response)=>{
+          fetch_DNSListByPage(this.pagination,this.search_obj).then((response)=>{
             this.pagination.count = response.data.count
             this.list=response.data.results
             this.listLoading = false
@@ -188,8 +221,18 @@
             }
           })
         },
+        changeGroup(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+          this.init()
+        },
+        searchDNS(){
+          this.init()
+        },
         changeLevel(){
-          fetch_DNSList(this.temp_level).then((response)=>{
+          fetch_DNSList(this.search_obj).then((response)=>{
             this.fatherDNS = []
             for(const dns of response.data){
               this.fatherDNS.push({
@@ -202,7 +245,8 @@
           })
         },
         handleCreate(){
-          this.temp= {}
+          this.reset_search()
+          this.reset_commit()
           this.dialogStatus = "create"
           this.getGroupList()
           this.dialogDNSVisible = true
@@ -211,7 +255,7 @@
           this.$refs['dnsForm'].validate((valid) => {
             if (valid) {
               this.btnStatus=true
-              create_DNS(this.temp).then(() => {
+              create_DNS(this.commit_obj).then(() => {
                 this.init()
                 this.dialogDNSVisible = false
                 this.$message({
@@ -228,9 +272,9 @@
           })
         },
         handleUpdate(row){
-          this.temp = Object.assign({}, row) // copy obj
+          this.commit_obj = Object.assign({}, row) // copy obj
           this.dialogDNSVisible = true
-          this.temp_level = row._level-1
+          this.search_obj.level = row._level-1
           this.changeLevel()
           this.getGroupList()
         },
@@ -238,7 +282,7 @@
           this.$refs['dnsForm'].validate((valid) => {
             if (valid) {
               this.btnStatus=true
-              update_DNS(this.temp).then(() => {
+              update_DNS(this.commit_obj).then(() => {
                 this.init()
                 this.dialogDNSVisible = false
                 this.$message({
@@ -255,7 +299,7 @@
           })
         },
         handleDelete(row){
-          this.temp = Object.assign({},row)
+          this.commit_obj = Object.assign({},row)
           this.btnStatus=true
           this.deleteConfirm()
           this.btnStatus=false
@@ -266,7 +310,7 @@
             cancelButtonText: '取消',
             type: 'warning'
           }).then(()=>{
-            delete_DNS(this.temp).then((response) => {
+            delete_DNS(this.commit_obj).then((response) => {
               this.$message({
                 showClose: true,
                 message: '删除成功',
