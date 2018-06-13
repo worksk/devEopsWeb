@@ -1,7 +1,7 @@
 <template>
   <div class="manager-host-container">
     <div class="filter-container">
-      <el-select v-model="group_id" placeholder="请选择" @change="changeGroup" filterable clearable>
+      <el-select v-model="search_obj.groups" placeholder="请选择" @change="changeGroup" @clear="clearGroup" filterable clearable>
         <el-option
           v-for="item in groups"
           :key="item.value"
@@ -9,9 +9,7 @@
           :value="item.value">
         </el-option>
       </el-select>
-      <el-input style="width: 200px;" v-model="search_ip" class="filter-item" placeholder="IP检索">
-      </el-input>
-      <el-button class="filter-item" @click="searchByIP()" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
       <el-button class="filter-item" @click="handleMultipleGroup()" style="margin-left: 10px;" type="primary" icon="el-icon-goods" :disabled="btnStatus">归类</el-button>
       <el-button class="filter-item" @click="handleExpired()" style="margin-left: 10px;" type="primary" icon="el-icon-time" :disabled="btnStatus">过期资源</el-button>
@@ -86,7 +84,7 @@
     </div>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogSelectHostVisible" width="20%" top="20vh">
-      <el-select v-model="hostselectgroup" placeholder="请选择" filterable clearable>
+      <el-select v-model="commit_obj.groups" placeholder="请选择" filterable clearable>
         <el-option
           v-for="item in groups"
           :key="item.value"
@@ -117,9 +115,9 @@
     </el-dialog>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogGroupVisible" width="60%" top="2vh">
-      <el-form ref="groupForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form ref="groupForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
         <el-form-item label="所属权限组" prop="pmn_groups">
-          <el-transfer v-model="temp.groups" :data="groups" placeholder="请选择所属应用组" filterable>
+          <el-transfer v-model="commit_obj.groups" :data="groups" placeholder="请选择所属应用组" filterable>
           </el-transfer>
         </el-form-item>
 
@@ -132,41 +130,41 @@
 
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="60%" top="2vh">
-      <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form :rules="rules" ref="dataForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
 
         <el-form-item label="主机信息" prop="detail.info">
           <el-tooltip content="请输入该主机涉及的服务内容" placement="bottom" effect="light">
-            <el-input type="textarea" v-model="temp.detail.info"></el-input>
+            <el-input type="textarea" v-model="commit_obj.detail.info"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="连接IP" prop="connect_ip">
           <el-tooltip content="请输入管理该机器的IP地址" placement="bottom" effect="light">
-            <el-input v-model="temp.connect_ip"></el-input>
+            <el-input v-model="commit_obj.connect_ip"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="连接端口" prop="sshport">
           <el-tooltip content="请输入管理该机器通过的SSH端口" placement="bottom" effect="light">
-            <el-input v-model="temp.sshport"></el-input>
+            <el-input v-model="commit_obj.sshport"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="服务IP" prop="service_ip">
           <el-tooltip content="请输入该机器对外提供服务的IP地址" placement="bottom" effect="light">
-            <el-input v-model="temp.service_ip"></el-input>
+            <el-input v-model="commit_obj.service_ip"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="密码" prop="passwd">
           <el-tooltip content="请输入记录的密码" placement="bottom" effect="light">
-            <el-input type="password" v-model="temp.passwd"></el-input>
+            <el-input type="password" v-model="commit_obj.passwd"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="状态" prop="_status">
           <el-tooltip content="请输入该机器目前的状态" placement="top" effect="light">
-            <el-select v-model="temp._status" placeholder="请选择主机状态">
+            <el-select v-model="commit_obj._status" placeholder="请选择主机状态">
               <el-option v-for="option in optionState" :key="option.label" :label="option.label" :value="option.value"></el-option>
             </el-select>
           </el-tooltip>
@@ -174,25 +172,25 @@
 
         <el-form-item label="阿里云ID" prop="detail.aliyun_id">
           <el-tooltip content="请输入阿里云UUID" placement="bottom" effect="light">
-            <el-input v-model="temp.detail.aliyun_id"></el-input>
+            <el-input v-model="commit_obj.detail.aliyun_id"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="VMwareID" prop="detail.vmware_id">
           <el-tooltip content="请输入VMware-UUID" placement="bottom" effect="light">
-            <el-input v-model="temp.detail.vmware_id"></el-input>
+            <el-input v-model="commit_obj.detail.vmware_id"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="主机名" prop="hostname">
           <el-tooltip content="请输入该机器主机名" placement="top" effect="light">
-            <el-input v-model="temp.hostname"></el-input>
+            <el-input v-model="commit_obj.hostname"></el-input>
           </el-tooltip>
         </el-form-item>
 
         <el-form-item label="位置" prop="detail.position">
           <el-tooltip content="请输入该主机目前在什么位置" placement="top" effect="light">
-            <el-select v-model="temp.detail.position" placeholder="请选择主机位置">
+            <el-select v-model="commit_obj.detail.position" placeholder="请选择主机位置">
               <el-option v-for="option in position" :key="option.id" :label="option.name" :value="option.id"></el-option>
             </el-select>
           </el-tooltip>
@@ -201,7 +199,7 @@
 
         <el-form-item label="系统类型" prop="detail.systemtype">
           <el-tooltip content="请输入该主机的操作系统" placement="top" effect="light">
-            <el-select v-model="temp.detail.systemtype" placeholder="操作系统">
+            <el-select v-model="commit_obj.detail.systemtype" placeholder="操作系统">
               <el-option v-for="option in systemtype" :key="option.id" :label="option.name" :value="option.id"></el-option>
             </el-select>
           </el-tooltip>
@@ -276,7 +274,6 @@
           systemtype: [],
           position: [],
           temp_passwd: '',
-          search_ip: '',
           systype_item: '',
           position_item: '',
           systype: [],
@@ -299,7 +296,9 @@
             selecthost: '批量归类主机'
           },
           dialogStatus:'',
-          temp: {
+          search_obj:{
+          },
+          commit_obj: {
             detail:{
             }
           },
@@ -330,8 +329,6 @@
       },
       created(){
         this.init()
-        this.getList(this.group_id)
-        this.getGroupList()
       },
       filters:{
         statusFilter(_status) {
@@ -355,6 +352,21 @@
       },
       methods:{
         init(){
+          this.list = null
+          this.listLoading = true
+          this.init_position()
+          this.init_systype()
+          this.init_hosts()
+          this.init_groups()
+        },
+        init_hosts(){
+          fetch_HostListByPage(this.pagination,this.search_obj).then(response =>{
+            this.pagination.count = response.data.count
+            this.list=response.data.results
+            this.listLoading = false
+          })
+        },
+        init_position(){
           fetch_PositionList().then(response=>{
             this.postype = []
             for (const pos of response.data){
@@ -362,6 +374,8 @@
             }
             this.position = response.data
           })
+        },
+        init_systype(){
           fetch_SystypeList().then(response=>{
             this.systype = []
             for (const sys of response.data){
@@ -370,11 +384,7 @@
             this.systemtype = response.data
           })
         },
-        handleCurrentChange(val) {
-          this.pagination.page = val
-          this.getList(this.group_id)
-        },
-        getGroupList(){
+        init_groups(){
           fetch_GroupList().then(response => {
             this.groups = []
             for (const group of response.data){
@@ -387,33 +397,37 @@
             }
           })
         },
-        getList(group_id){
-          this.list = null
-          this.listLoading = true
-          fetch_HostListByPage(this.pagination,group_id,this.search_ip).then(response =>{
-            this.pagination.count = response.data.count
-            this.list=response.data.results
-            this.listLoading = false
-          })
+        handleCurrentChange(val) {
+          this.pagination.page = val
+          this.init_hosts()
         },
-        resetTemp(){
-          this.temp={
+        reset_commit(){
+          this.commit_obj={
             detail:{
-              position:'',
-              systemtype:''
-            },
-            groups:[]
+            }
           }
         },
-        changeGroup(value){
+        reset_search(){
+          this.search_obj={
+
+          }
+        },
+        changeGroup(){
           this.pagination = {
             page: 1,
             count: 0
           }
-          this.getList(value)
+          this.init()
+        },
+        clearGroup(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+          this.init()
         },
         handleSelectionChange(val) {
-          this.multipleSelection = val;
+          this.multipleSelection = val
         },
         deleteConfirm() {
           this.$confirm('此操作将删除主机, 是否继续?', '提示', {
@@ -421,14 +435,13 @@
             cancelButtonText: '取消',
             type: 'warning'
           }).then(()=>{
-            delete_Host(this.temp).then((response) => {
+            delete_Host(this.commit_obj).then((response) => {
               this.$message({
                 showClose: true,
                 message: '删除成功',
                 type: 'success'
               })
               this.init()
-              this.getList(this.group_id)
             })
           })
         },
@@ -453,9 +466,8 @@
           return list
         },
         handleDetail(row){
-          this.temp = Object.assign({},row)
           this.dialogStatus = 'detail'
-          detail_HostByUUID(row.uuid).then((response) =>{
+          detail_HostByUUID(row).then((response) =>{
             this.details = this.filterDetail(response.data)
             this.dialogDetailVisible = true
           }).catch((error) => {
@@ -466,15 +478,8 @@
             this.dialogDetailVisible = false
           })
         },
-        searchByIP(){
-          this.pagination = {
-            page: 1,
-            count: 0
-          }
-          this.getList(this.group_id)
-        },
         handleCreate(row){
-          this.resetTemp()
+          this.reset_commit()
           this.dialogStatus = 'create'
           this.dialogFormVisible = true
           this.$nextTick(() => {
@@ -493,17 +498,18 @@
           this.dialogStatus = 'selecthost'
         },
         selectGroup(){
-          const list = []
+          let list = []
           for (const select of this.multipleSelection){
             list.push(select.id)
           }
-          selectHost_Group(this.hostselectgroup,{'hosts':list}).then((response)=>{
+          console.log(this.commit_obj)
+          selectHost_Group(this.commit_obj,{'hosts':list}).then((response)=>{
             this.$message({
               showClose: true,
               message: '归类成功',
               type: 'success'
             })
-            this.getList(this.group_id)
+            this.init_hosts()
           }).catch((error)=>{
             this.$message({
               showClose: true,
@@ -514,7 +520,7 @@
           this.dialogSelectHostVisible = false
         },
         handleGroup(row) {
-          this.temp = Object.assign({}, row) // copy obj
+          this.commit_obj = Object.assign({}, row) // copy obj
           this.dialogStatus = 'group'
           this.dialogGroupVisible = true
           this.$nextTick(() =>{
@@ -522,7 +528,7 @@
           })
         },
         handleUpdate(row){
-          this.temp = Object.assign({}, row) // copy obj
+          this.commit_obj = Object.assign({}, row) // copy obj
           this.dialogStatus = 'update'
           this.dialogFormVisible = true
           this.$nextTick(() => {
@@ -549,7 +555,7 @@
           })
         },
         handleDelete(row){
-          this.temp = Object.assign({},row)
+          this.commit_obj = Object.assign({},row)
           this.btnStatus=true
           this.deleteConfirm()
           this.btnStatus=false
@@ -558,9 +564,9 @@
           this.$refs['groupForm'].validate((valid) => {
             if (valid) {
               this.btnStatus=true
-              update_Host(this.temp).then(() => {
+              update_Host(this.commit_obj).then(() => {
                 this.dialogGroupVisible = false
-                this.getList(this.group_id)
+                this.init()
                 this.$message({
                   showClose: true,
                   message: '更新成功',
@@ -570,7 +576,6 @@
               }).catch((error)=>{
                 this.dialogGroupVisible = false
                 this.btnStatus=false
-                console.log(error)
               })
             }
           })
@@ -579,9 +584,7 @@
           this.$refs['dataForm'].validate((valid) => {
             if (valid) {
               this.btnStatus=true
-              create_Host(this.temp).then(() => {
-                // this.list.unshift(this.temp)
-                this.getList(this.group_id)
+              create_Host(this.commit_obj).then(() => {
                 this.init()
                 this.dialogFormVisible = false
                 this.$message({
@@ -593,7 +596,6 @@
               }).catch((error)=>{
                 this.btnStatus=false
                 this.dialogFormVisible = false
-                console.log(error)
               })
             }
           })
@@ -602,8 +604,7 @@
           this.$refs['dataForm'].validate((valid) => {
             if (valid) {
               this.btnStatus=true
-              update_Host(this.temp).then(() => {
-                this.getList(this.group_id)
+              update_Host(this.commit_obj).then(() => {
                 this.init()
                 this.dialogFormVisible = false
                 this.$message({
@@ -638,7 +639,6 @@
               }).catch((error)=>{
                 this.dialogSystypeVisible = false
                 this.btnStatus=false
-                console.log(error)
               })
             }
           })
@@ -659,7 +659,6 @@
               }).catch((error)=>{
                 this.dialogPositionVisible = false
                 this.btnStatus=false
-                console.log(error)
               })
             }
           })
@@ -685,13 +684,11 @@
         queryPositionSearch(queryString,cb) {
           const restaurants = this.position
           const results = queryString ? restaurants.filter(this.createPositionFilter(queryString)) : restaurants
-          // 调用 callback 返回建议列表的数据
           cb(results)
         },
         querySystypeSearch(queryString, cb) {
           const restaurants = this.systemtype
           const results = queryString ? restaurants.filter(this.createSystypeFilter(queryString)) : restaurants
-          // 调用 callback 返回建议列表的数据
           cb(results)
         }
       }
