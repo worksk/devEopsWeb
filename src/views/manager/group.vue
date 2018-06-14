@@ -1,9 +1,15 @@
 <template>
   <div class="manager-group-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled>
-      </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled>搜索</el-button>
+      <el-row style="margin-bottom:20px;">
+        <el-switch
+        v-model="detailSearch"
+        inactive-text="详细检索">
+        </el-switch>
+        <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
+        <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      </el-row>
+
       <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
     </div>
 
@@ -51,36 +57,36 @@
     </div>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="60%" top="2vh">
-      <el-form :rules="rules" ref="dataForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form :rules="rules" ref="dataForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
         <el-form-item label="应用组UUID" prop="uuid">
-          <el-input v-model="temp.uuid" disabled></el-input>
+          <el-input v-model="commit_obj.uuid" disabled></el-input>
         </el-form-item>
         <el-form-item label="应用组名称" prop="name">
           <el-tooltip content="请输入您的业务系统名称，如:[预发布]新媒体云服务平台" placement="top" effect="light">
-            <el-input v-model="temp.name"></el-input>
+            <el-input v-model="commit_obj.name"></el-input>
           </el-tooltip>
         </el-form-item>
         <el-form-item label="应用组信息" prop="info">
           <el-tooltip content="请简要描述您业务系统的作用和所属" placement="top" effect="light">
-            <el-input type="textarea" v-model="temp.info"></el-input>
+            <el-input type="textarea" v-model="commit_obj.info"></el-input>
           </el-tooltip>
         </el-form-item>
         <el-form-item label="状态" prop="_status">
-          <el-select v-model="temp._status" placeholder="请选择应用组状态">
+          <el-select v-model="commit_obj._status" placeholder="请选择应用组状态">
             <el-option v-for="option in optionState" :key="option.label" :label="option.label" :value="option.value"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="管理用户" prop="users">
-            <el-transfer v-model="temp.users" :data="users" placeholder="请选择管理用户" filterable>
+            <el-transfer v-model="commit_obj.users" :data="users" placeholder="请选择管理用户" filterable>
             </el-transfer>
         </el-form-item>
         <el-form-item label="添加密钥对" prop="key">
-          <el-select v-model="temp.key" placeholder="请选择密钥对">
+          <el-select v-model="commit_obj.key" placeholder="请选择密钥对">
             <el-option v-for="key in this.keys" :key="key.label" :label="key.label" :value="key.value"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="添加跳板机" prop="key">
-          <el-select v-model="temp.jumper" placeholder="请选择密钥对">
+          <el-select v-model="commit_obj.jumper" placeholder="请选择密钥对">
             <el-option v-for="jumper in this.jumpers" :key="jumper.label" :label="jumper.label" :value="jumper.value"></el-option>
           </el-select>
         </el-form-item>
@@ -104,10 +110,10 @@
     </el-dialog>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogPermissionVisible" width="60%" top="2vh">
-      <el-form ref="permissionForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form ref="permissionForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
 
         <el-form-item label="所属权限组" prop="pmn_groups">
-          <el-transfer v-model="temp.pmn_groups" :data="pmn_groups" placeholder="请选择所属用户组" filterable>
+          <el-transfer v-model="commit_obj.pmn_groups" :data="pmn_groups" placeholder="请选择所属用户组" filterable>
           </el-transfer>
         </el-form-item>
 
@@ -173,7 +179,7 @@
 
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogImgVisible" width="80%" top="2vh">
-      <img :src="temp.framework" style="width:100%;height:100%;">
+      <img :src="commit_obj.framework" style="width:100%;height:100%;">
     </el-dialog>
 
   </div>
@@ -216,14 +222,8 @@
           variable: '修正参数'
         },
         tempvar:{},
-        temp: {
-          name: '',
-          _status: 0,
-          info: '',
-          users: [],
-          file: '',
-          pmn_groups: []
-        },
+        commit_obj: {},
+        search_obj: {},
         rules: {
           name: [{ required: true, message: '应用组名称是必填的', trigger: 'change' }],
           info: [{ required: true, message: '应用组信息是必填的', trigger: 'change' }],
@@ -246,7 +246,7 @@
       }
     },
     created(){
-      this.getList()
+      this.init()
     },
     filters: {
       statusFilter(_status) {
@@ -265,22 +265,18 @@
         formData.append('image',item.file)
         formData.append('type',0)
         create_File(formData).then(response=>{
-          this.temp._framework = response.data.id
+          this.commit_obj._framework = response.data.id
         }).catch((error)=>{
-          this.temp._framework = ''
+          this.commit_obj._framework = ''
         })
       },
-      resetTemp(){
-        this.temp = {
-          name: '',
-          _status: 0,
-          info: '',
-          users: [],
-          _framework: '',
-          pmn_groups: []
-        }
+      reset_commit(){
+        this.commit_obj = {}
       },
-      getJumperList(){
+      reset_search(){
+        this.search_obj = {}
+      },
+      init_jumper(){
         fetch_JumperList().then(response=>{
           this.jumpers = []
           for (const jumper of response.data){
@@ -291,7 +287,7 @@
           }
         })
       },
-      getKeyList(){
+      init_key(){
         fetch_KeyList().then(response=>{
           this.keys = []
           for (const key of response.data){
@@ -302,9 +298,9 @@
           }
         })
       },
-      getList(){
+      init(){
         this.listLoading = true
-        fetch_GroupListByPage(this.pagination).then(response =>{
+        fetch_GroupListByPage(this.pagination,this.search_obj).then(response =>{
           this.pagination.count = response.data.count
           this.list=response.data.results
           this.listLoading = false
@@ -312,9 +308,9 @@
       },
       handleCurrentChange(val) {
         this.pagination.page = val
-        this.getList()
+        this.init()
       },
-      getUserList(){
+      init_ops(){
         fetch_OpsUserList().then(response=>{
           this.users = []
           for (const user of response.data){
@@ -326,7 +322,7 @@
           }
         })
       },
-      getPermissionList(){
+      init_pmngroup(){
         fetch_PmnGroupList().then(response => {
           this.pmn_groups = []
           for (const pmn of response.data){
@@ -344,23 +340,23 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(()=>{
-          delete_Group(this.temp).then((response) => {
+          delete_Group(this.commit_obj).then((response) => {
             this.$message({
               showClose: true,
               message: '删除成功',
               type: 'success'
             })
-            this.getList()
+            this.init()
           })
         })
       },
       handleImage(row){
-        this.temp = Object.assign({},row)
+        this.commit_obj = Object.assign({},row)
         this.dialogImgVisible = true
         this.dialogStatus = 'img'
       },
       handleDelete(row){
-        this.temp = Object.assign({},row)
+        this.commit_obj = Object.assign({},row)
         this.btnStatus=true
         this.deleteConfirm()
         this.btnStatus=false
@@ -425,11 +421,11 @@
         })
       },
       handleUpdate(row){
-        this.getKeyList()
-        this.getJumperList()
-        this.getPermissionList()
-        this.getUserList()
-        this.temp = Object.assign({}, row) // copy obj
+        this.init_key()
+        this.init_jumper()
+        this.init_pmngroup()
+        this.init_ops()
+        this.commit_obj = Object.assign({}, row) // copy obj
         this.dialogStatus = 'update'
         this.dialogFormVisible = true
         this.$nextTick(() => {
@@ -437,8 +433,8 @@
         })
       },
       handlePermission(row){
-        this.getPermissionList()
-        this.temp = Object.assign({}, row) // copy obj
+        this.init_pmngroup()
+        this.commit_obj = Object.assign({}, row) // copy obj
         this.dialogStatus = 'permission'
         this.dialogPermissionVisible = true
         this.$nextTick(() =>{
@@ -449,9 +445,9 @@
         this.$refs['permissionForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            update_Group(this.temp).then(() => {
+            update_Group(this.commit_obj).then(() => {
               this.dialogPermissionVisible = false
-              this.getList()
+              this.init()
               this.$message({
                 showClose: true,
                 message: '创建成功',
@@ -467,11 +463,11 @@
 
       },
       handleCreate(){
-        this.getPermissionList()
-        this.getUserList()
-        this.getKeyList()
-        this.getJumperList()
-        this.resetTemp()
+        this.init_pmngroup()
+        this.init_ops()
+        this.init_key()
+        this.init_jumper()
+        this.reset_commit()
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
@@ -482,14 +478,14 @@
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            create_Group(this.temp).then(() => {
+            create_Group(this.commit_obj).then(() => {
               this.dialogFormVisible = false
               this.$message({
                 showClose: true,
                 message: '创建成功',
                 type: 'success'
               })
-              this.getList()
+              this.init()
               this.btnStatus=false
             }).catch((error)=>{
               this.btnStatus=false
@@ -502,10 +498,10 @@
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            const tempData = Object.assign({}, this.temp)
+            const tempData = Object.assign({}, this.commit_obj)
             update_Group(tempData).then((response) => {
               this.dialogFormVisible = false
-              this.getList()
+              this.init()
               this.$message({
                 showClose: true,
                 message: '更新成功',

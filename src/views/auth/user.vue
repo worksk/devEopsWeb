@@ -1,9 +1,40 @@
 <template>
   <div class="manager-user-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled="">
-      </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled="">搜索</el-button>
+      <el-row style="margin-bottom:20px;">
+        <el-switch
+        v-model="detailSearch"
+        inactive-text="详细检索">
+        </el-switch>
+        <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
+      </el-row>
+      <el-row style="margin-bottom:5px;" v-show="detailSearch">
+         <el-col :span="7" :offset="1">
+          联系方式： <el-input size="medium" style="width: 200px;" v-model="search_obj.phone" class="filter-item" placeholder="根据电话号码模糊搜索"></el-input>
+        </el-col>
+        <el-col :span="7" :offset="1">
+          姓名： <el-input size="medium" style="width: 200px;" v-model="search_obj.name" class="filter-item" placeholder="根据姓名模糊搜索"></el-input>
+        </el-col>
+        <el-col :span="5" :offset="1">
+          用户名： <el-input size="medium" style="width: 200px;" v-model="search_obj.username" class="filter-item" placeholder="根据用户名模糊搜索"></el-input>
+        </el-col>
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchUser" style="float:right;" :disabled="btnStatus">搜索</el-button>
+      </el-row>
+      <el-row style="margin-bottom:20px;" v-show="detailSearch">
+         <el-col :span="7" :offset="1">
+          电子邮箱： <el-input size="medium" style="width: 200px;" v-model="search_obj.email" class="filter-item" placeholder="根据邮箱精准搜索"></el-input>
+        </el-col>
+        <el-col :span="7" :offset="1">
+          <el-switch
+            style="margin-top:7px"
+            v-model="search_obj.is_active"
+            active-text="可使用"
+            active-value=True
+            inactive-text="禁用"
+            inactive-value=False>
+          </el-switch>
+        </el-col>
+      </el-row>
       <!--<el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>-->
     </div>
 
@@ -55,7 +86,7 @@
       <el-table-column align="center" label="操作" width="500px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="user">
           <el-button type="primary" size="medium" @click="handleGroup(user.row)" :disabled="btnStatus">管理组</el-button>
-          <el-button type="warning" size="medium" @click="" :disabled="btnStatus">编辑</el-button>
+          <!-- <el-button type="warning" size="medium" @click="" :disabled="btnStatus">编辑</el-button> -->
           <el-button type="danger" size="medium" @click="handleStatus(user.row)" :disabled="btnStatus">改变状态</el-button>
           <el-button type="primary" size="medium" @click="handleDetail(user.row)" :disabled="btnStatus">操作详情</el-button>
         </template>
@@ -68,10 +99,10 @@
     </div>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogGroupVisible" width="60%" top="2vh">
-      <el-form ref="userGrpForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form ref="userGrpForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
 
         <el-form-item label="所属用户组" prop="users">
-          <el-transfer v-model="temp.groups" :data="groups" placeholder="请选择所属用户组" filterable>
+          <el-transfer v-model="commit_obj.groups" :data="groups" placeholder="请选择所属用户组" filterable>
           </el-transfer>
         </el-form-item>
 
@@ -93,10 +124,10 @@
         list: null,
         listLoading: true,
         btnStatus:false,
-        dialogStatus:'',
-        temp: {
-          groups:[]
-        },
+        dialogStatus: '',
+        detailSearch: false,
+        search_obj:{},
+        commit_obj:{},
         pagination: {
           page: 1,
           count: 0
@@ -106,8 +137,8 @@
         dialogStatus:'',
         textMap:{
           group: '管理组',
-          update: '编辑主机',
-          create: '新建主机'
+          update: '编辑用户',
+          create: '新建用户'
         },
         dialogGroupVisible: false
       }
@@ -136,17 +167,13 @@
     methods: {
       init(){
         this.listLoading = true
-        fetch_UserListByPage(this.pagination).then(response =>{
+        fetch_UserListByPage(this.pagination,this.search_obj).then(response =>{
           this.pagination.count = response.data.count
           this.list=response.data.results
           this.listLoading = false
         })
       },
-      handleCurrentChange(val) {
-        this.pagination.page = val
-        this.init()
-      },
-      getGroupList(){
+      init_pmngroup(){
         fetch_PmnGroupList().then(response=>{
           this.groups = []
           for (const group of response.data){
@@ -158,6 +185,23 @@
           }
         })
       },
+      reset_commit(){
+        this.commit_obj = {}
+      },
+      reset_search(){
+        this.search_obj = {}
+      },
+      handleCurrentChange(val) {
+        this.pagination.page = val
+        this.init()
+      },
+      searchUser(){
+        this.init()
+      },
+      resetSearch(){
+        this.reset_search()
+        this.init()
+      },
       activeState(is_active){
         if(is_active){
           return '可使用'
@@ -168,19 +212,18 @@
       handleGroup(row){
         this.dialogStatus = 'group'
         this.dialogGroupVisible = true
-        this.temp = Object.assign({},row)
-        this.getGroupList()
-        console.log(this.temp)
+        this.commit_obj = Object.assign({},row)
+        this.init_pmngroup()
       },
       handleStatus(row){
-        this.temp = Object.assign({},row)
+        this.commit_obj = Object.assign({},row)
         this.$confirm('此操作将修改该用户状态, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(()=>{
-          this.temp.is_active = !this.temp.is_active
-          update_User(this.temp).then((response) => {
+          this.commit_obj.is_active = !this.commit_obj.is_active
+          update_User(this.commit_obj).then((response) => {
             this.$message({
               showClose: true,
               message: '状态修改成功',
@@ -197,7 +240,7 @@
         this.$refs['userGrpForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            update_User(this.temp).then(() => {
+            update_User(this.commit_obj).then(() => {
               this.init()
               this.dialogGroupVisible = false
               this.$message({
@@ -209,7 +252,6 @@
             }).catch((error)=>{
               this.btnStatus=false
               this.dialogGroupVisible = false
-              console.log(error)
             })
           }
         })

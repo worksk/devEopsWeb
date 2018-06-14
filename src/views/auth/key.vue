@@ -1,12 +1,25 @@
 <template>
   <div class="manager-key-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled="">
-      </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled="">搜索</el-button>
-      <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      <el-row style="margin-bottom:20px;">
+        <el-switch
+        v-model="detailSearch"
+        inactive-text="详细检索">
+        </el-switch>
+        <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
+        <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      </el-row>
+      <el-row style="margin-bottom:20px;" v-show="detailSearch">
+        <el-col :span="7" :offset="1">
+          密钥名称： <el-input size="medium" style="width: 200px;" v-model="search_obj.name" class="filter-item" placeholder="模糊查找密钥名称"></el-input>
+        </el-col>
+        <el-col :span="7" :offset="1">
+          应用组名称： <el-input size="medium" style="width: 200px;" v-model="search_obj.group_name" class="filter-item" placeholder="模糊查找应用组下密钥"></el-input>
+        </el-col>
+        <el-button class="filter-item" type="primary" @click="searchKey" icon="el-icon-search" :disabled="btnStatus" style="float:right;">搜索</el-button>
+      </el-row>
     </div>
-
+    
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
 
@@ -55,23 +68,15 @@
     </div>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogKeyVisible" width="60%" top="2vh">
-      <el-form ref="keyForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form ref="keyForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
 
         <el-form-item label="ID" prop="id">
-          <el-input v-model="temp.id" disabled></el-input>
+          <el-input v-model="commit_obj.id" disabled></el-input>
         </el-form-item>
 
         <el-form-item label="密钥名称" prop="name">
-          <el-input v-model="temp.name"></el-input>
+          <el-input v-model="commit_obj.name"></el-input>
         </el-form-item>
-
-        <!-- <el-form-item label="公钥" prop="name">
-          <el-input v-model="temp.public_key"></el-input>
-        </el-form-item> -->
-
-        <!-- <el-form-item label="私钥" prop="name">
-          <el-input type="textarea" v-model="temp.private_key" :rows="10"></el-input>
-        </el-form-item> -->
 
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -94,10 +99,11 @@
         btnStatus:false,
         dialogKeyVisible: false,
         dialogStatus:'',
-        temp: {
-          id: '',
-          name: '',
-          pub_key: ''
+        detailSearch: false,
+        commit_obj: {
+        },
+        search_obj: {
+
         },
         pagination: {
           page: 1,
@@ -123,7 +129,7 @@
     methods: {
       init(){
         this.listLoading = true
-        fetch_KeyListByPage(this.pagination).then(response =>{
+        fetch_KeyListByPage(this.pagination,this.search_obj).then(response =>{
           this.pagination.count = response.data.count
           this.list = response.data.results
           this.listLoading = false
@@ -136,13 +142,21 @@
           duration: 1500
         })
       },
-      resetTemp(){
-        this.temp = {
-          name: ""
-        }
+      reset_commit(){
+        this.commit_obj = {}
+      },
+      reset_search(){
+        this.search_obj = {}
+      },
+      searchKey(){
+        this.init()
+      },
+      resetSearch(){
+        this.reset_search()
+        this.init()
       },
       handleCreate(row){
-        this.resetTemp()
+        this.reset_commit()
         this.dialogStatus = 'create'
         this.dialogKeyVisible = true
         this.$nextTick(() => {
@@ -154,7 +168,7 @@
         this.init()
       },
       handleUpdate(row){
-        this.temp = Object.assign({}, row) // copy obj
+        this.commit_obj = Object.assign({}, row) // copy obj
         this.dialogStatus = 'update'
         this.dialogKeyVisible = true
         this.$nextTick(() => {
@@ -165,7 +179,7 @@
         this.$refs['keyForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            create_Key(this.temp).then(() => {
+            create_Key(this.commit_obj).then(() => {
               this.init()
               this.dialogKeyVisible = false
               this.$message({
@@ -177,7 +191,6 @@
             }).catch((error)=>{
               this.btnStatus=false
               this.dialogKeyVisible = false
-              console.log(error)
             })
           }
         })
@@ -186,7 +199,7 @@
         this.$refs['keyForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            update_Key(this.temp).then(() => {
+            update_Key(this.commit_obj).then(() => {
               this.init()
               this.dialogKeyVisible = false
               this.$message({
@@ -198,13 +211,12 @@
             }).catch((error)=>{
               this.btnStatus=false
               this.dialogKeyVisible = false
-              console.log(error)
             })
           }
         })
       },
       handleDelete(row){
-        this.temp = Object.assign({},row)
+        this.commit_obj = Object.assign({},row)
         this.btnStatus=true
         this.deleteConfirm()
         this.btnStatus=false
@@ -215,7 +227,7 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(()=>{
-          delete_Key(this.temp).then((response) => {
+          delete_Key(this.commit_obj).then((response) => {
             this.$message({
               showClose: true,
               message: '删除成功',

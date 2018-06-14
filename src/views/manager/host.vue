@@ -1,18 +1,47 @@
 <template>
   <div class="manager-host-container">
     <div class="filter-container">
-      <el-select v-model="search_obj.groups" placeholder="请选择" @change="changeGroup" @clear="clearGroup" filterable clearable>
-        <el-option
-          v-for="item in groups"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
-      <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
-      <el-button class="filter-item" @click="handleMultipleGroup()" style="margin-left: 10px;" type="primary" icon="el-icon-goods" :disabled="btnStatus">归类</el-button>
-      <el-button class="filter-item" @click="handleExpired()" style="margin-left: 10px;" type="primary" icon="el-icon-time" :disabled="btnStatus">过期资源</el-button>
+      <el-row style="margin-bottom:20px;">
+        <el-select v-model="search_obj.groups" placeholder="请选择" @change="changeGroup" @clear="clearGroup" filterable clearable style="width: 400px;">
+          <el-option
+            v-for="item in groups"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-switch
+          v-model="detailSearch"
+          inactive-text="详细检索">
+        </el-switch>
+        <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
+        <el-button class="filter-item" @click="handleMultipleGroup()" style="margin-left: 10px;" type="primary" icon="el-icon-goods" :disabled="btnStatus">归类</el-button>
+        <el-button class="filter-item" @click="handleExpired()" style="margin-left: 10px;" type="primary" icon="el-icon-time" :disabled="btnStatus">过期资源</el-button>
+        <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      </el-row>
+      <el-row v-show="detailSearch" style="margin-bottom:5px;">
+        <el-col :span="7" :offset="1">
+          连接地址： <el-input size="medium" style="width: 200px;" v-model="search_obj.connect_ip" class="filter-item" placeholder="根据私网IP搜索"></el-input>
+        </el-col>
+        <el-col :span="7">
+          服务地址： <el-input size="medium" style="width: 200px;" v-model="search_obj.service_ip" class="filter-item" placeholder="根据公网IP搜索"></el-input>
+        </el-col>
+        <el-col :span="7">
+          主机名称： <el-input size="medium" style="width: 200px;" v-model="search_obj.hostname" class="filter-item" placeholder="根据主机名模糊搜索"></el-input>
+        </el-col>
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchHost" style="float:right;" :disabled="btnStatus">搜索</el-button>
+      </el-row>
+      <el-row v-show="detailSearch" style="margin-bottom:20px;">
+        <el-col :span="7" :offset="1">
+          详细信息： <el-input size="medium" style="width: 200px;" v-model="search_obj.info" class="filter-item" placeholder="根据主机用途模糊搜索"></el-input>
+        </el-col>
+        <el-col :span="7">
+          系统类型： <el-input size="medium" style="width: 200px;" v-model="search_obj.systype" class="filter-item" placeholder="根据操作系统类型模糊搜索"></el-input>
+        </el-col>
+        <el-col :span="7">
+          位置类型： <el-input size="medium" style="width: 200px;" v-model="search_obj.position" class="filter-item" placeholder="根据位置类型模糊搜索"></el-input>
+        </el-col>
+      </el-row>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
       ref="multipleTable"
@@ -271,6 +300,7 @@
           dialogPasswdVisible: false,
           dialogGroupVisible: false,
           dialogSelectHostVisible: false,
+          detailSearch: false,
           systemtype: [],
           position: [],
           temp_passwd: '',
@@ -280,9 +310,7 @@
           postype: [],
           groups: [],
           details: [],
-          multipleSelection: [],
-          group_id: null,
-          hostselectgroup: null,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+          multipleSelection: [],                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
           pagination: {
             page: 1,
             count: 0
@@ -417,14 +445,17 @@
             page: 1,
             count: 0
           }
-          this.init()
+          this.init_hosts()
         },
         clearGroup(){
           this.pagination = {
             page: 1,
             count: 0
           }
-          this.init()
+          this.init_hosts()
+        },
+        searchHost(){
+          this.init_hosts()
         },
         handleSelectionChange(val) {
           this.multipleSelection = val
@@ -485,6 +516,10 @@
           this.$nextTick(() => {
             this.$refs['dataForm'].clearValidate()
           })
+        },
+        resetSearch(){
+          this.reset_search()
+          this.init_hosts()
         },
         handleMultipleGroup(){
           if(this.multipleSelection.length == 0){

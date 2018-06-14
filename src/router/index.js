@@ -27,10 +27,10 @@ export default new Router({
 
 export const devEopsRouterMap = [
   {
-    path:'',
+    path:'/dashboard',
     component: layout,
     children: [{
-      path: '/dashboard',
+      path: '',
       component: _import('dashboard/index'),
       name: 'dashboard',
       meta: { title: '仪表盘',icon:'dashboard',hidden:true,cache:true}

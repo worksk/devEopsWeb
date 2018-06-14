@@ -1,8 +1,8 @@
 <template>
   <div class="manager-host-container">
     <div class="filter-container">
-      <el-row style="margin-bottom:5px;">
-        <el-select v-model="search_obj.group" placeholder="请选择" @change="changeGroup" filterable clearable>
+      <el-row style="margin-bottom:20px;">
+        <el-select v-model="search_obj.group" placeholder="请选择" @change="changeGroup" filterable clearable style="width: 400px;">
           <el-option
             v-for="item in groups"
             :key="item.value"
@@ -14,13 +14,20 @@
           v-model="detailSearch"
           inactive-text="详细检索">
         </el-switch>
+        <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
         <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
       </el-row>
-      <el-row v-show="detailSearch" style="margin-bottom:5px;">
-        <el-input style="width: 200px;" v-model="search_obj.dig" class="filter-item" placeholder="外网解析"></el-input>
-        <el-input style="width: 200px;" v-model="search_obj.inner_dig" class="filter-item" placeholder="内网解析"></el-input>
-        <el-input style="width: 200px;" v-model="search_obj.dns_name" class="filter-item" placeholder="域名名称"></el-input>
-        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchDNS" :disabled="btnStatus">搜索</el-button>
+      <el-row v-show="detailSearch" style="margin-bottom:20px;">
+        <el-col :span="7" :offset="1">
+          外网解析： <el-input style="width: 200px;" v-model="search_obj.dig" class="filter-item" placeholder="精准搜索外网解析"></el-input>
+        </el-col>
+        <el-col :span="7">
+          内网解析： <el-input style="width: 200px;" v-model="search_obj.inner_dig" class="filter-item" placeholder="精准搜索内网解析"></el-input>
+        </el-col>
+        <el-col :span="7">
+          分段域名： <el-input style="width: 200px;" v-model="search_obj.dns_name" class="filter-item" placeholder="模糊搜索段域名"></el-input>
+        </el-col>
+        <el-button class="filter-item" type="primary" icon="el-icon-search" style="float:right;" @click="searchDNS" :disabled="btnStatus">搜索</el-button>
       </el-row>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
@@ -188,8 +195,7 @@
           }
         },
         reset_search(){
-          let group_ip = this.search_obj.group
-          this.search_obj = {'group':group_ip}
+          this.search_obj = {}
         },
         reset_commit(){
           this.commit_obj = {}
@@ -229,6 +235,10 @@
           this.init()
         },
         searchDNS(){
+          this.init()
+        },
+        resetSearch(){
+          this.reset_search()
           this.init()
         },
         changeLevel(){
