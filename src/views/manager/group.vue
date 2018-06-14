@@ -9,8 +9,22 @@
         <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
         <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
       </el-row>
+      <el-row style="margin-bottom:20px;" v-show="detailSearch">
+        <el-col :span="7" :offset="1">
+          信息： <el-input size="medium" style="width: 300px;" v-model="search_obj.info" class="filter-item" placeholder="根据应用组名称及信息检索"></el-input>
+        </el-col>
+        <el-col :span="7" :offset="1">
+          管理员信息： <el-input size="medium" style="width: 300px;" v-model="search_obj.ops" class="filter-item" placeholder="根据管理员信息搜索"></el-input>
+        </el-col>
+        <el-col :span="5" :offset="1">
+          应用组状态
+          <el-select v-model="search_obj.status" placeholder="请选择应用组状态">
+            <el-option v-for="option in optionState" :key="option.label" :label="option.label" :value="option.value"></el-option>
+          </el-select>
+        </el-col>
 
-      <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchGroup" style="float:right;" :disabled="btnStatus">搜索</el-button>
+      </el-row>
     </div>
 
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
@@ -221,6 +235,7 @@
           key: '选择密钥对',
           variable: '修正参数'
         },
+        detailSearch: false,
         tempvar:{},
         commit_obj: {},
         search_obj: {},
@@ -350,6 +365,9 @@
           })
         })
       },
+      searchGroup(){
+        this.init()
+      },
       handleImage(row){
         this.commit_obj = Object.assign({},row)
         this.dialogImgVisible = true
@@ -460,7 +478,6 @@
             })
           }
         })
-
       },
       handleCreate(){
         this.init_pmngroup()
@@ -473,6 +490,10 @@
         this.$nextTick(() => {
           this.$refs['dataForm'].clearValidate()
         })
+      },
+      resetSearch(){
+        this.reset_search()
+        this.init()
       },
       createData(){
         this.$refs['dataForm'].validate((valid) => {
