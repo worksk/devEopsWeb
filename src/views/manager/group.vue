@@ -18,7 +18,7 @@
         </el-col>
         <el-col :span="5" :offset="1">
           应用组状态
-          <el-select v-model="search_obj.status" placeholder="请选择应用组状态">
+          <el-select v-model="search_obj.status" placeholder="请选择应用组状态" disabled="">
             <el-option v-for="option in optionState" :key="option.label" :label="option.label" :value="option.value"></el-option>
           </el-select>
         </el-col>

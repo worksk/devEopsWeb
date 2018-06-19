@@ -1,10 +1,34 @@
 <template>
   <div class="manager-meta-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
-      </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
-      <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      <el-row style="margin-bottom:20px;">
+        <el-select v-model="search_obj.group" placeholder="请选择" @change="changeGroup" @clear="clearGroup" filterable clearable style="width: 400px;">
+          <el-option
+            v-for="item in group_options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-switch
+        v-model="detailSearch"
+        inactive-text="详细检索">
+        </el-switch>
+        <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
+        <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      </el-row>
+      <el-row style="margin-bottom:20px;" v-show="detailSearch">
+        <el-col :span="5" :offset="1">
+          模块： <el-input size="medium" style="width: 200px;" v-model="search_obj.username" class="filter-item" placeholder="根据使用模块模糊搜索"></el-input>
+        </el-col>
+        <el-col :span="7" :offset="1">
+          参数： <el-input size="medium" style="width: 200px;" v-model="search_obj.phone" class="filter-item" placeholder="根据使用参数模糊搜索"></el-input>
+        </el-col>
+        <el-col :span="7" :offset="1">
+          主机： <el-input size="medium" style="width: 250px;" v-model="search_obj.name" class="filter-item" placeholder="根据主机连接IP或主机名模糊搜索"></el-input>
+        </el-col>
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchMeta" style="float:right;" :disabled="btnStatus">搜索</el-button>
+      </el-row>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
@@ -45,13 +69,13 @@
       </el-pagination>
     </div>
     
-    <el-form ref="metaForm" :model="temp" label-position="left" label-width="100px">
+    <el-form ref="metaForm" :model="commit_obj" label-position="left" label-width="100px">
       <el-dialog
         width="70%"
         :title="textMap[dialogStatus]+'Step1'"
         :visible.sync="dialogMetaVisible">
 
-            <el-table :data="temp.contents" border fit highlight-current-row
+            <el-table :data="commit_obj.contents" border fit highlight-current-row
                       style="width: 100%"
                       :default-sort="{prop: 'sort', order: 'ascending'}">
               <el-table-column width="120px" align="center" label="名称">
@@ -92,7 +116,7 @@
                 </template>
               </el-table-column>
             </el-table>
-        <el-input placeholder="拷贝代码" v-model="temp.info">
+        <el-input placeholder="拷贝代码" v-model="commit_obj.info">
           <template slot="prepend">信息: </template>
         </el-input>
 
@@ -131,7 +155,7 @@
         width="40%"
         title="确定操作范围Step2"
         :visible.sync="dialogAssetVisible">
-        <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Host" filterable>
+        <el-select v-model="commit_obj.group" placeholder="请选择" @change="init_host" filterable>
           <el-option
             v-for="item in group_options"
             :key="item.value"
@@ -140,7 +164,7 @@
           </el-option>
         </el-select>
 
-        <el-transfer v-model="temp.hosts" :data="hosts" placeholder="请选择应用主机IP" filterable>
+        <el-transfer v-model="commit_obj.hosts" :data="hosts" placeholder="请选择应用主机IP" filterable>
         </el-transfer>
 
         <div slot="footer" class="dialog-footer">
@@ -173,6 +197,7 @@
           page: 1,
           count: 0
         },
+        detailSearch: false,
         group_options:[],
         hosts:[],
         dialogMetaVisible:false,
@@ -183,10 +208,8 @@
         content: {
           need_file:false
         },
-        temp: {
-          contents: [],
-          hosts: []
-        }
+        commit_obj: {},
+        search_obj: {}
       }
     },
     components: {
@@ -194,6 +217,7 @@
     },
     created(){
       this.init()
+      this.init_group()
     },
     filters:{
       needFile(value){
@@ -207,28 +231,13 @@
     methods:{
       init(){
         this.listLoading = true
-        fetch_MetaListByPage(this.pagination).then(response =>{
+        fetch_MetaListByPage(this.pagination,this.search_obj).then(response =>{
           this.pagination.count = response.data.count
           this.list=response.data.results
           this.listLoading = false
         })
       },
-      handleCurrentChange(val) {
-        this.pagination.page = val
-        this.init()
-      },
-      resetContent(){
-        this.content = {
-          need_file:false
-        }
-      },
-      resetTemp(){
-        this.temp={
-          contents: [],
-          hosts:[]
-        }
-      },
-      fetch_Host(value){
+      init_host(value){
         fetch_HostList(value).then(response=>{
           this.hosts = []
           for (const host of response.data){
@@ -240,7 +249,7 @@
           }
         })
       },
-      fetch_Group(){
+      init_group(){
         fetch_GroupList().then(response=>{
           this.group_options = []
           for (const group of response.data){
@@ -252,6 +261,43 @@
           }
         })
       },
+      searchMeta(){
+        this.init()
+      },
+      handleCurrentChange(val) {
+        this.pagination.page = val
+        this.init()
+      },
+      reset_content(){
+        this.content = {
+          need_file: false
+        }
+      },
+      reset_commit(){
+        this.commit_obj = {}
+      },
+      reset_search(){
+        this.search_obj = {}
+      },
+      resetSearch(){
+        this.reset_search()
+        this.init()
+        this.init_group()
+      },
+      changeGroup(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+          this.init()
+      },
+      clearGroup(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+        this.init_group()
+      },
       handleCreate(){
         this.resetTemp()
         this.dialogStatus = 'create'
@@ -261,16 +307,16 @@
         })
       },
       handleUpdate(row){
-        this.temp = Object.assign({}, row) // copy obj
+        this.commit_obj = Object.assign({}, row) // copy obj
         this.dialogStatus = 'update'
         this.dialogMetaVisible = true
-        this.fetch_Host(this.temp.group)
+        this.init_host(this.commit_obj.group)
         this.$nextTick(() => {
           this.$refs['metaForm'].clearValidate()
         })
       },
       handleDelete(row){
-        this.temp = Object.assign({},row)
+        this.commit_obj = Object.assign({},row)
         this.btnStatus=true
         this.deleteConfirm()
         this.btnStatus=false
@@ -281,7 +327,7 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(()=>{
-          delete_Meta(this.temp).then((response) => {
+          delete_Meta(this.commit_obj).then((response) => {
             this.$message({
               showClose: true,
               message: '删除成功',
@@ -294,10 +340,10 @@
       handleContentCreate()
       {
         this.dialogCreateContentVisible = true
-        this.resetContent()
+        this.reset_content()
       },
       handleAsset(){
-        this.fetch_Group()
+        this.init_group()
         this.dialogMetaVisible = false
         this.dialogAssetVisible = true
       },
@@ -307,7 +353,7 @@
         this.dialogMetaVisible = true
       },
       sortContents(){
-        this.temp.contents.sort(function(a,b){
+        this.commit_obj.contents.sort(function(a,b){
           return a.sort - b.sort
         })
       },
@@ -315,40 +361,40 @@
         if(row.sort==1){// 如果要處理的條目已經是最上面一層
           return
         }
-        if(this.temp.contents.length>1){ // 如果要處理的條目確實需要上升=
-          for(var i=0; i<this.temp.contents.length; i++) {
-            if(this.temp.contents[i].sort == row.sort -1){
+        if(this.commit_obj.contents.length>1){ // 如果要處理的條目確實需要上升=
+          for(var i=0; i<this.commit_obj.contents.length; i++) {
+            if(this.commit_obj.contents[i].sort == row.sort -1){
               row.sort--
-              this.temp.contents[i].sort++
+              this.commit_obj.contents[i].sort++
             }
           }
         }
         this.sortContents()
       },
       handleDown(row){
-        if(row.sort == this.temp.contents.length){ // 如果要處理的條目已經是最下面一層
+        if(row.sort == this.commit_obj.contents.length){ // 如果要處理的條目已經是最下面一層
           return
         }
-        if(this.temp.contents.length>1){
-          for(var i=0;i<this.temp.contents.length;i++){
-            if(this.temp.contents[i].sort == row.sort +1){
+        if(this.commit_obj.contents.length>1){
+          for(var i=0;i<this.commit_obj.contents.length;i++){
+            if(this.commit_obj.contents[i].sort == row.sort +1){
               row.sort++
-              this.temp.contents[i].sort--
+              this.commit_obj.contents[i].sort--
             }
           }
         }
         this.sortContents()
       },
       handleContentDelete(row){
-        for(var i=0;i<this.temp.contents.length;i++){
-          if(this.temp.contents[i].sort == row.sort){
-            this.temp.contents.splice(i,1)
+        for(var i=0;i<this.commit_obj.contents.length;i++){
+          if(this.commit_obj.contents[i].sort == row.sort){
+            this.commit_obj.contents.splice(i,1)
           }
         }
       },
       createContent(){
-        this.content.sort = this.temp.contents.length+1
-        this.temp.contents.push(this.content)
+        this.content.sort = this.commit_obj.contents.length+1
+        this.commit_obj.contents.push(this.content)
         this.sortContents()
         this.dialogCreateContentVisible=false
       },
@@ -356,7 +402,7 @@
         this.$refs['metaForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            create_Meta(this.temp).then(() => {
+            create_Meta(this.commit_obj).then(() => {
               this.init()
               this.dialogAssetVisible = false
               this.$message({
@@ -377,7 +423,7 @@
         this.$refs['metaForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            update_Meta(this.temp).then(() => {
+            update_Meta(this.commit_obj).then(() => {
               this.init()
               this.dialogAssetVisible = false
               this.$message({

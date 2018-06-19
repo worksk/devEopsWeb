@@ -43,6 +43,13 @@ export function update_User(data){
   })
 }
 
+export function qrcode_User(){
+  return request({
+    url: '/api-auth/v1/user/qrcode/',
+    method: 'GET'
+  })
+}
+
 
 /*
 * API_MODULE: PmnList

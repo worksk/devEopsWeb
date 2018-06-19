@@ -39,7 +39,6 @@
         }
       },
       moveToTarget($target) {
-        console.log('moveToTarget')
         const $container = this.$refs.scrollContainer
         const $containerWidth = $container.offsetWidth
         const $targetLeft = $target.offsetLeft

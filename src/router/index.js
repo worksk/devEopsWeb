@@ -35,27 +35,29 @@ export const devEopsRouterMap = [
       name: 'dashboard',
       meta: { title: '仪表盘',icon:'dashboard',hidden:true,cache:true}
     }]
-  },{
-    path: '/timeline',
-    component: layout,
-    meta:{title: '时间线',icon:'clock-o'},
-    children: [{
-      path: 'dashboard',
-      component: _import('dashboard/index'),
-      name: 'dashboard1',
-      meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
-    },{
-      path: 'record',
-      component: _import('dashboard/index'),
-      name: 'record',
-      meta: { title: '记录',icon:'thumb-tack',hidden:false,cache:true}
-    },{
-      path: 'plan',
-      component: _import('dashboard/index'),
-      name: 'plan',
-      meta: { title: '计划',icon:'hourglass-half',hidden:false,cache:true}
-    }]
-  },{
+  }
+  // ,{
+  //   path: '/timeline',
+  //   component: layout,
+  //   meta:{title: '时间线',icon:'clock-o'},
+  //   children: [{
+  //     path: 'dashboard',
+  //     component: _import('dashboard/index'),
+  //     name: 'dashboard1',
+  //     meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
+  //   },{
+  //     path: 'record',
+  //     component: _import('dashboard/index'),
+  //     name: 'record',
+  //     meta: { title: '记录',icon:'thumb-tack',hidden:false,cache:true}
+  //   },{
+  //     path: 'plan',
+  //     component: _import('dashboard/index'),
+  //     name: 'plan',
+  //     meta: { title: '计划',icon:'hourglass-half',hidden:false,cache:true}
+  //   }]
+  // }
+  ,{
     path: '/authority',
     component: layout,
     meta:{title: '人员管理',icon:'address-card-o'},

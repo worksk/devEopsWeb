@@ -1,19 +1,22 @@
 import request from '@/utils/request'
+import { objectIterator } from '@/utils/iterator'
 
 /*
 * API_MODULE: Meta
 * API_USE: FETCH,CREATE,UPDATE,DELETE
 * */
-export function fetch_MetaList(group_id){
+export function fetch_MetaList(obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-ops/v1/meta/'+'?group='+group_id,
+    url: '/api-ops/v1/meta/' + st,
     method: 'GET' 
   })
 }
 
-export function fetch_MetaListByPage(pagination){
+export function fetch_MetaListByPage(pagination,obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-ops/v1/meta/bypage/'+'?page='+pagination.page,
+    url: '/api-ops/v1/meta/bypage/'+st+'&page='+pagination.page,
     method: 'GET'
   })
 }
@@ -62,16 +65,18 @@ export function uploadFile_Meta(id,data){
 * API_MODULE: Mission
 * API_USE: FETCH,CREATE,UPDATE,DELETE
 * */
-export function fetch_MissionList(group_id){
+export function fetch_MissionList(obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-ops/v1/mission/'+'?group='+group_id,
+    url: '/api-ops/v1/mission/'+st,
     method: 'GET'
   })
 }
 
-export function fetch_MissionListByPage(pagination){
+export function fetch_MissionListByPage(pagination,obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-ops/v1/mission/bypage/'+'?page='+pagination.page,
+    url: '/api-ops/v1/mission/bypage/'+st+'&page='+pagination.page,
     method: 'GET'
   })
 }

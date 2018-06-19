@@ -1,20 +1,34 @@
 <template>
   <div class="manager-mission-container">
     <div class="filter-container">
-      <el-date-picker
-        v-model="select_time"
-        type="daterange"
-        align="right"
-        unlink-panels
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-        value-format="yyyy-MM-dd">
-      </el-date-picker>
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件" disabled>
-      </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" disabled>搜索</el-button>
-      <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      <el-row style="margin-bottom:20px;">
+        <el-date-picker
+          v-model="select_time"
+          type="daterange"
+          align="right"
+          unlink-panels
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="yyyy-MM-dd"
+          @change="selectTime">
+        </el-date-picker>
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchCodeWork" :disabled="btnStatus">搜索</el-button>
+        <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
+        <el-switch
+          v-model="detailSearch"
+          inactive-text="详细检索">
+        </el-switch>
+        <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      </el-row>
+        <el-row v-show="detailSearch" style="margin-bottom:5px;">
+        <el-col :span="7" :offset="1">
+          工单信息： <el-input size="medium" style="width: 200px;" v-model="search_obj.info" class="filter-item" placeholder="根据工单信息模糊搜索"></el-input>
+        </el-col>
+        <el-col :span="7">
+          用户信息： <el-input size="medium" style="width: 200px;" v-model="search_obj.user" class="filter-item" placeholder="根据用户信息模糊搜索"></el-input>
+        </el-col>
+      </el-row>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
@@ -78,17 +92,17 @@
     </div>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogWorkVisible" width="60%" top="20vh">
-      <el-form ref="workForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+      <el-form ref="workForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
         <el-row :gutter="20">
           <el-col :span="16">
-            <el-select v-model="temp.mission" placeholder="请选择执行的任务" filterable>
+            <el-select v-model="commit_obj.mission" placeholder="请选择执行的任务" filterable>
               <el-option v-for="option in optionMission" :key="option.label" :label="option.label" :value="option.value"></el-option>
             </el-select>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="16">
-            <el-input placeholder="重大BUG发版" v-model="temp.info" label="123">
+            <el-input placeholder="重大BUG发版" v-model="commit_obj.info" label="123">
               <template slot="prepend">执行原因: </template>
             </el-input>
           </el-col>
@@ -184,6 +198,7 @@
           mission_item: null,
           select_time: '',
           work_uuid: null,
+          detailSearch: false,
           textMap:{
             create: '新建工单',
             update: '修改工单',
@@ -193,7 +208,9 @@
             page: 1,
             count: 0
           },
-          temp: {
+          commit_obj: {
+          },
+          search_obj: {
           },
           optionMission: []
         }
@@ -205,9 +222,9 @@
         this.init()
       },
       filters: {
-        timeFilter(last_login){
-          if(last_login){
-            const date = last_login.split('T')
+        timeFilter(timeformat){
+          if(timeformat){
+            const date = timeformat.split('T')
             const time = date[1].split('.')
             return date[0]+' '+time[0]
           }else{
@@ -219,13 +236,13 @@
         init(){
           this.list = null
           this.listLoading = true
-          fetch_WorkListByPage(this.pagination).then(response =>{
+          fetch_WorkListByPage(this.pagination,this.search_obj).then(response =>{
             this.pagination.count = response.data.count
             this.list=response.data.results
             this.listLoading = false
           })
         },
-        fetch_Mission(){
+        init_mission(){
           this.optionMission = []
           fetch_MissionListByUser().then(response=>{
             for (const mission of response.data){
@@ -237,16 +254,32 @@
             }       
           })
         },
+        selectTime(){
+          this.search_obj.time = this.select_time[0] + 'to' + this.select_time[1]
+        },
+        searchCodeWork(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+          this.init()
+        },
+        reset_commit(){
+          this.commit_obj = {}
+        },
+        reset_search(){
+          this.search_obj = {}
+        },
         handleCreate(){
           this.dialogStatus = 'create'
           this.dialogWorkVisible = true
-          this.fetch_Mission()
+          this.init_mission()
         },
         createWork(){
           this.$refs['workForm'].validate((valid) => {
             if (valid) {
               this.btnStatus=true
-              create_Work(this.temp).then(() => {
+              create_Work(this.commit_obj).then(() => {
                 this.init()
                 this.dialogWorkVisible = false
                 this.$message({
@@ -262,6 +295,10 @@
               })
             }
           })
+        },
+        resetSearch(){
+          this.reset_search()
+          this.init()
         },
         handleCurrentChange(val) {
           this.pagination.page = val
