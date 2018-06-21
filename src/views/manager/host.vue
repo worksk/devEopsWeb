@@ -455,6 +455,10 @@
           this.init_hosts()
         },
         searchHost(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
           this.init_hosts()
         },
         handleSelectionChange(val) {

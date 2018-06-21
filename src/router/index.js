@@ -131,10 +131,20 @@ export const devEopsRouterMap = [
       name: 'dashboard2',
       meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
     },{
-      path: 'user',
-      component: _import('db/index'),
-      name: 'user',
+      path: 'instance',
+      component: _import('db/instance'),
+      name: 'instance',
       meta: { title: '实例',icon:'cubes',hidden:false,cache:true}
+    },{
+      path: 'role',
+      component: _import('db/role'),
+      name: 'role',
+      meta: { title: '角色',icon:'user-secret',hidden:false,cache:true}
+    },{
+      path: 'user',
+      component: _import('db/user'),
+      name: 'user',
+      meta: { title: '用户',icon:'user-circle-o',hidden:false,cache:true}
     },{
       path: 'expired',
       component: _import('db/expired'),

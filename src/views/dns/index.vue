@@ -185,7 +185,7 @@
       },
       created(){
         this.init()
-        this.getGroupList()
+        this.init_group()
       },
       methods:{
         handleChange(val) {
@@ -214,7 +214,7 @@
         handleSelectionChange(val) {
           this.multipleSelection = val
         },
-        getGroupList(){
+        init_group(){
           fetch_GroupList().then((response)=>{
             this.groups = []
             for (const group of response.data){
@@ -258,7 +258,7 @@
           this.reset_search()
           this.reset_commit()
           this.dialogStatus = "create"
-          this.getGroupList()
+          this.init_group()
           this.dialogDNSVisible = true
         },
         createDNS(){
@@ -266,6 +266,7 @@
             if (valid) {
               this.btnStatus=true
               create_DNS(this.commit_obj).then(() => {
+                this.reset_search()
                 this.init()
                 this.dialogDNSVisible = false
                 this.$message({
@@ -286,7 +287,7 @@
           this.dialogDNSVisible = true
           this.search_obj.level = row._level-1
           this.changeLevel()
-          this.getGroupList()
+          this.init_group()
         },
         updateDNS(){
           this.$refs['dnsForm'].validate((valid) => {
