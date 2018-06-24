@@ -126,15 +126,27 @@
         </template>
       </el-table-column>
 
+      <el-table-column width="200px" align="center" label="详细信息">
+        <template slot-scope="role">
+          <span>{{ role.row.info }}</span>
+        </template>
+      </el-table-column>
+
       <el-table-column width="200px" align="center" label="应用组">
         <template slot-scope="role">
-          <span>{{ role.row.group }}</span>
+          <span>{{ role.row.groupname }}</span>
         </template>
       </el-table-column>
 
       <el-table-column width="200px" align="center" label="实例名称">
         <template slot-scope="role">
           <span>{{ role.row.instance_name }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="200px" align="center" label="所属应用组">
+        <template slot-scope="role">
+          <span>{{ role.row.groupname }}</span>
         </template>
       </el-table-column>
 
@@ -170,8 +182,14 @@
           </el-tooltip>
         </el-form-item>
 
+        <el-form-item label="角色信息" prop="info" size="medium">
+          <el-tooltip content="请输入该角色" placement="bottom" effect="light">
+            <el-input v-model="commit_obj.info"></el-input>
+          </el-tooltip>
+        </el-form-item>
+
         <el-form-item label="实例" prop="instance" size="medium">
-          <el-tooltip content="请输入当前角色属于哪个实例" placement="top" effect="light">
+          <el-tooltip content="请输入当前角色属于哪个角色" placement="top" effect="light">
             <el-select v-model="commit_obj.instance" placeholder="请选择实例">
               <el-option v-for="instance in instances" :key="instance.label" :label="instance.label" :value="instance.value"></el-option>
             </el-select>
@@ -209,8 +227,8 @@
             count: 0
           },
           textMap:{
-            update: '编辑数据库实例',
-            create: '新建数据库实例',
+            update: '编辑数据库角色',
+            create: '新建数据库角色',
           },
           dialogStatus:'',
           permissions:[

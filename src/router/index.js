@@ -180,5 +180,14 @@ export const devEopsRouterMap = [
       name: 'work',
       meta: { title: '工单',icon:'dashboard',hidden:true,cache:true}
     }]
+  },{
+    path:'',
+    component: layout,
+    children: [{
+      path: 'about',
+      component: _import('about/index'),
+      name: 'about',
+      meta: { title: '关于',icon:'dashboard',hidden:true,cache:true}
+    }]
   }
 ]

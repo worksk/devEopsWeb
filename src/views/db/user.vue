@@ -2,14 +2,6 @@
   <div class="manager-host-container">
     <div class="filter-container">
       <el-row style="margin-bottom:20px;">
-          <el-select v-model="search_obj.group" placeholder="请选择" @change="changeGroup" filterable clearable style="width: 400px;">
-            <el-option
-              v-for="item in groups"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
           <el-switch
             v-model="detailSearch"
             inactive-text="详细检索">
@@ -38,7 +30,7 @@
               inactive-value=True>
             </el-switch>
           </el-col>
-          <el-button class="filter-item" type="primary" icon="el-icon-search" style="float:right;" @click="searchDBInstance" :disabled="btnStatus">搜索</el-button>
+          <el-button class="filter-item" type="primary" icon="el-icon-search" style="float:right;" @click="searchDBUser" :disabled="btnStatus">搜索</el-button>
       </el-row>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
@@ -47,37 +39,37 @@
       tooltip-effect="dark">
 
       <el-table-column width="260px" align="center" label="UUID">
-        <template slot-scope="db">
-          <span>{{ db.row.uuid }}</span>
+        <template slot-scope="user">
+          <span>{{ user.row.uuid }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="200px" align="center" label="实例名称">
-        <template slot-scope="db">
-          <span>{{ db.row.name }}</span>
+      <el-table-column width="200px" align="center" label="用户名称">
+        <template slot-scope="user">
+          <span>{{ user.row.username }}</span>
         </template>
       </el-table-column>
 
       <el-table-column width="145px" align="center" label="状态">
-        <template slot-scope="db">
-          <el-tag :type="db.row._status | statusFilter">{{ optionState[db.row._status].label }}</el-tag>
+        <template slot-scope="user">
+          <el-tag :type="user.row._status | statusFilter">{{ optionState[user.row._status].label }}</el-tag>
         </template>
       </el-table-column>
 
-      <el-table-column width="145px" align="center" label="端口">
-        <template slot-scope="db">
-          <span>{{ db.row.port }}</span>
+      <el-table-column width="200px" align="center" label="用户信息">
+        <template slot-scope="user">
+          <span>{{ user.row.info }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column width="145px" align="center" label="用户">
-        <template slot-scope="db">
-          <span>超级</span>
+      <el-table-column width="200px" align="center" label="角色名称">
+        <template slot-scope="user">
+          <span>{{ user.row.rolename }}</span>
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="操作" width="450px" class-name="small-padding fixed-width" fixed="right">
-        <template slot-scope="db">
+        <template slot-scope="user">
           <el-button type="warning" size="medium" disabled="">编辑</el-button>
           <el-button type="danger" size="medium" disabled="">删除</el-button>
         </template>
@@ -124,22 +116,6 @@
           </el-tooltip>
         </el-form-item>
 
-        <el-form-item label="所属应用组" prop="group" size="medium">
-          <el-select v-model="commit_obj.group" placeholder="请选择" @change="init_hosts" filterable>
-            <el-option
-              v-for="item in groups"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="关联主机" prop="hosts" size="medium">
-          <el-transfer v-model="commit_obj.hosts" :data="hosts" placeholder="请选择任务内的元操作" filterable>
-          </el-transfer>
-        </el-form-item>
-
         <el-form-item label="超管账户" prop="admin_user" size="medium">
           <el-tooltip content="请输入超管账户" placement="bottom" effect="light">
             <el-input v-model="commit_obj.admin_user"></el-input>
@@ -164,13 +140,12 @@
 </template>
 
 <script>
-  import { fetch_DBInstanceListByPage,create_DBInstance,update_DBInstance,delete_DBInstance } from '@/api/db';
-  import { fetch_HostList,fetch_GroupList } from '@/api/manager';
+  import { fetch_DBUserListByPage,create_DBUser,update_DBUser,delete_DBUser } from '@/api/db';
   export default {
       data(){
         return{
           list: null,
-          listLoading: true,
+          listLoading: true, 
           btnStatus: false,
           dialogDBVisible: false,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
           pagination: {
@@ -178,12 +153,10 @@
             count: 0
           },
           textMap:{
-            update: '编辑数据库实例',
-            create: '新建数据库实例',
+            update: '编辑数据库用户',
+            create: '新建数据库用户',
           },
           dialogStatus:'',
-          groups: [],
-          hosts:[],
           detailSearch: false,
           commit_obj: {},
           search_obj: {},
@@ -213,41 +186,14 @@
       methods:{
         init(){
           this.reset_search()
-          this.init_instance()
-          this.init_group()
+          this.init_user()
         },
-        init_instance(){
-          fetch_DBInstanceListByPage(this.pagination,this.search_obj).then((response)=>{
+        init_user(){
+          fetch_DBUserListByPage(this.pagination,this.search_obj).then((response)=>{
             this.pagination.count = response.data.count
             this.list=response.data.results
             this.listLoading = false
           })
-        },
-        init_group(){
-          fetch_GroupList().then((response)=>{
-            this.groups = []
-            for (const group of response.data){
-              this.groups.push({
-                value: group.id,
-                key: group.id,
-                label: group.name,
-                disabled: false
-              })
-            }
-          })
-        },
-        init_hosts(value){
-          this.hosts = []
-          fetch_HostList({'groups':value}).then(response=>{
-              this.hosts = []
-              for (const host of response.data){
-                this.hosts.push({
-                  key: host.id,
-                  label: host.hostname,
-                  disabled: false
-                })
-              }
-            })
         },
         reset_search(){
           this.search_obj = {}
@@ -258,50 +204,15 @@
         resetSearch(){
           this.init()
         },
-        changeGroup(){
-          this.pagination = {
-            page: 1,
-            count: 0
-          }
-          this.init_instance()
-        },
-        searchDBInstance(){
+        searchDBUser(){
           this.init_instance()
         },
         handleCreate(row){
-          this.reset_commit()
-          this.hosts = []
-          this.dialogStatus = 'create'
-          this.dialogDBVisible = true
-          this.$nextTick(() => {
-            this.$refs['dataForm'].clearValidate()
-          })
-        },
-        handleExpired(){
-            this.$router.push({path:'/db/expired'})
+
         },
         createInstance(){
-          this.$refs['dataForm'].validate((valid) => {
-            if (valid) {
-              this.btnStatus=true
-              create_DBInstance(this.commit_obj).then(() => {
-                this.init()
-                this.dialogDBVisible = false
-                this.$message({
-                  showClose: true,
-                  message: '创建成功',
-                  type: 'success'
-                })
-                this.btnStatus=false
-              }).catch((error)=>{
-                this.btnStatus=false
-                this.dialogDBVisible = false
-              })
-            }
-          })
         },
         updateInstance(){
-
         },
         handleCurrentChange(val) {
           this.pagination.page = val

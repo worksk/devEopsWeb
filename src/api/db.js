@@ -89,3 +89,49 @@ export function delete_DBRole(obj){
     data: obj
   })
 }
+
+
+
+/*
+* API_MODULE: DB USER
+* API_USE: FETCH,CREATE,UPDATE,DELETE
+* */
+export function fetch_DBUserList(obj){
+  let st = objectIterator(obj)
+  return request({
+    url: '/api-db/v1/user/'+st,
+    method: 'GET'
+  })
+}
+
+export function fetch_DBUserListByPage(pagination,obj){
+  let st = objectIterator(obj)
+  return request({
+    url: '/api-db/v1/user/bypage/'+st+'&page='+pagination.page,
+    method: 'GET'
+  })
+}
+
+export function create_DBUser(obj){
+  return request({
+    url: '/api-db/v1/user/create/',
+    method: 'POST',
+    data: obj
+  })
+}
+
+export function update_DBUser(obj){
+  return request({
+    url: '/api-db/v1/user/'+obj.uuid+'/update/',
+    method: 'PUT',
+    data: obj
+  })
+}
+
+export function delete_DBUser(obj){
+  return request({
+    url: '/api-db/v1/user/'+obj.uuid+'/delete/',
+    method: 'DELETE',
+    data: obj
+  })
+}

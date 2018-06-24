@@ -59,6 +59,12 @@
         </template>
       </el-table-column>
 
+      <el-table-column width="200px" align="center" label="应用组">
+        <template slot-scope="role">
+          <span>{{ role.row.groupname }}</span>
+        </template>
+      </el-table-column>
+
       <el-table-column width="145px" align="center" label="状态">
         <template slot-scope="db">
           <el-tag :type="db.row._status | statusFilter">{{ optionState[db.row._status].label }}</el-tag>
