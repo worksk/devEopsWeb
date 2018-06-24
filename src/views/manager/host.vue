@@ -98,7 +98,7 @@
 
       <el-table-column align="center" label="操作" width="450px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="host">
-          <el-button type="primary" size="medium" @click="handleCopy(host.row)" :disabled="btnStatus">密码</el-button>
+          <el-button type="primary" size="medium" @click="handleQRCode(host.row)" :disabled="btnStatus">密码</el-button>
           <el-button type="primary" size="medium" @click="handleDetail(host.row)" :disabled="btnStatus">详细</el-button>
           <el-button type="warning" size="medium" @click="handleGroup(host.row)" :disabled="btnStatus">应用组</el-button>
           <el-button type="warning" size="medium" @click="handleUpdate(host.row)" :disabled="btnStatus">编辑</el-button>
@@ -128,9 +128,14 @@
     </el-dialog>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogPasswdVisible" width="20%" top="20vh">
-      <span>我是想加一点验证码验证的 你懂吧</span>
+      <span>请确认您的权限是运维工程师并且已经拥有QR-Code</span>
+      <el-input v-model="commit_obj.qrcode" placeholder="请输入您当前账户的QR-Code"></el-input>
+
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" icon="document" v-clipboard:copy='temp_passwd' v-clipboard:success='clipboardSuccess' @click="dialogPasswdVisible = false">copy</el-button>
+        <el-button type="primary" icon="document" 
+        @click="UpdateQRCode">校验QR-Code
+      </el-button>
+        <el-button v-show="temp_passwd" type="primary" icon="document" v-clipboard:copy='temp_passwd' v-clipboard:success='clipboardSuccess' @click="dialogPasswdVisible = false">粘贴密码</el-button>
       </div>
     </el-dialog>
 
@@ -419,6 +424,8 @@
               this.groups.push({
                 value: group.id,
                 key: group.id,
+                // value: group.uuid,
+                // key: group.uuid,
                 label: group.name,
                 disabled: false
               })
@@ -541,7 +548,6 @@
           for (const select of this.multipleSelection){
             list.push(select.id)
           }
-          console.log(this.commit_obj)
           selectHost_Group(this.commit_obj,{'hosts':list}).then((response)=>{
             this.$message({
               showClose: true,
@@ -574,19 +580,25 @@
             this.$refs['dataForm'].clearValidate()
           })
         },
-        handleCopy(row){
-          fetch_HostPasswd(row.uuid).then((response) => {
-            this.dialogStatus = 'passwd'
-            this.temp_passwd = response.data[0].passwd
-            this.dialogPasswdVisible = true
-          }).catch(() => {
+        handleQRCode(row){
+          this.dialogStatus = 'passwd'
+          this.dialogPasswdVisible = true
+          this.commit_obj.uuid = row.uuid
+        },
+        UpdateQRCode(){
+          fetch_HostPasswd(this.commit_obj).then((response) => {
             this.$message({
-              type: 'info',
-              message: '粘贴失败!'
+              message: '校验成功',
+              type: 'success',
+              duration: 1500
             })
+            this.temp_passwd = response.data[0].passwd
           })
         },
         clipboardSuccess() {
+          this.reset_commit()
+          this.temp_passwd=''
+          this.dialogPasswdVisible = false
           this.$message({
             message: '复制成功',
             type: 'success',

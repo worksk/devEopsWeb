@@ -2,6 +2,17 @@
   <div class="manager-host-container">
     <div class="filter-container">
       <el-row style="margin-bottom:20px;">
+
+          <el-select v-model="search_obj.group" placeholder="请选择" @change="changeGroup" filterable clearable style="width: 400px;">
+            <el-option
+              v-for="item in groups"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+
+
           <el-switch
             v-model="detailSearch"
             inactive-text="详细检索">
@@ -9,13 +20,32 @@
           <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
           <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
       </el-row>
-      <el-row v-show="detailSearch" style="margin-bottom:20px;">
+      <el-row v-show="detailSearch" style="margin-bottom:5px;">
+          <el-col :span="7" :offset="1">
+            应用组名称： <el-input style="width: 200px;" v-model="search_obj.group" class="filter-item" placeholder="根据应用组信息模糊搜索"></el-input>
+          </el-col>
+          <el-col :span="7">
+            角色名称： <el-input style="width: 200px;" v-model="search_obj.name" class="filter-item" placeholder="根据角色名称模糊搜索"></el-input>
+          </el-col>
+      </el-row>
+      <!-- <el-row v-show="detailSearch" style="margin-bottom:20px;">
           <el-col :span="4" :offset="1">
             <el-switch
               style="margin-top:10px"
-              v-model="search_obj.update"
+              active-text="拥有Select"
+              active-value=True
+              inactive-text="未拥有Select"
+              v-model="search_obj.select"
+              inactive-value=False>
+            </el-switch>
+          </el-col>
+
+          <el-col :span="4">
+            <el-switch
+              style="margin-top:10px"
               active-text="拥有Update"
               active-value=True
+              v-model="search_obj.can_update"
               inactive-text="未拥有Update"
               inactive-value=False>
             </el-switch>
@@ -24,9 +54,9 @@
           <el-col :span="4">
             <el-switch
               style="margin-top:10px"
-              v-model="search_obj.delete"
               active-text="拥有Delete"
               active-value=True
+              v-model="search_obj.can_delete"
               inactive-text="未拥有Delete"
               inactive-value=False>
             </el-switch>
@@ -35,15 +65,49 @@
           <el-col :span="4">
             <el-switch
               style="margin-top:10px"
-              v-model="search_obj.drop"
-              active-text="拥有Drop"
+              active-text="拥有Insert"
+              active-value=Trye
+              v-model="search_obj.insert"
+              inactive-text="未拥有Insert"
+              inactive-value=False>
+            </el-switch>
+          </el-col>
+
+          <el-col :span="4">
+            <el-switch
+              style="margin-top:10px"
+              active-text="拥有Create"
               active-value=True
-              inactive-text="未拥有Drop"
+              v-model="search_obj.create"
+              inactive-text="未拥有Create"
               inactive-value=False>
             </el-switch>
           </el-col>
           <el-button class="filter-item" type="primary" icon="el-icon-search" style="float:right;" @click="searchDBRole" :disabled="btnStatus">搜索</el-button>
       </el-row>
+      <el-row v-show="detailSearch" style="margin-bottom:20px;">
+          <el-col :span="4" :offset="1">
+            <el-switch
+              style="margin-top:10px"
+              active-text="拥有Drop"
+              active-value=True
+              inactive-text="未拥有Drop"
+              v-model="search_obj.drop"
+              inactive-value=False>
+            </el-switch>
+          </el-col>
+
+          <el-col :span="4">
+            <el-switch
+              style="margin-top:10px"
+              active-text="拥有Alter"
+              active-value=True
+              v-model="search_obj.alter"
+              inactive-text="未拥有Alter"
+              inactive-value=False>
+            </el-switch>
+          </el-col>
+      </el-row> -->
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
       ref="multipleTable"
@@ -68,10 +132,16 @@
         </template>
       </el-table-column>
 
+      <el-table-column width="200px" align="center" label="实例名称">
+        <template slot-scope="role">
+          <span>{{ role.row.instance_name }}</span>
+        </template>
+      </el-table-column>
+
       <el-table-column width="500px" align="center" label="权限">
         <div slot-scope="role">
           <template v-for="permission in role.row.permissions">
-              <el-tag>{{ permission }}</el-tag>
+              <el-tag>{{ permission | permission_Filter }}</el-tag>
           </template>
           <!--<el-tag>...</el-tag>-->
         </div>
@@ -79,8 +149,8 @@
 
       <el-table-column align="center" label="操作" width="350px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="role">
-          <el-button type="warning" size="medium" disabled="">编辑</el-button>
-          <el-button type="danger" size="medium" disabled="">删除</el-button>
+          <el-button type="warning" size="medium" @click="handleUpdate(role.row)">编辑</el-button>
+          <el-button type="danger" size="medium" @click="handleDelete(role.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -126,6 +196,7 @@
 
 <script>
   import { fetch_DBRoleListByPage,create_DBRole,update_DBRole,delete_DBRole,fetch_DBInstanceList } from '@/api/db';
+  import { fetch_GroupList } from '@/api/manager';
   export default {
       data(){
         return{
@@ -152,6 +223,7 @@
             {key: 7,label: 'alter'}
           ],
           instances:[],
+          groups:[],
           detailSearch: false,
           commit_obj: {},
           search_obj: {}
@@ -161,18 +233,44 @@
         this.init()
       },
       filters:{
+        permission_Filter(value){
+          let permissions = {
+            1:'select',
+            2:'update',
+            3:'delete',
+            4:'insert',
+            5:'create',
+            6:'drop',
+            7:'alter'
+          }
+          return permissions[value]
+        }
       },
       methods:{
         init(){
           this.reset_search()
           this.init_role()
           this.init_instance()
+          this.init_group()
         },
         init_role(){
           fetch_DBRoleListByPage(this.pagination,this.search_obj).then((response)=>{
             this.pagination.count = response.data.count
             this.list=response.data.results
             this.listLoading = false
+          })
+        },
+        init_group(){
+          fetch_GroupList().then((response)=>{
+            this.groups = []
+            for (const group of response.data){
+              this.groups.push({
+                value: group.uuid,
+                key: group.uuid,
+                label: group.name,
+                disabled: false
+              })
+            }
           })
         },
         init_instance(){
@@ -200,6 +298,13 @@
         searchDBRole(){
           this.init_role()
         },
+        changeGroup(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+          this.init_role()
+        },
         handleCreate(row){
           this.reset_commit()
           this.dialogStatus = 'create'
@@ -208,17 +313,40 @@
             this.$refs['dataForm'].clearValidate()
           })
         },
-        rebuild_commit(){
-          for(let permission in this.commit_obj.permissions){
-            let tmp = this.permissions[permission]
-            Object.assign(this.commit_obj,{tmp:"True"})
-          }
+        handleUpdate(row){
+          this.commit_obj = Object.assign({}, row) // copy obj
+          this.dialogStatus = 'update'
+          this.dialogRoleVisible = true
+          this.$nextTick(() => {
+            this.$refs['dataForm'].clearValidate()
+          })
+        },
+        handleDelete(row){
+          this.commit_obj = Object.assign({},row)
+          this.btnStatus=true
+          this.deleteConfirm()
+          this.btnStatus=false
+        },
+        deleteConfirm() {
+          this.$confirm('此操作将删除角色, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(()=>{
+            delete_DBRole(this.commit_obj).then((response) => {
+              this.$message({
+                showClose: true,
+                message: '删除成功',
+                type: 'success'
+              })
+              this.init()
+            })
+          })
         },
         createRole(){
           this.$refs['dataForm'].validate((valid) => {
             if (valid) {
               this.btnStatus=true
-              this.rebuild_commit()
               create_DBRole(this.commit_obj).then(() => {
                 this.init()
                 this.dialogRoleVisible = false
@@ -236,7 +364,24 @@
           })
         },
         updateRole(){
-
+          this.$refs['dataForm'].validate((valid) => {
+            if (valid) {
+              this.btnStatus=true
+              update_DBRole(this.commit_obj).then(() => {
+                this.init()
+                this.dialogRoleVisible = false
+                this.$message({
+                  showClose: true,
+                  message: '更新成功',
+                  type: 'success'
+                })
+                this.btnStatus=false
+              }).catch((error)=>{
+                this.btnStatus=false
+                this.dialogRoleVisible = false
+              })
+            }
+          })
         },
         handleCurrentChange(val) {
           this.pagination.page = val

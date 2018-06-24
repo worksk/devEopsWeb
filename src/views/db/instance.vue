@@ -34,9 +34,9 @@
               style="margin-top:10px"
               v-model="search_obj.is_master"
               active-text="Slave节点"
-              active-value=False
+              active-value="false"
               inactive-text="Master节点"
-              inactive-value=True>
+              inactive-value="true">
             </el-switch>
           </el-col>
           <el-button class="filter-item" type="primary" icon="el-icon-search" style="float:right;" @click="searchDBInstance" :disabled="btnStatus">搜索</el-button>
@@ -71,16 +71,16 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="145px" align="center" label="用户">
+      <el-table-column width="145px" align="center" label="主节点">
         <template slot-scope="db">
-          <span>超级</span>
+          <span>{{ db.row.is_master }}</span>
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="操作" width="450px" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="db">
-          <el-button type="warning" size="medium" disabled="">编辑</el-button>
-          <el-button type="danger" size="medium" disabled="">删除</el-button>
+          <el-button type="warning" size="medium" @click="handleUpdate(db.row)">编辑</el-button>
+          <el-button type="danger" size="medium" @click="handleDelete(db.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -111,9 +111,9 @@
               style="margin-top:10px"
               v-model="commit_obj.is_master"
               active-text="Slave节点"
-              active-value=False
+              active-value="false"
               inactive-text="Master节点"
-              inactive-value=True>
+              inactive-value="true">
             </el-switch>
         </el-form-item>
 
@@ -185,6 +185,7 @@
           dialogStatus:'',
           groups: [],
           hosts:[],
+          zz: "False",
           detailSearch: false,
           commit_obj: {},
           search_obj: {},
@@ -285,6 +286,29 @@
           this.$nextTick(() => {
             this.$refs['dataForm'].clearValidate()
           })
+          this.commit_obj.is_master = String(this.commit_obj.is_master)
+        },
+        handleDelete(row){
+          this.commit_obj = Object.assign({},row)
+          this.btnStatus=true
+          this.deleteConfirm()
+          this.btnStatus=false
+        },
+        deleteConfirm() {
+          this.$confirm('此操作将删除实例, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(()=>{
+            delete_DBInstance(this.commit_obj).then((response) => {
+              this.$message({
+                showClose: true,
+                message: '删除成功',
+                type: 'success'
+              })
+              this.init()
+            })
+          })
         },
         handleManager(){
           this.commit_obj = Object.assign({}, row) // copy obj
@@ -318,7 +342,24 @@
           })
         },
         updateInstance(){
-
+          this.$refs['dataForm'].validate((valid) => {
+            if (valid) {
+              this.btnStatus=true
+              update_DBInstance(this.commit_obj).then(() => {
+                this.init()
+                this.dialogDBVisible = false
+                this.$message({
+                  showClose: true,
+                  message: '更新成功',
+                  type: 'success'
+                })
+                this.btnStatus=false
+              }).catch((error)=>{
+                this.btnStatus=false
+                this.dialogDBVisible = false
+              })
+            }
+          })
         },
         handleCurrentChange(val) {
           this.pagination.page = val

@@ -208,6 +208,7 @@
     data(){
       return {
         list: null,
+        hosts_list: null,
         listLoading: true,
         dialogFormVisible: false,
         dialogImgVisible: false,
@@ -233,7 +234,8 @@
           img: '应用组架构图',
           permission: '权限组修改',
           key: '选择密钥对',
-          variable: '修正参数'
+          variable: '修正参数',
+          host: '主机列表'
         },
         detailSearch: false,
         tempvar:{},
@@ -264,6 +266,16 @@
       this.init()
     },
     filters: {
+      uuidFilter(detail) {
+        if (detail.aliyun_id){
+          return detail.aliyun_id
+        }else if(detail.vmware_id){
+          const ary = detail.vmware_id.split('-')
+          return ary[0] + '-' + ary[1] + '-'+ ary[2]
+        }else{
+          return 'None'
+        }
+      },
       statusFilter(_status) {
         const statusMap = {
           0: 'danger',
