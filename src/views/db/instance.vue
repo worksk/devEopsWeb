@@ -34,9 +34,9 @@
               style="margin-top:10px"
               v-model="search_obj.is_master"
               active-text="Slave节点"
-              active-value="false"
+              active-value=False
               inactive-text="Master节点"
-              inactive-value="true">
+              inactive-value=True>
             </el-switch>
           </el-col>
           <el-button class="filter-item" type="primary" icon="el-icon-search" style="float:right;" @click="searchDBInstance" :disabled="btnStatus">搜索</el-button>
@@ -287,6 +287,7 @@
         },
         handleUpdate(row){
           this.commit_obj = Object.assign({}, row) // copy obj
+          this.init_hosts(this.commit_obj.group)
           this.dialogStatus = 'update'
           this.dialogDBVisible = true
           this.$nextTick(() => {
