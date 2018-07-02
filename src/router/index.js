@@ -27,35 +27,37 @@ export default new Router({
 
 export const devEopsRouterMap = [
   {
-    path:'',
+    path:'/dashboard',
     component: layout,
     children: [{
-      path: 'dashboard',
+      path: '',
       component: _import('dashboard/index'),
       name: 'dashboard',
       meta: { title: '仪表盘',icon:'dashboard',hidden:true,cache:true}
     }]
-  },{
-    path: '/timeline',
-    component: layout,
-    meta:{title: '时间线',icon:'clock-o'},
-    children: [{
-      path: 'dashboard',
-      component: _import('dashboard/index'),
-      name: 'dashboard1',
-      meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
-    },{
-      path: 'record',
-      component: _import('dashboard/index'),
-      name: 'record',
-      meta: { title: '记录',icon:'thumb-tack',hidden:false,cache:true}
-    },{
-      path: 'plan',
-      component: _import('dashboard/index'),
-      name: 'plan',
-      meta: { title: '计划',icon:'hourglass-half',hidden:false,cache:true}
-    }]
-  },{
+  }
+  // ,{
+  //   path: '/timeline',
+  //   component: layout,
+  //   meta:{title: '时间线',icon:'clock-o'},
+  //   children: [{
+  //     path: 'dashboard',
+  //     component: _import('dashboard/index'),
+  //     name: 'dashboard1',
+  //     meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
+  //   },{
+  //     path: 'record',
+  //     component: _import('dashboard/index'),
+  //     name: 'record',
+  //     meta: { title: '记录',icon:'thumb-tack',hidden:false,cache:true}
+  //   },{
+  //     path: 'plan',
+  //     component: _import('dashboard/index'),
+  //     name: 'plan',
+  //     meta: { title: '计划',icon:'hourglass-half',hidden:false,cache:true}
+  //   }]
+  // }
+  ,{
     path: '/authority',
     component: layout,
     meta:{title: '人员管理',icon:'address-card-o'},
@@ -86,6 +88,15 @@ export const devEopsRouterMap = [
       meta: { title: '跳板机',icon:'rocket',hidden:false,cache:true}
     }]
   },{
+    path:'',
+    component: layout,
+    children: [{
+      path: 'dns',
+      component: _import('dns/index'),
+      name: 'dns',
+      meta: { title: '域名',icon:'codepen',hidden:true,cache:true}
+    }]
+  },{
     path: '/manager',
     component: layout,
     meta:{title: '资产管理',icon:'truck'},
@@ -107,18 +118,38 @@ export const devEopsRouterMap = [
     },{
       path: 'expired',
       component: _import('manager/expired'),
+      name: 'expired',  
+      meta: { title: '过期列表',icon:'clock-o',hidden:true,cache:true}
+    }]
+  },{
+    path: '/db',
+    component: layout,
+    meta:{title: '数据库',icon:'database'},
+    children: [{
+      path: 'dashboard',
+      component: _import('dashboard/index'),
+      name: 'dashboard2',
+      meta: { title: '概况',icon:'dashboard',hidden:true,cache:true}
+    },{
+      path: 'instance',
+      component: _import('db/instance'),
+      name: 'instance',
+      meta: { title: '实例',icon:'cubes',hidden:false,cache:true}
+    },{
+      path: 'role',
+      component: _import('db/role'),
+      name: 'role',
+      meta: { title: '角色',icon:'user-secret',hidden:false,cache:true}
+    },{
+      path: 'user',
+      component: _import('db/user'),
+      name: 'user',
+      meta: { title: '用户',icon:'user-circle-o',hidden:false,cache:true}
+    },{
+      path: 'expired',
+      component: _import('db/expired'),
       name: 'expired',
-      meta: { title: '过期列表',icon:'clock-o',hidden:false,cache:true}
-    },{
-      path: 'storage',
-      component: _import('dashboard/index'),
-      name: 'storage',
-      meta: { title: '存储',icon:'hdd-o',hidden:true,cache:true}
-    },{
-      path: 'search',
-      component: _import('dashboard/index'),
-      name: 'search',
-      meta: { title: '搜索',icon:'search',hidden:true,cache:true}
+      meta: { title: '过期列表',icon:'click-o',hidden:true,cache:true}
     }]
   },{
     path: '/ops',
@@ -141,16 +172,6 @@ export const devEopsRouterMap = [
       meta: { title: '任务',icon:'superpowers',hidden:false,cache:true}
     }]
   },{
-    path: '/app',
-    component: layout,
-    meta:{title: '应用实例',icon:'newspaper-o'},
-    children: [{
-      path: 'rds',
-      component: _import('application/expired'),
-      name: 'mission',
-      meta: { title: '过期实例',icon:'clock-o',hidden:false,cache:true}
-    }]
-  },{
     path:'',
     component: layout,
     children: [{
@@ -158,6 +179,15 @@ export const devEopsRouterMap = [
       component: _import('work/index'),
       name: 'work',
       meta: { title: '工单',icon:'dashboard',hidden:true,cache:true}
+    }]
+  },{
+    path:'',
+    component: layout,
+    children: [{
+      path: 'about',
+      component: _import('about/index'),
+      name: 'about',
+      meta: { title: '关于',icon:'dashboard',hidden:true,cache:true}
     }]
   }
 ]

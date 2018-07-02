@@ -16,6 +16,9 @@
           <el-dropdown-item>
             <span style="display:block;">{{ name }}</span>
           </el-dropdown-item>
+          <el-dropdown-item>
+            <span style="display:block;" @click="QRCode">QRCode</span>
+          </el-dropdown-item>
           <router-link to="/dashboard">
           <el-dropdown-item>
               仪表盘
@@ -68,16 +71,31 @@
       <!--</el-dropdown>-->
 
     </div>
+
+    <el-dialog
+        width="30%"
+        title="当前账户的QRCode"
+        :visible.sync="dialogQRCode">
+      <img :src="qrcodeimg" style="width:100%;height:100%;">
+    </el-dialog>
+
   </el-menu>
 </template>
 
 <script>
+  import { qrcode_User } from '@/api/auth'
   import Hamburger from '@/components/Hamburger'
   import Breadcrumb from '@/components/Breadcrumb'
   import Screenfull from '@/components/Screenfull'
   import Awesome from '@/components/Awesome'
   import { mapGetters } from 'vuex'
     export default {
+      data() {
+        return {
+          dialogQRCode: false,
+          qrcodeimg : "",
+        }
+      },
       components: {
         Hamburger,Breadcrumb,Screenfull,Awesome
       },
@@ -96,6 +114,14 @@
               location.reload()
             })
           })
+        },
+        QRCode(){
+          qrcode_User().then((response)=>{
+            console.log(response.data.url)
+            this.qrcodeimg = 'http://10.100.100.246:8888'+response.data.url
+
+          })
+          this.dialogQRCode = true
         }
       }
     }

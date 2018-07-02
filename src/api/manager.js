@@ -1,44 +1,47 @@
 import request from '@/utils/request'
+import { objectIterator } from '@/utils/iterator'
 
 /*
 * API_MODULE: GROUP
 * API_USE: FETCH,CREATE,UPDATE,DELETE
 * */
-export function fetch_GroupList(){
+export function fetch_GroupList(obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-manager/v1/group/',
+    url: '/api-manager/v1/group/' + st,
     method: 'GET'
   })
 }
 
-export function fetch_GroupListByPage(){
+export function fetch_GroupListByPage(pagination,obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-manager/v1/group/bypage/',
+    url: '/api-manager/v1/group/bypage/'+st+'&page='+pagination.page,
     method: 'GET'
   })
 }
 
-export function create_Group(data){
+export function create_Group(obj){
   return request({
     url: '/api-manager/v1/group/create/',
     method: 'POST',
-    data:data
+    data: obj
   })
 }
 
-export function update_Group(data){
+export function update_Group(obj){
   return request({
-    url: '/api-manager/v1/group/'+data.uuid+'/update/',
+    url: '/api-manager/v1/group/'+obj.uuid+'/update/',
     method: 'PUT',
-    data:data
+    data: obj
   })
 }
 
-export function delete_Group(data){
+export function delete_Group(obj){
   return request({
-    url: '/api-manager/v1/group/'+data.uuid+'/delete/',
+    url: '/api-manager/v1/group/'+obj.uuid+'/delete/',
     method: 'DELETE',
-    data:data
+    data: obj
   })
 }
 
@@ -50,9 +53,9 @@ export function framework_Group(id,data){
   })
 }
 
-export function selectHost_Group(id,data){
+export function selectHost_Group(obj,data){
   return request({
-    url: '/api-manager/v1/group/'+ id + '/selecthost/',
+    url: '/api-manager/v1/group/'+ obj.groups + '/selecthost/',
     method: 'PUT',
     data: data
   })
@@ -69,11 +72,11 @@ export function fetch_PositionList(){
   })
 }
 
-export function create_Position(data){
+export function create_Position(obj){
   return request({
     url: '/api-manager/v1/position/create/',
     method: 'POST',
-    data: data
+    data: obj
   })
 }
 
@@ -88,11 +91,11 @@ export function fetch_SystypeList(){
   })
 }
 
-export function create_Systype(data){
+export function create_Systype(obj){
   return request({
     url: '/api-manager/v1/systype/create/',
     method: 'POST',
-    data: data
+    data: obj
   })
 }
 
@@ -100,61 +103,57 @@ export function create_Systype(data){
 * API_MODULE: HOST
 * API_USE: FETCH,CREATE,UPDATE,DELETE,PASSWD,DETAIL
 * */
-export function fetch_HostList(group_id){
+export function fetch_HostList(obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-manager/v1/host/'+'?groups='+group_id,
+    url: '/api-manager/v1/host/'+st,
     method: 'GET'
   })
 }
 
-export function fetch_HostListByPage(pagination,group_id,search_ip){
-  if(group_id!=''){
-    return request({
-      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page+'&groups='+group_id+'&connect_ip='+search_ip,
-      method: 'GET'
-    })                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-  }else{
-    return request({
-      url: '/api-manager/v1/host/bypage/'+'?page='+pagination.page+'&connect_ip='+search_ip,
-      method: 'GET'
-    })
-  }
-}
-
-export function fetch_HostPasswd(uuid){
+export function fetch_HostListByPage(pagination,obj){
+  let st = objectIterator(obj)
   return request({
-    url: '/api-manager/v1/host/'+uuid+'/passwd/',
+    url: '/api-manager/v1/host/bypage/'+st+'&page='+pagination.page,
     method: 'GET'
   })
 }
 
-export function create_Host(data){
+export function fetch_HostPasswd(obj){
+  console.log(obj)
+  return request({
+    url: '/api-manager/v1/host/'+obj.uuid+'/'+obj.qrcode+'/passwd/',
+    method: 'GET',
+  })
+}
+
+export function create_Host(obj){
   return request({
     url: '/api-manager/v1/host/create/',
     method: 'POST',
-    data:data
+    data: obj
   })
 }
 
-export function update_Host(data){
+export function update_Host(obj){
   return request({
-    url: '/api-manager/v1/host/'+data.uuid+'/update/',
+    url: '/api-manager/v1/host/'+obj.uuid+'/update/',
     method: 'PUT',
-    data:data
+    data: obj
   })
 }
 
-export function delete_Host(data){
+export function delete_Host(obj){
   return request({
-    url: '/api-manager/v1/host/'+data.uuid+'/delete/',
+    url: '/api-manager/v1/host/'+obj.uuid+'/delete/',
     method: 'DELETE',
-    data:data
+    data: obj
   })
 }
 
-export function detail_HostByUUID(uuid){
+export function detail_HostByUUID(obj){
   return request({
-    url: '/api-manager/v1/host/'+uuid+'/detail/byuuid/',
+    url: '/api-manager/v1/host/'+obj.uuid+'/detail/byuuid/',
     method: 'GET'
   })
 }

@@ -1,10 +1,38 @@
 <template>
   <div class="manager-mission-container">
     <div class="filter-container">
-      <el-input style="width: 200px;" class="filter-item" placeholder="检索条件">
-      </el-input>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" :disabled="btnStatus">搜索</el-button>
-      <el-button class="filter-item" @click="handleCreate()" style="margin-left: 10px;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      <el-row style="margin-bottom:20px;">
+        <el-select v-model="search_obj.group" placeholder="请选择" @change="changeGroup" @clear="clearGroup" filterable clearable style="width: 400px;">
+          <el-option
+            v-for="item in group_options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-switch
+        v-model="detailSearch"
+        inactive-text="详细检索">
+        </el-switch>
+        <el-button class="filter-item" @click="resetSearch()" style="margin-left: 10px;" type="primary" icon="el-icon-refresh" :disabled="btnStatus">清除</el-button>
+        <el-button class="filter-item" @click="handleCreate()" style="float:right;" type="primary" icon="el-icon-edit" :disabled="btnStatus">新增</el-button>
+      </el-row>
+      <el-row style="margin-bottom:20px;" v-show="detailSearch">
+        <el-col :span="7" :offset="1">
+          信息： <el-input size="medium" style="width: 200px;" v-model="search_obj.info" class="filter-item" placeholder="根据任务信息模糊搜索"></el-input>
+        </el-col>
+        <el-col :span="7" :offset="1">
+          <el-switch
+            style="margin-top:7px"
+            v-model="search_obj.need_validate"
+            active-text="需要验证"
+            active-value=True
+            inactive-text="不需要验证"
+            inactive-value=False>
+          </el-switch>
+        </el-col>
+        <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchMission" style="float:right;" :disabled="btnStatus">搜索</el-button>
+      </el-row>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
@@ -52,9 +80,9 @@
     </div>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogMissionVisible" width="60%" top="20vh">
-        <el-form ref="missionForm" :model="temp" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
+        <el-form ref="missionForm" :model="commit_obj" label-position="left" label-width="100px" style='width: 700px; margin-left:40px;'>
 
-        <el-select v-model="temp.group" placeholder="请选择" @change="fetch_Meta" filterable>
+        <el-select v-model="commit_obj.group" placeholder="请选择" @change="init_meta" filterable>
           <el-option
             v-for="item in group_options"
             :key="item.value"
@@ -63,14 +91,14 @@
           </el-option>
         </el-select>
 
-        <el-transfer v-model="temp.metas" :data="metas" placeholder="请选择任务内的元操作" filterable>
+        <el-transfer v-model="commit_obj.metas" :data="metas" placeholder="请选择任务内的元操作" filterable>
         </el-transfer>
 
-        <el-input placeholder="更新vote预发布代码" v-model="temp.info">
+        <el-input placeholder="更新vote预发布代码" v-model="commit_obj.info">
           <template slot="prepend">信息: </template>
         </el-input>
 
-        <el-checkbox v-model="temp.need_validate">是否需要管理员验证</el-checkbox>
+        <el-checkbox v-model="commit_obj.need_validate">是否需要管理员验证</el-checkbox>
 
       </el-form>
 
@@ -97,6 +125,7 @@
         dialogStatus:'',
         dialogMissionVisible: false,
         metas:[],
+        detailSearch: false,
         textMap:{
           create: '新建任务',
           update: '修改任务'
@@ -105,11 +134,9 @@
           page: 1,
           count: 0
         },
-        temp: {
-          group: null,
-          metas:[],
-          info: "",
-          need_validate: true,
+        commit_obj: {
+        },
+        search_obj: {
         },
         group_options:[],
       }
@@ -118,6 +145,7 @@
     },
     created(){
       this.init()
+      this.init_group()
     },
     filters:{
       NeedValidate(value){
@@ -131,46 +159,14 @@
     methods:{
       init(){
         this.listLoading = true
-        fetch_MissionListByPage(this.pagination).then(response=>{
+        fetch_MissionListByPage(this.pagination,this.search_obj).then(response=>{
           this.pagination.count = response.data.count
           this.list=response.data.results
           this.listLoading = false
         })
       },
-      resetTemp(){
-        this.temp = {
-          group: null,
-          metas:[],
-          info: "",
-          need_validate: true
-        }
-      },
-      handleCurrentChange(val) {
-          this.pagination.page = val
-          this.init()
-      },
-      handleCreate(){
-        this.dialogStatus = 'create'
-        this.metas = []
-        this.resetTemp()
-        this.fetch_Group()
-        this.dialogMissionVisible = true
-        this.$nextTick(() => {
-          this.$refs['missionForm'].clearValidate()
-        })
-      },
-      handleUpdate(row){
-        this.temp = Object.assign({}, row) // copy obj
-        this.dialogStatus = 'update'
-        this.dialogMissionVisible = true
-        this.fetch_Group()
-        this.fetch_Meta(this.temp.group)
-        this.$nextTick(() => {
-          this.$refs['missionForm'].clearValidate()
-        })
-      },
-      fetch_Group(){
-        fetch_GroupList().then(response=>{
+      init_group(){
+        fetch_GroupList(this.search_obj).then(response=>{
           this.group_options = []
           for (const group of response.data){
             this.group_options.push({
@@ -181,10 +177,8 @@
           }
         })
       },
-      fetch_Meta(value){
-        console.log(value)
-        // this.temp.metas = []
-        fetch_MetaList(value).then(response=>{
+      init_meta(value){
+        fetch_MetaList({'group':value}).then(response=>{
           this.metas = []
           for (const meta of response.data){
             this.metas.push({
@@ -195,12 +189,63 @@
           }
         })
       },
+      reset_commit(){
+        this.commit_obj = {}
+      },
+      reset_search(){
+        this.search_obj = {}
+      },
+      resetSearch(){
+        this.reset_search()
+        this.init()
+      },
+      searchMission(){
+        this.init()
+      },
+      changeGroup(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+          this.init()
+      },
+      clearGroup(){
+          this.pagination = {
+            page: 1,
+            count: 0
+          }
+        this.init_group()
+      },
+      handleCurrentChange(val) {
+          this.pagination.page = val
+          this.init()
+      },
+      handleCreate(){
+        this.dialogStatus = 'create'
+        this.metas = []
+        this.reset_commit()
+        this.init_group()
+        this.dialogMissionVisible = true
+        this.$nextTick(() => {
+          this.$refs['missionForm'].clearValidate()
+        })
+      },
+      handleUpdate(row){
+        this.commit_obj = Object.assign({}, row) // copy obj
+        this.dialogStatus = 'update'
+        this.dialogMissionVisible = true
+        this.init_group()
+        this.init_meta(this.commit_obj.group)
+        this.$nextTick(() => {
+          this.$refs['missionForm'].clearValidate()
+        })
+      },
       createMission(){
         this.$refs['missionForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            create_Mission(this.temp).then(() => {
-              this.init()
+            create_Mission(this.commit_obj).then(() => {
+              this.resetSearch()
               this.dialogMissionVisible = false
               this.$message({
                 showClose: true,
@@ -219,9 +264,8 @@
         this.$refs['missionForm'].validate((valid) => {
           if (valid) {
             this.btnStatus=true
-            console.log(this.temp.need_validate)
-            update_Mission(this.temp).then(() => {
-              this.init()
+            update_Mission(this.commit_obj).then(() => {
+              this.resetSearch()
               this.dialogMissionVisible = false
               this.$message({
                 showClose: true,
@@ -238,7 +282,7 @@
         })
       },
       handleDelete(row){
-        this.temp = Object.assign({},row)
+        this.commit_obj = Object.assign({},row)
         this.btnStatus=true
         this.deleteConfirm()
         this.btnStatus=false
@@ -249,7 +293,7 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(()=>{
-          delete_Mission(this.temp).then((response) => {
+          delete_Mission(this.commit_obj).then((response) => {
             this.$message({
               showClose: true,
               message: '删除成功',

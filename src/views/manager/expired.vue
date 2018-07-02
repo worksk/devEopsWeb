@@ -127,7 +127,7 @@
         handleDetail(row){
           this.temp = Object.assign({},row)
           this.dialogStatus = 'detail'
-          detail_HostByAliID(row.aliyun_id).then((response) =>{
+          detail_HostByAliID(row.recognition_id).then((response) =>{
             this.details = this.filterDetail(response.data)
             this.dialogDetailVisible = true
           }).catch((error) => {
