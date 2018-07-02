@@ -76,12 +76,13 @@
       </el-table-column>
 
       <el-table-column align="center" label="操作" width="100px" class-name="small-padding fixed-width" fixed="right">
-        <template slot-scope="work">
-          <el-button size="mini" v-if="work.row.status==2" type="danger" @click="handleRun(work.row)" :disabled="btnStatus">执行</el-button>
+        <template slot-scope="work">      
+          <el-button size="mini" v-if="work.row.status<0" type="danger" disabled>失败</el-button>    
+          <el-button size="mini" v-else-if="work.row.status==1" type="warning" @click="checkWork(work.row)" :disabled="btnStatus">审核</el-button>
+          <el-button size="mini" v-else-if="work.row.status==2" type="warning" @click="handleUploadWork(work.row)" :disabled="btnStatus">上传文件</el-button>
+          <el-button size="mini" v-else-if="work.row.status==3" type="danger" @click="handleRun(work.row)" :disabled="btnStatus">执行</el-button>
           <el-button size="mini" v-else-if="work.row.status==4" type="warning" disabled>执行中</el-button>
-          <el-button size="mini" v-else-if="work.row.status==3" type="primary" disabled>执行完毕</el-button>
-          <el-button size="mini" v-else-if="work.row.status==1" type="warning" @click="handleUploadWork(work.row)" :disabled="btnStatus">上传文件</el-button>
-          <el-button size="mini" v-else-if="work.row.status==0" type="warning" @click="checkWork(work.row)" :disabled="btnStatus">审核</el-button>
+          <el-button size="mini" v-else-if="work.row.status==5" type="primary" disabled>执行完毕</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -168,7 +169,8 @@
       title="执行任务"
       :visible.sync="dialogXtermVisible"
       :before-close="handleClose">
-      <xterm :work_uuid="work_uuid"></xterm>
+      <!-- <xterm :work_uuid="work_uuid"></xterm> -->
+      <yo-progress :work_uuid="work_uuid"></yo-progress>
       <!-- <div slot="footer" class="dialog-footer">
         <el-button @click="closeXterm" :disabled="btnStatus">关闭</el-button>
       </div> -->
@@ -182,6 +184,7 @@
     import { fetch_WorkListByPage,create_Work,check_Work,run_Work,upload_Work } from '@/api/work';
     import { create_File } from '@/api/utils';
     import Xterm from '@/components/Xterm/index';
+    import YoProgress from '@/components/Progress/index';
     export default {
       data(){
         return{
@@ -216,7 +219,7 @@
         }
       },
       components: {
-        Xterm
+        Xterm,YoProgress
       },
       created(){
         this.init()
@@ -273,6 +276,7 @@
         handleCreate(){
           this.dialogStatus = 'create'
           this.dialogWorkVisible = true
+          this.reset_commit()
           this.init_mission()
         },
         createWork(){
@@ -355,7 +359,6 @@
           })
         },
         handleRun(row){
-          console.log(this.select_time)
           run_Work(row.uuid).then((response)=>{
             this.$confirm('此操作将执行该并对业务系统造成影响, 是否继续?', '提示', {
               confirmButtonText: '确定',

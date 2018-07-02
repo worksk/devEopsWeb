@@ -188,6 +188,7 @@
             message: '刷新成功',
             type: 'success'
           })
+          this.init()
         }).catch((error)=>{
           this.$message({
             showClose: true,

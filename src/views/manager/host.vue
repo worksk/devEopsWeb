@@ -24,18 +24,15 @@
           连接地址： <el-input size="medium" style="width: 200px;" v-model="search_obj.connect_ip" class="filter-item" placeholder="根据私网IP搜索"></el-input>
         </el-col>
         <el-col :span="7">
-          服务地址： <el-input size="medium" style="width: 200px;" v-model="search_obj.service_ip" class="filter-item" placeholder="根据公网IP搜索"></el-input>
+          主机名称： <el-input size="medium" style="width: 200px;" v-model="search_obj.hostname" class="filter-item" placeholder="根据主机名模糊搜索"></el-input>
         </el-col>
         <el-col :span="7">
-          主机名称： <el-input size="medium" style="width: 200px;" v-model="search_obj.hostname" class="filter-item" placeholder="根据主机名模糊搜索"></el-input>
+          详细信息： <el-input size="medium" style="width: 200px;" v-model="search_obj.info" class="filter-item" placeholder="根据主机用途模糊搜索"></el-input>
         </el-col>
         <el-button class="filter-item" type="primary" icon="el-icon-search" @click="searchHost" style="float:right;" :disabled="btnStatus">搜索</el-button>
       </el-row>
       <el-row v-show="detailSearch" style="margin-bottom:20px;">
         <el-col :span="7" :offset="1">
-          详细信息： <el-input size="medium" style="width: 200px;" v-model="search_obj.info" class="filter-item" placeholder="根据主机用途模糊搜索"></el-input>
-        </el-col>
-        <el-col :span="7">
           系统类型： <el-input size="medium" style="width: 200px;" v-model="search_obj.systype" class="filter-item" placeholder="根据操作系统类型模糊搜索"></el-input>
         </el-col>
         <el-col :span="7">
@@ -87,12 +84,6 @@
       <el-table-column width="115" align="center" label="状态" class-name="status-col" >
         <template slot-scope="host">
           <el-tag :type="host.row._status | statusFilter">{{ optionState[host.row._status].label }}</el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column width="145px" align="center" label="业务IP">
-        <template slot-scope="host">
-          <span>{{ host.row.service_ip }}</span>
         </template>
       </el-table-column>
 
@@ -181,12 +172,6 @@
         <el-form-item label="连接端口" prop="sshport">
           <el-tooltip content="请输入管理该机器通过的SSH端口" placement="bottom" effect="light">
             <el-input v-model="commit_obj.sshport"></el-input>
-          </el-tooltip>
-        </el-form-item>
-
-        <el-form-item label="服务IP" prop="service_ip">
-          <el-tooltip content="请输入该机器对外提供服务的IP地址" placement="bottom" effect="light">
-            <el-input v-model="commit_obj.service_ip"></el-input>
           </el-tooltip>
         </el-form-item>
 
@@ -337,14 +322,14 @@
           },
           optionState: [
             {
-              value: 0,
-              label: '错误'
+              value: -3,
+              label: '关机'
             }, {
+              value: -2,
+              label: '暂停'
+            },{
               value: 1,
               label: '正常'
-            }, {
-              value: 2,
-              label: '不可达'
             }],
           rules: {
             'detail.info':[{ required: true, message: '主机信息是必须的', trigger: 'change' }],
@@ -352,7 +337,6 @@
               { required: true, message: '连接IP是您管理主机的重要信息', trigger: 'change' },
               { pattern: /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/, message: '您输入的IP地址有误',trigger:'blur'}
               ],
-            service_ip:[{ pattern: /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/, message: '您输入的IP地址有误',trigger:'blur'}],
             sshport: [{ required: true, message: '连接端口是您管理主机的重要信息', trigger: 'change' }],
             _status: [{ required: true, message:'您未填写该主机目前的状态', trigger: 'blur'}],
             'detail.position': [{ required: true, message:'请填写该主机目前所在的位置', trigger: 'blur'}],
@@ -366,9 +350,9 @@
       filters:{
         statusFilter(_status) {
           const statusMap = {
-            0: 'danger',
-            1: 'success',
-            2: 'info'
+            '-2': 'danger',
+            '1': 'success',
+            '-1': 'warning'
           }
           return statusMap[_status]
         },
@@ -376,8 +360,7 @@
           if (detail.aliyun_id){
             return detail.aliyun_id
           }else if(detail.vmware_id){
-            const ary = detail.vmware_id.split('-')
-            return ary[0] + '-' + ary[1] + '-'+ ary[2]
+            return detail.vmware_id
           }else{
             return 'None'
           }
@@ -540,6 +523,7 @@
             })
             return 
           }
+          this.reset_commit()
           this.dialogSelectHostVisible = true
           this.dialogStatus = 'selecthost'
         },

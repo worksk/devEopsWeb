@@ -241,7 +241,7 @@
           if (valid) {
             this.btnStatus=true
             update_User(this.commit_obj).then(() => {
-              this.init()
+              this.resetSearch()
               this.dialogGroupVisible = false
               this.$message({
                 showClose: true,

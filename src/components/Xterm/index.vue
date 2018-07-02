@@ -18,11 +18,11 @@
       },
       cols: {
         type: Number,
-        default: 100
+        default: 120
       },
       work_uuid:{
-        type: Number,
-        default: 0
+        type: String,
+        default: ''
       }
     },
     data() {

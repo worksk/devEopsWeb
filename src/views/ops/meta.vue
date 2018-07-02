@@ -238,7 +238,7 @@
         })
       },
       init_host(value){
-        fetch_HostList(value).then(response=>{
+        fetch_HostList({groups:value}).then(response=>{
           this.hosts = []
           for (const host of response.data){
             this.hosts.push({
@@ -274,7 +274,7 @@
         }
       },
       reset_commit(){
-        this.commit_obj = {}
+        this.commit_obj = {contents:[]}
       },
       reset_search(){
         this.search_obj = {}
@@ -299,7 +299,7 @@
         this.init_group()
       },
       handleCreate(){
-        this.resetTemp()
+        this.reset_commit()
         this.dialogStatus = 'create'
         this.dialogMetaVisible = true
         this.$nextTick(() => {

@@ -223,7 +223,7 @@
       handleCreate(){
         this.dialogStatus = 'create'
         this.metas = []
-        this.commit_obj()
+        this.reset_commit()
         this.init_group()
         this.dialogMissionVisible = true
         this.$nextTick(() => {
@@ -245,7 +245,7 @@
           if (valid) {
             this.btnStatus=true
             create_Mission(this.commit_obj).then(() => {
-              this.init()
+              this.resetSearch()
               this.dialogMissionVisible = false
               this.$message({
                 showClose: true,
@@ -265,7 +265,7 @@
           if (valid) {
             this.btnStatus=true
             update_Mission(this.commit_obj).then(() => {
-              this.init()
+              this.resetSearch()
               this.dialogMissionVisible = false
               this.$message({
                 showClose: true,
