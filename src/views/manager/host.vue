@@ -130,10 +130,20 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" width="40%" top="2vh">
-        <template v-for="detail in details">
-          <el-tag :hit="true">{{ detail }}</el-tag>
-        </template>
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogDetailVisible" width="80%" top="2vh" :fullscreen="true">
+      <div class="cpu">
+        <IEcharts
+          :option="monitor_obj.CPU"
+          :loading="monitorLoading"
+        />
+      </div>
+      <div class="memory">
+        <IEcharts
+          :option="monitor_obj.Memory"
+          :loading="monitorLoading"
+        />
+      </div>
+
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogDetailVisible = false" :disabled="btnStatus">取消</el-button>
       </div>
@@ -274,14 +284,19 @@
 </template>
 
 <script>
+  import IEcharts from 'vue-echarts-v3/src/lite.js';
+  import 'echarts/lib/chart/bar';
+  import 'echarts/lib/chart/line';
+  import 'echarts/lib/component/title';
   import { fetch_HostListByPage,fetch_PositionList,fetch_SystypeList,delete_Host,create_Host,update_Host,create_Systype,create_Position,fetch_HostPasswd,detail_HostByUUID } from '@/api/manager';
   import { fetch_GroupList,selectHost_Group } from "@/api/manager";
-
+  import { fetch_MonitorHostAliyunCPU,fetch_MonitorHostAliyunMemory } from '@/api/monitor';
   export default {
       data(){
         return{
           list: null,
           listLoading: true,
+          monitorLoading: true,
           btnStatus: false,
           dialogDetailVisible: false,
           dialogFormVisible: false,                                     
@@ -314,6 +329,9 @@
             selecthost: '批量归类主机'
           },
           dialogStatus:'',
+          monitor_obj:{
+
+          },
           search_obj:{
           },
           commit_obj: {
@@ -343,6 +361,9 @@
             'detail.systemtype': [{ required: true, message:'请填写该主机的操作系统类型', trigger: 'blur'}]
           }
         }
+      },
+      components: {
+        IEcharts
       },
       created(){
         this.init()
@@ -415,6 +436,22 @@
             }
           })
         },
+        init_detail_aliyun(obj){
+          fetch_MonitorHostAliyunCPU(obj.uuid).then((response)=>{
+            this.monitor_obj.CPU = response.data
+            if(this.monitor_obj.CPU != null & this.monitor_obj.Memory != null){
+              this.dialogDetailVisible = true
+              this.monitorLoading = false
+            }
+          })
+          fetch_MonitorHostAliyunMemory(obj.uuid).then((response)=>{
+            this.monitor_obj.Memory = response.data
+            if(this.monitor_obj.CPU != null & this.monitor_obj.Memory != null){
+              this.dialogDetailVisible = true
+              this.monitorLoading = false
+            }
+          })
+        },
         handleCurrentChange(val) {
           this.pagination.page = val
           this.init_hosts()
@@ -470,38 +507,9 @@
             })
           })
         },
-        filterDetail(data){//后续修改
-          const list=[]
-          if(data.type=='aliyun'){
-            list.push('地区 : ' + data.RegionId)
-            list.push('过期时间 : ' + data.ExpiredTime)
-            list.push('私网地址 : ' + data.VpcAttributes.PrivateIpAddress.IpAddress[0])
-            list.push('实例名称 : ' + data.InstanceName)
-            list.push('CPU核数 : ' + data.Cpu)
-            list.push('内存大小MB : ' + data.Memory)
-            list.push('带宽大小 : ' + data.InternetMaxBandwidthIn)
-          }else{
-            list.push('使用内存MB : ' + data.privateMemory +'/'+ data.memoryMB)
-            list.push('电源状态 : ' + data.powerState)
-            list.push('CPU核数 : ' + data.numCpu)
-            list.push('CPU使用 : ' + data.overallCpuUsage +'MHz')
-            list.push('私网地址 : ' + data.ipAddress)
-            list.push('存储使用B : ' + data.committed)
-          }
-          return list
-        },
         handleDetail(row){
           this.dialogStatus = 'detail'
-          detail_HostByUUID(row).then((response) =>{
-            this.details = this.filterDetail(response.data)
-            this.dialogDetailVisible = true
-          }).catch((error) => {
-            this.$message({
-              type: 'error',
-              message: '获取详细信息失败!'
-            })
-            this.dialogDetailVisible = false
-          })
+          this.init_detail_aliyun(row)
         },
         handleCreate(row){
           this.reset_commit()
@@ -734,6 +742,14 @@
   .manager-host-container {
     padding: 32px;
     /*background-color: rgb(240, 242, 245);*/
+  }
+  .cpu {
+    width: 700px;
+    height: 400px;
+  }
+  .memory {
+    width: 700px;
+    height: 400px;
   }
   .el-tag {
     margin-left: 10px;
