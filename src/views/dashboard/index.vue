@@ -1,10 +1,24 @@
 <template>
   <div class="dashboard-editor-container">
     <router-view></router-view>
+    <el-card class="box-card">
+      <el-row>
+        <el-col :span="5" :offset="1">
+          <div class="systype">
+            <IEcharts
+              :option="systype"
+              :loading="loading"
+            />
+          </div>
+        </el-col>
+      </el-row>
+    </el-card>
+
+
     <el-row>
-      <el-col :span="16" :offset="1">
+      <el-col :span="12" :offset="1">
         <el-card class="box-card">
-          <echarts width="980px" height="550px" ref="groupsele"></echarts>
+          <!-- <echarts width="980px" height="550px" ref="groupsele"></echarts> -->
         </el-card>
       </el-col>
         <el-col :span="6" :offset="1">
@@ -23,74 +37,39 @@
           </el-card>
         </el-col>
     </el-row>
-    <el-row>
-      <el-col :span="16" :offset="1">
-        <el-card class="box-card">
-          <echarts width="980px" height="550px" ref="systemele"></echarts>
-        </el-card>
-      </el-col>
-      <!-- <el-col :span="5" :offset="1">
-        <el-card class="box-card">
-          <echarts width="230px" height="300px" ref="wordele"></echarts>
-        </el-card>
-      </el-col> -->
-    </el-row>
   </div>
 </template>
 
 <script>
-import echarts from 'echarts';
-import Echarts from '@/components/Echarts/index';
-import { fetch_ManagerStatus } from '@/api/dashboard';
+// import echarts from 'echarts';
+// import Echarts from '@/components/Echarts/index';
+import IEcharts from 'vue-echarts-v3/src/lite.js';
+import 'echarts/lib/chart/bar';
+import 'echarts/lib/chart/line';
+import 'echarts/lib/component/title';
+import { fetch_SystemStatus } from '@/api/dashboard';
 import { Trends,TimeLine,Pie } from '@/utils/charts';
 export default {
   data () {
     return {
-      codeupdate: {},
-      systemtype: {},
-      position: {},
-      groups: {},
-      data: {},
-      wordcloud: {}
+      loading: false,
+      systype: {
+        
+      },
     }
   },
   components: {
-    Echarts
+    IEcharts
   },
   created(){
-    // this.getManagerStatus()
-    // this.wordcloud = Trends('尝试',[
-    //   {name:'周一',value:'1000'},
-    //   {name:'周二',value:'5'},
-    //   {name:'周三',value:'300'},
-    //   {name:'周四',value:'7'},
-    //   {name:'周五',value:'4'},
-    //   {name:'周六',value:'66'},
-    //   {name:'周七',value:'3'}
-    // ])
-    // this.codeupdate = TimeLine('代码更新次数','代码更新次数',[
-    //   {day:'周一',value:'1'},
-    //   {day:'周二',value:'5'},
-    //   {day:'周三',value:'3'},
-    //   {day:'周四',value:'7'},
-    //   {day:'周五',value:'4'},
-    //   {day:'周六',value:'2'},
-    //   {day:'周七',value:'3'}
-    // ])
-    this.getManagerStatus()
+    this.init_systype()
   },
   methods:{
-    getManagerStatus(){
-      fetch_ManagerStatus().then((response)=>{
-        this.data=response.data
-        this.draw()
+    init_systype(){
+      fetch_SystemStatus().then((response)=>{
+        this.systype = response.data
       })
-    },
-    draw(){
-      this.$refs.systemele.Reload(Pie('系统类型统计', this.data.systemtype))
-      this.$refs.groupsele.Reload(Pie('应用组统计', this.data.groups))
-      this.$refs.wordele.Reload(Trends('系统类型字符云', this.data.systemtype))
-    }
+    }                                                                       
   }
 }
 </script>
@@ -104,6 +83,10 @@ export default {
       padding: 16px 16px 0;
       margin-bottom: 32px;
     }
+  }
+  .systype {
+    width: 700px;
+    height: 400px;
   }
   .el-row{
     margin-bottom: 20px;

@@ -19,9 +19,16 @@ export function fetch_ExpiredAliyunRDSList(pagination){
   })
 }
 
-export function fetch_ManagerStatus(){
+export function fetch_SystemStatus(){
   return request({
-    url: '/api-dashboard/v1/manager/',
+    url: '/api-dashboard/v1/systype/',
+    method: 'GET'
+  })
+}
+
+export function fetch_GroupStatus(){
+  return request({
+    url: '/api-dashboard/v1/group/',
     method: 'GET'
   })
 }
